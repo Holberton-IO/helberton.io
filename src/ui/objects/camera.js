@@ -1,0 +1,120 @@
+import Point from "./point.js";
+import * as GameUtils from "../utils.js";
+import * as GameMath from "../../utils/math.js";
+
+class Camera {
+    constructor() {
+        this.zoom = 5;
+        this.camPosition = new Point(0, 0);
+        this.camRotationOffset = 0;
+        this.camPositionOffset = new Point(0, 0);
+        this.camPrevPosition = new Point(0, 0);
+
+
+        this.camShakeBuffer = [];
+        //
+    }
+
+
+    // TODO ADD VIEWPORT RADIUS
+    checkObjectInCamera(point) {
+        return (
+            point.x < this.position.x ||
+            point.x > this.position.x ||
+            point.y < this.position.y ||
+            point.y > this.position.y
+        )
+    }
+
+    shakeCamera(p, rotate = true) {
+        this.camShakeBuffer.push([
+            p, 0, !!rotate
+        ]);
+    }
+
+    shakeCameraDirection(dir, amount = 6, rotate = true) {
+        let x, y = 0;
+        switch (dir) {
+            case 0:
+                x = amount;
+                break;
+            case 1:
+                y = amount;
+                break;
+            case 2:
+                x = -amount;
+                break;
+            case 3:
+                y = -amount;
+                break;
+        }
+        this.shakeCamera(new Point(x, y), rotate);
+    }
+
+    calCameraOffset() {
+        for (let i = this.camShakeBuffer.length - 1; i >= 0; i--) {
+            let shake = this.camShakeBuffer[i];
+            shake[1] = window.gameEngine.deltaTime * 0.003;
+            let shakeTime = shake[1];
+            let shakeTime2 = 0;
+            let shakeTime3 = 0;
+            if (shakeTime < 1) {
+                shakeTime2 = GameUtils.ease.out(shakeTime);
+                shakeTime3 = GameUtils.ease.inout(shakeTime);
+
+            } else if (shakeTime < 8) {
+                shakeTime2 = GameUtils.ease.inout(GameMath.inverseLinearInterpolate(8, 1, shakeTime));
+                shakeTime3 = GameUtils.ease.in(GameMath.inverseLinearInterpolate(8, 1, shakeTime));
+            } else {
+                this.camShakeBuffer.splice(i, 1);
+            }
+            this.camPositionOffset.x += shake[0].x * shakeTime2;
+            this.camPositionOffset.y += shake[0].y * shakeTime2;
+
+            this.camPositionOffset.x += shake[0] * Math.cos(shakeTime * 8) * 0.04 * shakeTime3;
+            this.camPositionOffset.y += shake[0] * Math.cos(shakeTime * 7) * 0.04 * shakeTime3;
+            if (shake[2]) {
+                this.camRotationOffset += Math.cos(shakeTime * 9) * 0.003 * shakeTime3;
+            }
+            console.log( this.camShakeBuffer.length);
+        }
+
+        let limit = 80;
+        let x = this.camPositionOffset.x;
+        let y = this.camPositionOffset.y;
+        x /= limit;
+        y /= limit;
+        x = GameMath.smoothLimit(x);
+        y = GameMath.smoothLimit(y);
+        x *= limit;
+        y *= limit;
+        this.camPositionOffset.x = x;
+        this.camPositionOffset.y = y;
+
+    }
+
+    calZoom(ctx) {
+        const canvas = ctx.canvas;
+        const maxDimension = Math.max(canvas.width, canvas.height);
+        const zoomEdge = maxDimension / window.game.maxZoom;
+        const screenPixels = canvas.width * canvas.height;
+        const blockPixels = screenPixels / window.game.maxBlocksNumber;
+        const zoomBlocks = Math.sqrt(blockPixels) / 10;
+        this.zoom = Math.max(zoomEdge, zoomBlocks);
+        ctx.rotate(this.camRotationOffset);
+        ctx.scale(this.zoom, this.zoom);
+
+        ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);
+    }
+
+
+    loop() {
+        this.camPrevPosition = this.camPosition;
+        this.calCameraOffset();
+    }
+
+
+}
+
+
+export default Camera;
