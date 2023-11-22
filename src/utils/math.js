@@ -1,6 +1,7 @@
-const linearInterpolate = (a, b, t) => {
-    return a + (b - a) * t;
+const linearInterpolate = (a, b, v) => {
+    return a + (b - a) * v;
 }
+
 
 const inverseLinearInterpolate = (a, b, v) => {
     return (v - a) / (b - a);
@@ -15,11 +16,6 @@ const adaptedConLinearInterpolate = (val2) => (a, b, val1) => {
     return adaptedLinearInterpolate(a, b, val1, val2);
 }
 
-const clamp = (val, min, max) => {
-    return Math.max(min, Math.min(max, val));
-}
-
-
 const smoothLimit = (v) => {
     let negative = v < 0;
     if (negative) {
@@ -32,7 +28,14 @@ const smoothLimit = (v) => {
     return v;
 }
 
+const clamp = (val, min, max) => {
+    return Math.max(min, Math.min(max, val));
+}
+
+
+const calPercentage = (a, percentage) => a * percentage;
+
 export {
     linearInterpolate, inverseLinearInterpolate, adaptedLinearInterpolate, adaptedConLinearInterpolate
-    , clamp , smoothLimit
+    , clamp , smoothLimit,calPercentage
 };

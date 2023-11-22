@@ -13,6 +13,7 @@ class GameEngine {
 
         this.timesCap = [0, 6.5, 16, 33, 49, 99];
         this.currentCapIndex = 0;
+
         this.processFrames = [];
         this.missedFrames = [];
 
@@ -79,13 +80,15 @@ class GameEngine {
 
 
     loop(timeStamp) {
-        this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp;
+        window.game.timeStamp = timeStamp;
+        this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp; // 16
         this.checkIncreasingInFramesProcess();
         this.checkDecreaseInFramesProcess();
         this.deltaTime = this.currentFrameTimeStamp + this.totalDeltaTimeCap;
         this.lastFrameTimeStamp = timeStamp;
         if (this.deltaTime < this.getCap(this.currentCapIndex)) {
             this.totalDeltaTimeCap += this.currentFrameTimeStamp;
+
         } else {
             this.totalDeltaTimeCap = 0;
             this.drawFunction();
@@ -101,6 +104,7 @@ class GameEngine {
         {
             this.scaleCanvas(ctx);
         }
+
         ctx.save();
         let canvas = ctx.canvas;
         ctx.translate(canvas.width / 2, canvas.height / 2);
@@ -109,12 +113,13 @@ class GameEngine {
 
 
     }
+
     scaleCanvas(ctx, w=GameUtils.getWidth(), h=GameUtils.getHeight()){
         let MAX_PIXEL_RATIO = calculate_pixel_ratio();
         let drawingQuality = 1;
         let c = ctx.canvas;
         c.width = w * drawingQuality * MAX_PIXEL_RATIO;
-        c.height = w * drawingQuality * MAX_PIXEL_RATIO;
+        c.height = h * drawingQuality * MAX_PIXEL_RATIO;
         let styleRatio = 1;
         c.style.width = w * styleRatio + "px";
 	    c.style.height = h * styleRatio + "px";
