@@ -1,6 +1,7 @@
 import Point from "./ui/objects/point.js";
 
 const globals = {
+    timeStamp: 0,
     gameSpeed: 0.006,
     viewPortRadius: 30,
     maxZoom: 430,

@@ -3,14 +3,14 @@ import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
 
 class Player {
-    constructor(position, id) {
+    constructor(position = new Point(0,0), id) {
         this.id = id
         this.position = position
         this.drawPosition = new Point(-1, -1);
         this.drawPosSet = false;
         this.serverPosition = new Point(0,0);
         this.dir = 0;
-        this.isMyPlayer = this.id === 0;
+        this.isMyPlayer = false;
         this.isDead = false;
         this.deathWasCertain = false;
         this.didUncertainDeathLastTick = false;
@@ -25,7 +25,8 @@ class Player {
 
 
         this.color = "#ffffff";
-        this.trails = []
+        this.trails = [];
+        this.name = "";
 
     }
 
@@ -56,6 +57,8 @@ class Player {
 
         
     }
+
+
 
     draw(ctx){
         this.drawPlayerTiles(ctx);

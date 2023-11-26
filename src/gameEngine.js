@@ -1,6 +1,8 @@
 import * as GameMath from './utils/math.js';
 import * as GameUtils from './ui/utils.js';
 import {calculate_pixel_ratio} from "./ui/utils.js";
+import GameObjects from "./gameObjects.js"
+
 
 class GameEngine {
     constructor(fps) {
@@ -16,6 +18,9 @@ class GameEngine {
 
         this.processFrames = [];
         this.missedFrames = [];
+
+
+        this.gameObjects = new GameObjects();
 
         this.drawFunction = () => {
         };
@@ -35,7 +40,7 @@ class GameEngine {
         // If the game is running too fast, it will decrease the currentCapIndex.
         // if currentFrameTimeStamp < 90% of the currentCapIndex, then decrease the currentCapIndex.
         if (this.currentFrameTimeStamp < GameMath.linearInterpolate(
-            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex + 1),
+            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex - 1),
             0.9
         )) {
             this.processFrames.push(Date.now());
@@ -43,7 +48,7 @@ class GameEngine {
             // If Draw More than 190 frames in 10 seconds, then remove the first frame.
             while (this.processFrames.length > 190) {
                 if (Date.now() - this.processFrames[0] > 10_000) {
-                    this.processFrames.slice(0, 1)
+                    this.processFrames.splice(0, 1)
                 } else {
                     // if first frame happen in less than 10 seconds, decrease the currentCapIndex.
                     this.currentCapIndex--;
@@ -67,7 +72,7 @@ class GameEngine {
             // If Draw Less than 5 frames in 5 seconds, then remove the first frame.
             while (this.missedFrames.length > 5) {
                 if (Date.now() - this.missedFrames[0] > 5_000) {
-                    this.missedFrames.slice(0, 1)
+                    this.missedFrames.splice(0, 1)
                 } else {
                     // if first frame happen in less than 5 seconds, increase the currentCapIndex.
                     this.currentCapIndex++;

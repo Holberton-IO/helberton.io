@@ -2,16 +2,28 @@ import json
 from flask import Flask, render_template, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask_sock import Sock
+
+from gameserver.network.socket import Socket
+from gameserver.game_server import GameServer
 
 app = Flask(__name__)
+sock = Sock()
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Allow all origins, you may specify a list of allowed origins
-
+sock.init_app(app)
+gameserver = GameServer(map_size=40)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+@sock.route('/game')
+def game_server(ws):
+    s = Socket(ws, gameserver)
+    s.on_connect()
+
+
+
 if __name__ == '__main__':
-    socketio.run(app, debug=True, allow_unsafe_werkzeug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')

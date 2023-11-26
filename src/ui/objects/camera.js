@@ -19,10 +19,10 @@ class Camera {
     // TODO ADD VIEWPORT RADIUS
     checkObjectInCamera(point) {
         return (
-            point.x < this.camPosition.x ||
-            point.x > this.camPosition.x ||
-            point.y < this.camPosition.y ||
-            point.y > this.camPosition.y
+            point.x < this.camPosition.x - window.game.viewPortRadius ||
+            point.x > this.camPosition.x + window.game.viewPortRadius ||
+            point.y < this.camPosition.y - window.game.viewPortRadius ||
+            point.y > this.camPosition.y + window.game.viewPortRadius
         )
     }
 
