@@ -3,7 +3,7 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_sock import Sock
-
+from gameserver.game_loop import GameLoop
 from gameserver.network.socket import Socket
 from gameserver.game_server import GameServer
 
@@ -12,6 +12,8 @@ sock = Sock()
 CORS(app)
 sock.init_app(app)
 gameserver = GameServer(map_size=40)
+game_loop = GameLoop(gameserver)
+
 
 @app.route('/')
 def index():
@@ -27,3 +29,4 @@ def game_server(ws):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
+

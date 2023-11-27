@@ -1,3 +1,5 @@
+import Block from './ui/objects/block.js';
+
 class GameObjects {
     constructor() {
         this.players = [];
@@ -16,13 +18,11 @@ class GameObjects {
         this.players.push(player);
     }
 
-    setBlocks(blocks) {
-        this.blocks = blocks;
+    addBlock(block) {
+        return Block.getBlockAt(block.position, this.blocks);
     }
 
-    setPlayers(players) {
-        this.players = players;
-    }
+
 }
 
 export default GameObjects;

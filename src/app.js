@@ -7,18 +7,18 @@ const camera = new Camera();
 const gameEngine = new GameEngine(60);
 window.gameEngine = gameEngine;
 window.camera = camera;
-window.game = gameEngine;
-
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-let blocks = [];
-
-
-
+let blocks = window.gameEngine.gameObjects.blocks;
 
 
 const draw = () => {
+
+    if(gameEngine.gameObjects.myPlayer) {
+       camera.camPrevPosition = camera.camPosition;
+         camera.camPosition = gameEngine.gameObjects.myPlayer.position;
+    }
     gameEngine.scaleCanvas(ctx);
     ctx.fillStyle = "#3a3428";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -27,6 +27,10 @@ const draw = () => {
     for (let b of blocks) {
         b.draw(ctx, false);
     }
+
+    // camera.camPosition.x += 0.1;
+
+
 
 
     ctx.restore();

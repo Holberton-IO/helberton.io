@@ -2,6 +2,7 @@ from gameserver.network.utils.writer import Writer
 from gameserver.network.utils.reader import Reader
 from gameserver.network.packets import dic
 from gameserver.client import GameClient
+import traceback
 
 
 class Socket:
@@ -34,15 +35,17 @@ class Socket:
 
                 self.on_receive(data)
         except Exception as e:
-            print(e)
+            print(e,)
+            traceback.print_exc()
         finally:
             self.close()
             print("Connection closed")
 
     def send(self, data):
-        print("Sending", data)
+        # print("Sending", data)
         self.sock.send(data)
 
     def close(self):
         self.is_alive = False
         self.game_server.remove_client(self.client)
+

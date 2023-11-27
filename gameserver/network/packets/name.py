@@ -24,7 +24,7 @@ class NamePacket(Packet):
 
     def handle_packet(self, packet, client):
         packet.is_verified = True
-        client.player = Player(packet.name)
+        client.player = Player(client.game_server, client, packet.name)
         client.send(self)
 
     def finalize(self):

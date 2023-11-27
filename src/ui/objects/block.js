@@ -1,6 +1,7 @@
 import Point from "./point.js";
 import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
+import Rectangle from "./rectangle.js";
 
 class Block {
     constructor(p) {
@@ -13,6 +14,8 @@ class Block {
         this.animDirection = 0;
         this.animProgress = 0;
         this.animDelay = 0;
+
+        this.colorsWithId = null;
 
         this.lastSetTime = Date.now()
     }
@@ -146,56 +149,18 @@ class Block {
     }
 
     drawRegularBlock(ctx, darkColor, brightColor, size) {
-        if(this.currentBlock < 2)
-            return;
-        const colors = {
-            red: {
-                brighter: "#a22929",
-                darker: "#7b1e1e",
-                slightlyBrighter: "#af2c2c",
-                pattern: "#8c2222",
-                patternEdge: "#631717",
-                boundsDark: "#420707",
-                boundsBright: "#4c0808",
-            },
-            blue: {
-		brighter: "#27409c",
-		darker: "#1d3179",
-		pattern: "#213786",
-		patternEdge: "#1b2b67",
-		slightlyBrighter: "#2a44a9",
-	},
-            yellow: {
-		brighter: "#d2b732",
-		darker: "#af992b",
-		pattern: "#D1A932",
-		patternEdge: "#B5922B",
-		slightlyBrighter: "#e6c938",
-	},
-            gold: {
-		brighter: "#F6B62C",
-		darker: "#F7981B",
-		pattern: "#DC821E",
-		patternEdge: "#BD6B0E",
-		slightlyBrighter: "#FBDF78",
-		bevelBright: "#F9D485",
-	},
-            orange: {
-		brighter: "#d06c18",
-		darker: "#ab5a15",
-		pattern: "#AF5B16",
-		patternEdge: "#914A0F",
-		slightlyBrighter: "#da7119",
-	},
 
+
+        if (this.currentBlock < 2)
+            return;
+
+        if (this.colorsWithId === null) {
+            return;
         }
 
-        let colorIndex = (this.currentBlock - 2) % Object.keys(colors).length;;
-        let color_key =  Object.keys(colors)[colorIndex];
-        let color = colors[color_key];
 
-        let bcolor = color.pattern;
-        let dcolor = color.patternEdge;
+        let bcolor = this.colorsWithId.pattern;
+        let dcolor = this.colorsWithId.patternEdge;
 
 
         const sizeFactor = 10 / 9;
@@ -207,8 +172,7 @@ class Block {
         const spacingTen = GameMath.calPercentage(newS, 0.1); // 1
         const spacingNinty = GameMath.calPercentage(newS, 0.9);
 
-        if(this.animProgress > 0.8)
-        {
+        if (this.animProgress > 0.8) {
             ctx.fillStyle = dcolor;
             ctx.fillRect(newP.x + spacingTen, newP.y + spacingTen, size, size);
         }
@@ -255,6 +219,27 @@ class Block {
         this.drawEmptyBlock(ctx, "#2d2926", "#4e463f", 7);
         this.drawRegularBlock(ctx, "#2d2926", "#4e463f", 9);
         //Ocuupited Block
+    }
+
+
+    static convertRectToBlock(rect, colorsWithId, listOfBlocks, myPlayer) {
+
+        const viewPortRadius = window.game.viewPortRadius;
+        if (myPlayer) {
+            rect.min.x = Math.max(rect.min.x, Math.round(myPlayer.position.x - viewPortRadius));
+            rect.min.y = Math.max(rect.min.y, Math.round(myPlayer.position.y - viewPortRadius));
+
+            rect.max.x = Math.min(rect.max.x, Math.round(myPlayer.position.x + viewPortRadius));
+            rect.max.y = Math.min(rect.max.y, Math.round(myPlayer.position.y + viewPortRadius));
+        }
+
+        for (let {x, y} of rect.for_each()) {
+            let block = Block.getBlockAt(new Point(x, y), listOfBlocks);
+            block.colorsWithId = colorsWithId;
+            block.setBlockId(colorsWithId.id, Math.random() * 400);
+        }
+
+        console.log(listOfBlocks);
     }
 
 }

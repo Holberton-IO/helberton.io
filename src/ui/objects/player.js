@@ -24,9 +24,18 @@ class Player {
 
 
 
-        this.color = "#ffffff";
+
         this.trails = [];
         this.name = "";
+
+
+
+        // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
 
     }
 

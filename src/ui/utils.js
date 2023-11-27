@@ -23,8 +23,13 @@ const ease = {
 
 const drawInCtxRec = (ctx, point, size, color, spacing = 0) => {
     ctx.fillStyle = color;
-    ctx.fillRect(point.x + spacing, point.y + spacing, size , size);
+    ctx.fillRect(point.x + spacing, point.y + spacing, size, size);
 }
 
 
-export {getHeight, getWidth, calculate_pixel_ratio, ease,drawInCtxRec}
+const convertIntColorToHex = (color) => {
+    return "#" + ("000000" + color.toString(16)).slice(-6);
+}
+
+
+export {convertIntColorToHex,getHeight, getWidth, calculate_pixel_ratio, ease, drawInCtxRec}
