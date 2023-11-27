@@ -2,8 +2,10 @@ import math
 import random
 from gameserver.game.player import Player
 from gameserver.game.map import Map
+from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
+from gameserver.network.packets import PlayerStatePacket
 
 
 class GameServer:
@@ -95,6 +97,34 @@ class GameServer:
         for p in self.players:
             if rec.is_rect_overlap(p.get_viewport()):
                 yield p
+
+    def get_overlapping_players_with_player(self, player):
+        for p in self.players:
+            if player.get_viewport().is_rect_overlap(p.get_viewport()):
+                yield p
+
+    def get_overlapping_waiting_blocks_players_rec(self, rec):
+        for p in self.players:
+            player_waiting_blocks = p.waiting_bounds
+            if rec.is_rect_overlap(player_waiting_blocks):
+                yield p
+
+    def get_overlapping_viewport_with_rec(self, rec):
+        for p in self.players:
+            if rec.is_rect_overlap(p.get_viewport()):
+                yield p
+
+    def get_overlapping_waiting_blocks_players_pos(self, pos):
+        rec = Rectangle(pos, pos)
+        yield from self.get_overlapping_waiting_blocks_players_rec(rec)
+
+    def broadcast_player_state(self, player):
+        player_state_packet = PlayerStatePacket(player)
+        for p in self.get_overlapping_viewport_with_rec(player.waiting_bounds):
+            p.client.send(player_state_packet)
+
+    def broadcast_player_waiting_blocks(self, player):
+        pass
 
     def loop(self, tick, dt):
         for player in self.players:

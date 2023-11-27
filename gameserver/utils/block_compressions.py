@@ -70,7 +70,7 @@ class BlockCompression:
                     )
                     recs.append({
                         "rect": rec,
-                        "ref": section.data
+                        "data": section.data
                     })
                 columns_with_same_data = 0
                 prev_column = sections

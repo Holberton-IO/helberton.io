@@ -1,3 +1,5 @@
+import time
+
 from gameserver.network.packet import Packet
 from gameserver.network.utils.writer import Writer
 
@@ -39,37 +41,45 @@ class ReadyPacket(Packet):
         self.player_name = client.player.name
         client.player.player_id = self.user_id
 
+        # Add Player To Game Server
         client.game_server.add_new_player(client.player)
 
+        # Set Player Position
         position, direction = client.game_server.get_spawn_point()
         client.player.position = position
         client.player.direction = direction
-        client.player.generate_player_colors()  # Will Generate Colors
+        client.player.last_edge_check_position = position.clone()
         self.player_x = client.player.position.x
         self.player_y = client.player.position.y
         self.player_direction = client.player.direction
 
+
         """
         Set Player Colors
         """
+        client.player.generate_player_colors()
+
         self.color_brighter = client.player.color_brighter
         self.color_darker = client.player.color_darker
         self.color_slightlyBrighter = client.player.color_slightlyBrighter
         self.color_pattern = client.player.color_pattern
         self.color_patternEdge = client.player.color_patternEdge
-        # Send Other Players
-        client.player.on_new_player()
 
+        # Start Tracking Player
+        client.player.on_change_position()
+        client.player.join_time = time.time()
 
-        print("Player Position:", client.player.position)
-        print("Player Direction:", client.player.direction)
+        # Notify Area Around Player Is Filled
+        client.game_server.map.fill_new_player_blocks(client.player)
 
-        (client.player.send_player_viewport())
+        # Send Player State To All Players
+        client.game_server.broadcast_player_state(client.player)
 
+        # Send ViewPort To Player
+        client.player.send_player_viewport()
 
+        # Send Ready To Start
         client.send(self)
-
-
 
     def finalize(self):
         writer = Writer(self.packet_id)

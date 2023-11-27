@@ -25,7 +25,6 @@ class Rectangle:
             for y in range(self.min.y, self.max.y):
                 yield x, y
 
-
     def is_rect_overlap(self, rect):
         return self.min.x < rect.max.x and \
                self.max.x > rect.min.x and \
@@ -37,3 +36,15 @@ class Rectangle:
                self.min.x > rect.max.x or \
                self.max.y < rect.min.y or \
                self.min.y > rect.max.y
+
+    def expand_to(self, vector):
+        min_vec = Vector(
+            min(self.min.x, vector.x),
+            min(self.min.y, vector.y)
+        )
+        max_vec = Vector(
+            max(self.max.x, vector.x),
+            max(self.max.y, vector.y)
+        )
+        self.min = min_vec
+        self.max = max_vec

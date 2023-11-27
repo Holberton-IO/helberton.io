@@ -90,7 +90,7 @@ class GameEngine {
         this.checkIncreasingInFramesProcess();
         this.checkDecreaseInFramesProcess();
         this.deltaTime = this.currentFrameTimeStamp + this.totalDeltaTimeCap;
-        console.log(this.deltaTime, this.gameObjects.blocks.length);
+        // console.log(this.deltaTime, this.gameObjects.blocks.length);
         this.lastFrameTimeStamp = timeStamp;
         if (this.deltaTime < this.getCap(this.currentCapIndex)) {
             this.totalDeltaTimeCap += this.currentFrameTimeStamp;

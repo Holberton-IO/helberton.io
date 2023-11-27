@@ -33,8 +33,7 @@ class NamePacket extends Packet {
 
     handleReceivedPacket(packet, client) {
         console.log("Received Name Packet");
-        console.log(packet.toHexString());
-        console.log(packet);
+
 
         if (packet.isVerified) {
             client.isVerified = packet.isVerified;

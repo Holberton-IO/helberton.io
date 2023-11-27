@@ -1,3 +1,6 @@
+import math
+
+
 class Vector:
     def __init__(self, x, y):
         self.x = x
@@ -33,3 +36,11 @@ class Vector:
 
     def is_vector_in_map(self, map_size):
         return 0 <= self.x < map_size and 0 <= self.y < map_size
+
+    def distance_to(self, vector):
+        return math.sqrt((self.x - vector.x) ** 2 + (self.y - vector.y) ** 2)
+
+    def set(self, vec):
+        self.x = vec.x
+        self.y = vec.y
+        return self

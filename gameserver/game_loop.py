@@ -20,7 +20,7 @@ class GameLoop:
         self.game_server = game_server
         self.is_running = True
         self.thread = Thread(target=self.loop)
-        # self.start()
+        self.start()
 
     def start(self):
         self.is_running = True

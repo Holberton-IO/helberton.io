@@ -5,32 +5,20 @@ import {convertIntColorToHex} from "../../ui/utils.js";
 import Point from "../../ui/objects/point";
 
 
-class Ready extends Packet {
+class PlayerStatePacket extends Packet {
 
     constructor(userId, mapSize) {
         super();
         this.userId = userId;
-        this.packetId = 1002;
-        this.mapSize = mapSize;
-        this.playerName = "";
-        this.playerX = 0;
-        this.playerY = 0;
-        this.direction = 0;
+        this.packetId = 1004;
+        this.player = null;
 
-
-        // Colors
-        this.colorBrighter = 0;
-        this.colorDarker = 0;
-        this.colorSlightlyBrighter = 0
-        this.colorPattern = 0
-        this.colorPatternEdge = 0
     }
 
 
     // Handel Server Response
     static parsePacket(p) {
         p.userId = p.reader.readInt4();
-        p.mapSize = p.reader.readInt2();
         p.playerName = p.reader.readString();
 
         p.playerX = p.reader.readInt2();
@@ -57,7 +45,10 @@ class Ready extends Packet {
 
 
     handleReceivedPacket(packet, client) {
-        console.log("Received Ready Packet");
+        console.log("PlayerState Ready Packet");
+
+        const myPlayer = window.gameEngine.gameObjects.myPlayer;
+
         const player = new Player(null, packet.userId);
         player.isMyPlayer = true;
         player.name = packet.playerName;
@@ -69,14 +60,16 @@ class Ready extends Packet {
         player.position = new Point(packet.playerX, packet.playerY);
         player.direction = packet.direction;
 
+        if (myPlayer && myPlayer.equals(player)) {
+            myPlayer.position = player.position;
+            myPlayer.direction = player.direction;
+        }
 
-        window.gameEngine.gameObjects.addMyPlayer(player);
-        window.gameEngine.gameObjects.mapSize = packet.mapSize;
-        console.log("My Player");
-        console.log(player);
-        console.log("Ready");
-        console.log(window.gameEngine.gameObjects);
+        window.gameEngine.gameObjects.addPlayer(player);
+
+
+
     }
 }
 
-export default Ready;
+export default PlayerStatePacket;

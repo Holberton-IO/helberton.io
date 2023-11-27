@@ -75,7 +75,9 @@ class Player {
 
     }
 
-
+    equals(player){
+        return this.id === player.id;
+    }
 }
 
 

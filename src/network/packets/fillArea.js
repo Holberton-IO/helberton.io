@@ -55,7 +55,7 @@ class FillAreaPacket extends Packet {
 
     handleReceivedPacket(packet, client) {
         console.log("Received Fill Area Packet");
-        console.log(packet);
+
         const colorsWithId = {
             brighter: packet.colorBrighter,
             darker: packet.colorDarker,

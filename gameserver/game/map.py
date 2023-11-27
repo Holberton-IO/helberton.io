@@ -40,6 +40,17 @@ class Map:
         for p in self.game.get_overlapping_players_with_rec(rect):
             p.client.send(area_packet)
 
+    def get_compressed_blocks_in(self, rect):
+        rect = rect.clamp(
+            Rectangle(
+                Vector(0, 0),
+                Vector(self.game.map.map_size, self.game.map.map_size)
+            )
+        )
+        compressed_blocks = self.compress_blocks_in(rect)
+        for cmp_block in compressed_blocks:
+            yield cmp_block
+
     def fill_new_player_blocks(self, player):
         blocks_num = self.game.new_player_blocks
         initial_reversed_blocks = (blocks_num * 2) + 1
@@ -50,11 +61,11 @@ class Map:
         rect = Rectangle(min_vec, max_vec)
         self.fill_blocks(rect, player)
 
-    def get_blocks_around_player(self, player):
-        blocks_num = self.game.new_player_blocks
+    def is_valid_viewport_around(self, player):
+        blocks_num = self.game.updates_viewport_rect_size
         rect = Rectangle(
             player.position.add_scalar(-blocks_num),
-            player.position.add_scalar(blocks_num + 1)
+            player.position.add_scalar(blocks_num)
         ).clamp(Rectangle(
             Vector(0, 0),
             Vector(self.map_size, self.map_size)
@@ -63,9 +74,30 @@ class Map:
         width = rect.max.x - rect.min.x
         height = rect.max.y - rect.min.y
         if width <= 0 or height <= 0:
-            return []
+            return False
+        return True
+
+
+    def is_valid_viewport_around_rect(self, rect):
+        rect = rect.clamp(Rectangle(
+            Vector(0, 0),
+            Vector(self.map_size, self.map_size)
+        ))
+
+        width = rect.max.x - rect.min.x
+        height = rect.max.y - rect.min.y
+        if width <= 0 or height <= 0:
+            return False
+        return True
 
     def compress_blocks_in(self, rect):
-        print("Player Viewport:", rect)
         block_compression = BlockCompression(self.blocks).compress_inside_rectangle(rect)
         return block_compression
+
+    def check_vector_in_walls(self, vector):
+        if vector.x <= 0 or \
+                vector.x >= self.map_size - 1 or \
+                vector.y <= 0 or \
+                vector.y >= self.map_size - 1:
+            return True
+        return False

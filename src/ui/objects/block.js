@@ -239,7 +239,7 @@ class Block {
             block.setBlockId(colorsWithId.id, Math.random() * 400);
         }
 
-        console.log(listOfBlocks);
+        // console.log(listOfBlocks);
     }
 
 }

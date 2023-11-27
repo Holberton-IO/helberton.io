@@ -2,7 +2,7 @@ import Block from './ui/objects/block.js';
 
 class GameObjects {
     constructor() {
-        this.players = [];
+        this.players = {};
         this.blocks = [];
         this.myPlayer = null;
         this.mapSize = 0;
@@ -10,12 +10,14 @@ class GameObjects {
 
     addMyPlayer(player) {
         this.myPlayer = player;
-        this.players.push(player);
+        this.players[player.id] = player;
     }
 
 
     addPlayer(player) {
-        this.players.push(player);
+        if (this.players[player.id])
+            return
+        this.players[player.id] = player;
     }
 
     addBlock(block) {
