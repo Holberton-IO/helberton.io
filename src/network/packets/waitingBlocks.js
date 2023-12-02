@@ -20,7 +20,7 @@ class WaitingBlocksPacket extends Packet {
     // Handel Server Response
     static parsePacket(p) {
         p.userId = p.reader.readInt4();
-        const blocksCount = p.reader.readInt4();
+        const blocksCount = p.reader.readInt2();
         for (let i = 0; i < blocksCount; i++) {
             const vec = new Point(p.reader.readInt2(), p.reader.readInt2());
             p.blocks.push(vec);
@@ -42,8 +42,16 @@ class WaitingBlocksPacket extends Packet {
         console.log("WaitingBlocksPacket  Packet");
         console.log(window.gameEngine.gameObjects.players);
         const myPlayer = window.gameEngine.gameObjects.myPlayer;
-        const player = window.gameEngine.gameObjects.players.get(packet.userId);
-        if(myPlayer.equals(player))
+
+        const playerList = window.gameEngine.gameObjects.players;
+        let player = null;
+        if (packet.userId in playerList) {
+            player = playerList[packet.userId];
+        }
+        else {
+            throw new Error("Player Not Found We Need To Send Player Colors");
+        }
+        if(myPlayer && myPlayer.equals(player))
         {
 
         }

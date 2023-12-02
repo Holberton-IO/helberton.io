@@ -8,16 +8,15 @@ class GameObjects {
         this.mapSize = 0;
     }
 
-    addMyPlayer(player) {
-        this.myPlayer = player;
-        this.players[player.id] = player;
-    }
 
 
     addPlayer(player) {
-        if (this.players[player.id])
-            return
+        if (player.id in this.players)
+            return this.players[player.id];
+        if (player.isMyPlayer)
+            this.myPlayer = player;
         this.players[player.id] = player;
+        return player;
     }
 
     addBlock(block) {

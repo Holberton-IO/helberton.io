@@ -58,8 +58,8 @@ class Ready extends Packet {
 
     handleReceivedPacket(packet, client) {
         console.log("Received Ready Packet");
-        const player = new Player(null, packet.userId);
-        player.isMyPlayer = true;
+        const player = client.player;
+
         player.name = packet.playerName;
         player.colorBrighter = packet.colorBrighter;
         player.colorDarker = packet.colorDarker;
@@ -67,14 +67,10 @@ class Ready extends Packet {
         player.colorPattern = packet.colorPattern;
         player.colorPatternEdge = packet.colorPatternEdge;
         player.position = new Point(packet.playerX, packet.playerY);
-        player.direction = packet.direction;
+        player.dir = packet.direction;
 
-
-        window.gameEngine.gameObjects.addMyPlayer(player);
         window.gameEngine.gameObjects.mapSize = packet.mapSize;
-        console.log("My Player");
-        console.log(player);
-        console.log("Ready");
+        player.isReady = true;
         console.log(window.gameEngine.gameObjects);
     }
 }

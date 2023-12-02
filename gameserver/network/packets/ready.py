@@ -36,10 +36,11 @@ class ReadyPacket(Packet):
         """On Received Ready Packet"""
         print(client.player.name, "is ready")
 
-        self.user_id = client.game_server.generate_random_id()
+        #self.user_id = client.game_server.generate_random_id()
         self.map_size = client.game_server.map.map_size
         self.player_name = client.player.name
-        client.player.player_id = self.user_id
+        #client.player.player_id = self.user_id
+        self.user_id = client.player.player_id
 
         # Add Player To Game Server
         client.game_server.add_new_player(client.player)
@@ -80,6 +81,7 @@ class ReadyPacket(Packet):
 
         # Send Ready To Start
         client.send(self)
+        client.player.is_send_ready_packet = True
 
     def finalize(self):
         writer = Writer(self.packet_id)

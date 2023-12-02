@@ -24,6 +24,7 @@ const PlayerStatus = {
 
 class Client {
     constructor(server,onConnect, ) {
+        window.client = this;
         this.server = server;
         this.ws = new Socket(this.server, this);
         this.ws.iniSocket();
@@ -33,6 +34,7 @@ class Client {
         this.connectionStatus = ConnectionStatus.CONNECTING;
         this.playerStatus = PlayerStatus.WAITING;
         this.username = "";
+        this.player = null;
 
 
     }

@@ -77,7 +77,6 @@ class Map:
             return False
         return True
 
-
     def is_valid_viewport_around_rect(self, rect):
         rect = rect.clamp(Rectangle(
             Vector(0, 0),
@@ -101,3 +100,24 @@ class Map:
                 vector.y >= self.map_size - 1:
             return True
         return False
+
+    def fill_waiting_blocks(self, player):
+        blocks = player.capture_blocks
+        if len(blocks) == 1:
+            vector = blocks[0]
+            rect = Rectangle(vector, vector.add_scalar(1))
+            self.fill_blocks(rect, player)
+
+        for vec in range(len(blocks) - 1):
+            vector = blocks[vec]
+            next_vector = blocks[vec + 1]
+            # Prevent Diagonal
+            if vector.x != next_vector.x and vector.y != next_vector.y:
+                raise Exception("Invalid Vector")
+            # Sort the two corners so that `min` is always in the top left.
+
+
+            min_vec = Vector(min(vector.x, next_vector.x), min(vector.y, next_vector.y))
+            max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
+            rec = Rectangle(min_vec, max_vec)
+            self.fill_blocks(rec, player)

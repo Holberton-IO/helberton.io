@@ -5,7 +5,7 @@ from gameserver.game.map import Map
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
-from gameserver.network.packets import PlayerStatePacket
+from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket
 
 
 class GameServer:
@@ -90,6 +90,7 @@ class GameServer:
                 random.random()
             ))
         )
+
         start_direction = self.get_closet_wall_direction(vec)["direction"]
         return vec, start_direction
 
@@ -121,10 +122,13 @@ class GameServer:
     def broadcast_player_state(self, player):
         player_state_packet = PlayerStatePacket(player)
         for p in self.get_overlapping_viewport_with_rec(player.waiting_bounds):
+            print("Player State Packet Sent To: ", p.name)
             p.client.send(player_state_packet)
 
     def broadcast_player_waiting_blocks(self, player):
-        pass
+        packet = WaitingBlocksPacket(player)
+        for nearby_player in player.player_see_this_player():
+            nearby_player.client.send(packet)
 
     def loop(self, tick, dt):
         for player in self.players:

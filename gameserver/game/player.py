@@ -5,12 +5,17 @@ from gameserver.game.rect import Rectangle
 from gameserver.network.packets.player_state import PlayerStatePacket
 from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
 from gameserver.game.line import Line
-
+from gameserver.utils.game import *
 
 class Player:
     def __init__(self, game_server, client, name="", player_id=""):
         self.game = game_server
         self.client = client
+        self.is_send_ready_packet = False
+
+        # Movement
+        self.movement_queue = []
+        self.lashCertainClientPos = None
 
         self.name = name
         self.player_id = player_id
@@ -47,6 +52,8 @@ class Player:
 
     @property
     def last_capture_block(self):
+        if len(self.capture_blocks) == 0:
+            return None
         return self.capture_blocks[-1]
 
     @property
@@ -80,12 +87,20 @@ class Player:
             self.direction = "left"
 
     def loop(self, tick, dt, game_server):
+        if not self.is_send_ready_packet:
+            return
         if self.is_dead:
             return
 
         last_position = self.position.clone()
         self.position = self.position.get_vector_from_direction(self.direction)
+        if self.position.is_vector_hast_negative() or self.game.map.check_vector_in_walls(self.position):
+            self.position = last_position.clone()
 
+        self.update_current_block(last_position)
+        self.on_change_position()
+        self.pares_movement_queue()
+        # print("Player Loop: ", self.position, self.direction)
         # TODO Handle Player Movement
         # TODO Handle Player Capture Area
 
@@ -103,7 +118,7 @@ class Player:
             # Prevent Diagonal
             if last_block_vec.x != position.x and last_block_vec.y != position.y:
                 raise Exception("Diagonal Capture Not Allowed")
-            last_block_2 = self.capture_blocks[-2]
+            last_block_2 = None if len(self.capture_blocks) < 2 else self.capture_blocks[-2]
             if last_block_2:
                 # Check if last block is in same line
                 # Prevent adding block in between two blocks
@@ -125,17 +140,22 @@ class Player:
 
     def update_current_block(self, last_position: Vector):
         data = self.game.map.get_valid_blocks(self.position)
-        if type(data) == Player and data == self:
+        if type(data) == Player and data == self and self.is_capturing:
             # We Come Back To Our Blocks
-            return
+            self.add_waiting_block(last_position)
+            self.game.map.fill_waiting_blocks(self)
+            #     this.#updateCapturedArea();
+            # 				this.game.broadcastPlayerEmptyTrail(this);
+            # 				this.#clearTrailVertices();
 
         """
         if not player.is_capturing: start capturing
         """
-        if not self.is_capturing:
-            self.add_waiting_block(self.position)
-
-            return
+        if type(data) == int and data == 1 or data != self:
+            if not self.is_capturing:
+                self.add_waiting_block(self.position)
+                self.game.broadcast_player_waiting_blocks(self)
+                return
 
     def add_player_to_viewport(self, player):
         if player in self.players_in_viewport:
@@ -163,7 +183,7 @@ class Player:
             return
         self.players_in_viewport.discard(player)
         player.other_players_in_viewport.discard(self)
-        # TODO SEND REMOVED FROM VIEWPORT PACKET
+        # TODO SEND REMOVED FROM VIEWPORT PACKET (IMPORTANT)
 
     def update_player_viewport(self):
         left_players = set(self.players_in_viewport)
@@ -183,7 +203,6 @@ class Player:
             player.remove_player_from_viewport(self)
 
     def on_change_position(self):
-        print(f"on_change_position for {self.name}")
         # Update Blocks Bounds
         if not self.is_capturing:
             self.waiting_bounds = Rectangle(self.position.clone(), self.position.clone())
@@ -282,7 +301,7 @@ class Player:
         :param rect:
         :return:
         """
-        if not self.game.map.is_valid_viewport_around_rect(self, rect):
+        if not self.game.map.is_valid_viewport_around_rect(rect):
             return
 
         for cmp_block in self.game.map.get_compressed_blocks_in(self.get_viewport()):
@@ -343,3 +362,70 @@ class Player:
 
     def generate_state_packet(self):
         return PlayerStatePacket(self)
+
+    def player_see_this_player(self):
+        for player in self.other_players_in_viewport:
+            yield player
+
+    def client_update_pos(self, direction, pos):
+        self.movement_queue.append((direction, pos))
+        self.pares_movement_queue()
+
+
+
+    def check_move_is_valid(self, new_direction, new_pos):
+        # Prevent Opposite Direction
+        if check_is_dir_with_opposite(self.direction, new_direction):
+            return False
+        # Prevent Same Direction
+        if self.direction == new_direction:
+            return False
+        ### TODO HANDEL CASES IN PAPER
+        return True
+
+    def is_future_position(self, new_pos):
+        if new_pos == self.position:
+            return False
+        if self.direction == "up" and new_pos.y < self.position.y:
+            return True
+        if self.direction == "down" and new_pos.y > self.position.y:
+            return True
+
+        if self.direction == "left" and new_pos.x < self.position.x:
+            return True
+
+        if self.direction == "right" and new_pos.x > self.position.x:
+            return True
+        return False
+
+    def pares_movement_queue(self):
+        last_move_was_invalid = False
+
+        while len(self.movement_queue) > 0:
+            print("Movement Queue: ", self.movement_queue[0])
+            move = self.movement_queue[0]
+            new_direction = move[0]
+            new_pos = move[1]
+            is_valid = self.check_move_is_valid(new_direction, new_pos)
+            if not is_valid:
+                self.movement_queue.pop(0)
+                last_move_was_invalid = True
+                continue
+
+            last_move_was_invalid = False
+            if self.is_future_position(new_pos):
+                return
+
+            self.movement_queue.pop(0)
+            prev_pos = self.position.clone()
+            self.position = new_pos.clone()
+            self.lashCertainClientPos = new_pos.clone()
+            if self.is_capturing:
+                self.add_waiting_block(self.position)
+
+            self.direction = new_direction
+            self.game.broadcast_player_state(self)
+            self.update_current_block(self.position)
+            self.on_change_position()
+
+

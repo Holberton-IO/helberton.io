@@ -47,10 +47,13 @@ class PlayerStatePacket extends Packet {
     handleReceivedPacket(packet, client) {
         console.log("PlayerState Ready Packet");
 
-        const myPlayer = window.gameEngine.gameObjects.myPlayer;
+        const myPlayer = client.player;
 
-        const player = new Player(null, packet.userId);
-        player.isMyPlayer = true;
+        let player = new Player(null, packet.userId);
+
+        player = window.gameEngine.gameObjects.addPlayer(player);
+
+
         player.name = packet.playerName;
         player.colorBrighter = packet.colorBrighter;
         player.colorDarker = packet.colorDarker;
@@ -58,16 +61,73 @@ class PlayerStatePacket extends Packet {
         player.colorPattern = packet.colorPattern;
         player.colorPatternEdge = packet.colorPatternEdge;
         player.position = new Point(packet.playerX, packet.playerY);
-        player.direction = packet.direction;
+        player.dir = packet.direction;
 
-        if (myPlayer && myPlayer.equals(player)) {
-            myPlayer.position = player.position;
-            myPlayer.direction = player.direction;
+        player.hasReceivedPosition = true;
+        player.moveRelativeToServerPosNextFrame = true;
+        player.lastServerPosSentTime = Date.now();
+
+
+        myPlayer.lastPosHasBeenConfirmed = true;
+        let offset = player.calMoveOffset();
+        let newPos = new Point(packet.playerX, packet.playerY);
+        let newDir = packet.direction;
+        Player.movePlayer(newPos, newDir, offset);
+        let doSetPos = true;
+
+        if (player.isMyPlayer) {
+            player.lastPosServerSentTime = Date.now();
+
+            // Check If dir and por are close to current
+            const distVector = player.position.distanceVector(newPos);
+            if ((player.dir === newDir || player.myNextDir === newDir) &&
+                distVector.x < 1 && distVector.y < 1) {
+                doSetPos = false;
+            }
+
+            //if dir and pos are the first item of lastClientsideMoves
+            //when two movements are made shortly after each other the
+            //previous check (dir && pos) won't suffice, eg:
+            // client makes move #1
+            // client makes move #2
+            // receives move #1 <-- different from current dir & pos
+            // recieves move #2
+            if (player.clientSideMoves.length > 0) {
+                const lastClientSideMove = player.clientSideMoves.shift()
+                if (lastClientSideMove.dir === newDir
+                    && lastClientSideMove.pos.equals(newPos)) {
+                    doSetPos = false;
+                } else {
+                    player.clientSideMoves = [];
+                }
+            }
+
+            if (doSetPos) {
+                player.myNextDir = newDir;
+                player.changeCurrentDir(newDir,newPos,false,false);
+
+                //TODO REQUEST MY WAITING
+                player.sendDirQueue=[];
+            }
+
+
+            player.serverPos = newPos;
+            player.serverDir = newDir;
+        }else
+        {
+            player.dir = newDir;
         }
 
-        window.gameEngine.gameObjects.addPlayer(player);
+        if (doSetPos) {
+            player.position = newPos;
+            player.lastPosServerSentTime = Date.now();
+        }
 
 
+        if (!player.drawPosSet) {
+            player.drawPosSet = true;
+            player.drawPosition = new Point(packet.playerX, packet.playerY);
+        }
 
     }
 }

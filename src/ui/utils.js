@@ -32,4 +32,24 @@ const convertIntColorToHex = (color) => {
 }
 
 
-export {convertIntColorToHex,getHeight, getWidth, calculate_pixel_ratio, ease, drawInCtxRec}
+const isOppositeDir = (newDir, OldDir) => {
+    if (newDir === 'up' && OldDir === 'down')
+        return true;
+    else if (newDir === 'down' && OldDir === 'up')
+        return true;
+    else if (newDir === 'left' && OldDir === 'right')
+        return true;
+    else return newDir === 'right' && OldDir === 'left';
+
+}
+
+const isVerticalDir = (dir) => {
+    return dir === 'up' || dir === 'down';
+}
+
+const isMovingToPositiveDir = (dir) => {
+    return dir === 'down' || dir === 'right';
+
+}
+
+export {isMovingToPositiveDir,isVerticalDir,isOppositeDir, convertIntColorToHex, getHeight, getWidth, calculate_pixel_ratio, ease, drawInCtxRec}

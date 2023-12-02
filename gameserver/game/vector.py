@@ -22,8 +22,13 @@ class Vector:
         else:
             raise Exception("Invalid Direction")
 
-        return direction_vector + self
+        return  direction_vector + self
 
+
+
+
+    def is_vector_hast_negative(self):
+        return self.x < 0 or self.y < 0
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y)
 
@@ -43,4 +48,12 @@ class Vector:
     def set(self, vec):
         self.x = vec.x
         self.y = vec.y
+        return self
+
+    def set_x(self, pos):
+        self.x = pos.x
+        return self
+
+    def set_y(self, pos):
+        self.y = pos.y
         return self

@@ -34,5 +34,5 @@ class GameLoop:
             tick = time.time()
             self.dt = tick - self.lastTick
             self.lastTick = tick
-            self.game_server.loop(self.lastTick, self.dt)
+            self.game_server.loop(tick, self.dt)
             time.sleep(GameLoop.sleep_time)

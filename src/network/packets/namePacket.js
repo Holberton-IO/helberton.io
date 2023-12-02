@@ -3,7 +3,7 @@ import Reader from '../utils/reader.js';
 import Writer from '../utils/writer.js';
 import {PlayerStatus} from "../client.js"
 import Ready from "./ready";
-
+import Player  from "../../ui/objects/player";
 
 class NamePacket extends Packet {
 
@@ -12,6 +12,7 @@ class NamePacket extends Packet {
         this.name = name;
         this.packetId = 1001;
         this.isVerified = false;
+        this.userId = 0;
     }
 
 
@@ -19,6 +20,7 @@ class NamePacket extends Packet {
     static parsePacket(p) {
         const nameLength = p.reader.readInt2();
         p.name = p.reader.readStringFromBytes(nameLength);
+        p.userId = p.reader.readInt4();
         p.isVerified = p.reader.readInt1() === 1;
         return p;
     }
@@ -36,9 +38,16 @@ class NamePacket extends Packet {
 
 
         if (packet.isVerified) {
+
+            const player = new Player(null, packet.userId);
+            player.isMyPlayer = true;
+
+            client.player = player;
             client.isVerified = packet.isVerified;
             client.username = packet.name;
             client.playerStatus = PlayerStatus.READY;
+            window.gameEngine.gameObjects.addPlayer(player);
+
             client.send(new Ready());
         }else
         {

@@ -2,6 +2,7 @@ import Camera from './ui/objects/camera.js';
 import GameEngine from "./gameEngine";
 import {Client}  from "./network/client";
 import {} from "./globals.js";
+import {} from "./controls.js";
 
 const camera = new Camera();
 const gameEngine = new GameEngine(60);
@@ -11,14 +12,14 @@ window.camera = camera;
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let blocks = window.gameEngine.gameObjects.blocks;
-
+let players = window.gameEngine.gameObjects.players;
+let client = null;
+let myPlayer = null;
 
 const draw = () => {
+    if(client && client.player)
+        myPlayer = client.player;
 
-    if(gameEngine.gameObjects.myPlayer) {
-       camera.camPrevPosition = camera.camPosition;
-         camera.camPosition = gameEngine.gameObjects.myPlayer.position;
-    }
     gameEngine.scaleCanvas(ctx);
     ctx.fillStyle = "#3a3428";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -27,20 +28,24 @@ const draw = () => {
     for (let b of blocks) {
         b.draw(ctx, false);
     }
+    for (let p in players) {
+        players[p].draw(ctx);
+    }
+    if(myPlayer && myPlayer.hasReceivedPosition) {
 
-    // camera.camPosition.x += 0.1;
-
-
-
+        camera.camPosition = myPlayer.position;
+        // console.log(camera.camPosition)
+    }
 
     ctx.restore();
 }
 
 
 gameEngine.setDrawFunction(draw);
-window.requestAnimationFrame(gameEngine.loop.bind(gameEngine));
 
-let client = new Client('ws://127.0.0.1:5000/game', (client) => {
+
+window.requestAnimationFrame(gameEngine.loop.bind(gameEngine));
+client = new Client('ws://127.0.0.1:5000/game', (client) => {
     client.setPlayerName("Test");
 });
 

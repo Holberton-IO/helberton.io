@@ -2,6 +2,7 @@ import * as GameMath from './utils/math.js';
 import * as GameUtils from './ui/utils.js';
 import {calculate_pixel_ratio} from "./ui/utils.js";
 import GameObjects from "./gameObjects.js"
+import PingPacket from "./network/packets/ping";
 
 
 class GameEngine {
@@ -84,6 +85,39 @@ class GameEngine {
     }
 
 
+    handleServerTiming(timeStamp) {
+        if (!window.client || !window.client.player)
+            return;
+        const myPlayer = window.client.player;
+        const maxWaitTimeForDisconnect = window.game.maxWaitingSocketTime;
+        const clientSideSetPosPassedTime = Date.now() - myPlayer.lastMyPostSetClientSendTime;
+        const clientSideValidSetPosPassed = Date.now() - myPlayer.lastMyPostSetValidClientSendTime;
+        const serverSideSetPosPassed = Date.now() - myPlayer.lastPosServerSentTime;
+
+        const timeTookToConfirmation = serverSideSetPosPassed - clientSideSetPosPassedTime;
+
+
+        if (clientSideValidSetPosPassed > maxWaitTimeForDisconnect &&
+            timeTookToConfirmation > maxWaitTimeForDisconnect) {
+            console.log("Check Your Internet Connection");
+
+        }else {
+
+        }
+
+        const maxPingTime = myPlayer.waitingForPing ? 1_0000: 5_000;
+        const pingPassedTime = Date.now() - myPlayer.lastPingTime;
+        if(pingPassedTime > maxPingTime) {
+            myPlayer.waitingForPing = true;
+            myPlayer.lastPingTime = Date.now();
+            const pingPacket = new PingPacket();
+            window.client.send(pingPacket);
+        }
+
+
+
+    }
+
     loop(timeStamp) {
         window.game.timeStamp = timeStamp;
         this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp; // 16
@@ -99,15 +133,15 @@ class GameEngine {
             this.totalDeltaTimeCap = 0;
             this.drawFunction();
         }
+
+
+        this.handleServerTiming(timeStamp);
         window.requestAnimationFrame(this.loop.bind(this));
     }
 
 
-
-    camTransform(ctx,changeSize=false)
-    {
-        if(changeSize)
-        {
+    camTransform(ctx, changeSize = false) {
+        if (changeSize) {
             this.scaleCanvas(ctx);
         }
 
@@ -120,7 +154,7 @@ class GameEngine {
 
     }
 
-    scaleCanvas(ctx, w=GameUtils.getWidth(), h=GameUtils.getHeight()){
+    scaleCanvas(ctx, w = GameUtils.getWidth(), h = GameUtils.getHeight()) {
         let MAX_PIXEL_RATIO = calculate_pixel_ratio();
         let drawingQuality = 1;
         let c = ctx.canvas;
@@ -128,7 +162,7 @@ class GameEngine {
         c.height = h * drawingQuality * MAX_PIXEL_RATIO;
         let styleRatio = 1;
         c.style.width = w * styleRatio + "px";
-	    c.style.height = h * styleRatio + "px";
+        c.style.height = h * styleRatio + "px";
     }
 
 }
