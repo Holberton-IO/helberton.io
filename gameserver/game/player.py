@@ -7,6 +7,7 @@ from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
 from gameserver.game.line import Line
 from gameserver.utils.game import *
 
+
 class Player:
     def __init__(self, game_server, client, name="", player_id=""):
         self.game = game_server
@@ -45,6 +46,8 @@ class Player:
 
         # TODO Hanlde Removing From Game
         self.is_removed_from_game = False
+
+        self.start_position = None
 
     @property
     def is_capturing(self):
@@ -101,6 +104,8 @@ class Player:
         self.on_change_position()
         self.pares_movement_queue()
         # print("Player Loop: ", self.position, self.direction)
+        # print(self.position,self.movement_queue)
+        # print(self.position, self.movement_queue)
         # TODO Handle Player Movement
         # TODO Handle Player Capture Area
 
@@ -111,6 +116,8 @@ class Player:
         self.current_waiting_blocks_ex_pos = length
 
     def add_waiting_block(self, position):
+        print("Add Waiting Block: ", self.capture_blocks)
+        print("----- -> ", self.position)
         last_block_vec = self.last_capture_block
         if last_block_vec:
             if last_block_vec == position:
@@ -125,12 +132,14 @@ class Player:
                 if last_block_vec.x == last_block_2.x \
                         and last_block_vec.x == position.x:
                     if last_block_vec.y <= position.y <= last_block_2.y:
+                        return
                         raise Exception("Block In Between Two Blocks")
                     last_block_vec.set_y(position)
                     return
                 if last_block_vec.y == last_block_2.y \
                         and last_block_vec.y == position.y:
                     if last_block_vec.x <= position.x <= last_block_2.x:
+                        return
                         raise Exception("Block In Between Two Blocks")
                     last_block_vec.set_x(position)
                     return
@@ -142,8 +151,12 @@ class Player:
         data = self.game.map.get_valid_blocks(self.position)
         if type(data) == Player and data == self and self.is_capturing:
             # We Come Back To Our Blocks
+            # print("[add_waiting_block] Player Come Back To Our Blocks")
             self.add_waiting_block(last_position)
             self.game.map.fill_waiting_blocks(self)
+
+            self.capture_blocks = []
+            self.current_waiting_blocks_ex_pos = 0
             #     this.#updateCapturedArea();
             # 				this.game.broadcastPlayerEmptyTrail(this);
             # 				this.#clearTrailVertices();
@@ -153,6 +166,8 @@ class Player:
         """
         if type(data) == int and data == 1 or data != self:
             if not self.is_capturing:
+                # print("[add_waiting_block] Player Exit For Occupied Area")
+
                 self.add_waiting_block(self.position)
                 self.game.broadcast_player_waiting_blocks(self)
                 return
@@ -186,11 +201,13 @@ class Player:
         # TODO SEND REMOVED FROM VIEWPORT PACKET (IMPORTANT)
 
     def update_player_viewport(self):
+        # list = [youssef]
         left_players = set(self.players_in_viewport)
 
         for player in self.game.get_overlapping_waiting_blocks_players_rec(self.get_viewport()):
             left_players.discard(player)
             self.add_player_to_viewport(player)
+
         for player in left_players:
             self.remove_player_from_viewport(player)
 
@@ -213,7 +230,7 @@ class Player:
         if self.is_capturing:
             last_block_vec = self.last_capture_block
             waiting_blocks_len = last_block_vec.distance_to(self.position) + self.current_waiting_blocks_ex_pos
-            self.max_waiting_blocks = max(self.max_waiting_blocks, waiting_blocks_len)
+            self.max_waiting_blocks = max(self.max_waiting_blocks, int(waiting_blocks_len))
 
         # Check if player is out of map
         self.update_player_viewport()
@@ -245,6 +262,7 @@ class Player:
                 # Send Kill Packet
                 # other_player Killed by self
                 pass
+        # TODO DELAY IN SENDING EDGES
         self.send_required_edge_blocks()
 
     def check_point_in_capture_area(self, point, include_last_block=False):
@@ -371,8 +389,6 @@ class Player:
         self.movement_queue.append((direction, pos))
         self.pares_movement_queue()
 
-
-
     def check_move_is_valid(self, new_direction, new_pos):
         # Prevent Opposite Direction
         if check_is_dir_with_opposite(self.direction, new_direction):
@@ -380,10 +396,19 @@ class Player:
         # Prevent Same Direction
         if self.direction == new_direction:
             return False
+
         ### TODO HANDEL CASES IN PAPER
+
+        #
+
         return True
 
     def is_future_position(self, new_pos):
+        """
+        Is Client Faster Than Server
+        :param new_pos:
+        :return:
+        """
         if new_pos == self.position:
             return False
         if self.direction == "up" and new_pos.y < self.position.y:
@@ -402,10 +427,19 @@ class Player:
         last_move_was_invalid = False
 
         while len(self.movement_queue) > 0:
+
+            print("Movement Queue Length: ", len(self.movement_queue))
             print("Movement Queue: ", self.movement_queue[0])
             move = self.movement_queue[0]
             new_direction = move[0]
             new_pos = move[1]
+            # Check If Touch Wall
+
+            if self.game.map.check_vector_in_walls(new_pos):
+                self.movement_queue.pop(0)
+                last_move_was_invalid = True
+                continue
+
             is_valid = self.check_move_is_valid(new_direction, new_pos)
             if not is_valid:
                 self.movement_queue.pop(0)
@@ -416,11 +450,14 @@ class Player:
             if self.is_future_position(new_pos):
                 return
 
+            print(f"Server Position {self.position}, Client Position {new_pos}", "\n",
+                  f"Start Position {self.start_position}")
             self.movement_queue.pop(0)
             prev_pos = self.position.clone()
             self.position = new_pos.clone()
             self.lashCertainClientPos = new_pos.clone()
             if self.is_capturing:
+                # print("[add_waiting_block] Player Changed Position In Waiting Mode")
                 self.add_waiting_block(self.position)
 
             self.direction = new_direction
@@ -428,4 +465,7 @@ class Player:
             self.update_current_block(self.position)
             self.on_change_position()
 
-
+        if last_move_was_invalid:
+            print("Invalid Movement")
+            player_state_packet = PlayerStatePacket(self)
+            self.client.send(player_state_packet)

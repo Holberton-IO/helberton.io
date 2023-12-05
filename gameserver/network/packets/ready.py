@@ -48,13 +48,14 @@ class ReadyPacket(Packet):
         # Set Player Position
         position, direction = client.game_server.get_spawn_point()
         client.player.position = position
+        client.player.start_position = position.clone()
         client.player.direction = direction
         client.player.last_edge_check_position = position.clone()
         self.player_x = client.player.position.x
         self.player_y = client.player.position.y
         self.player_direction = client.player.direction
-
-
+        print("On Ready Packet", self.player_x, self.player_y, self.player_direction)
+        # (30,5)
         """
         Set Player Colors
         """

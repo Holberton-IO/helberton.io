@@ -15,6 +15,12 @@ class Point {
     clone() {
         return new Point(this.x, this.y);
     }
+
+
+    floorVector()
+    {
+        return new Point(Math.floor(this.x),Math.floor(this.y));
+    }
 }
 
 export default Point;

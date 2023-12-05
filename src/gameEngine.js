@@ -91,13 +91,14 @@ class GameEngine {
         const myPlayer = window.client.player;
         const maxWaitTimeForDisconnect = window.game.maxWaitingSocketTime;
         const clientSideSetPosPassedTime = Date.now() - myPlayer.lastMyPostSetClientSendTime;
-        const clientSideValidSetPosPassed = Date.now() - myPlayer.lastMyPostSetValidClientSendTime;
+        const lastConfirmationPassedTime = Date.now() - myPlayer.lastConfirmedTimeForPos;
         const serverSideSetPosPassed = Date.now() - myPlayer.lastPosServerSentTime;
 
         const timeTookToConfirmation = serverSideSetPosPassed - clientSideSetPosPassedTime;
 
-
-        if (clientSideValidSetPosPassed > maxWaitTimeForDisconnect &&
+        // console.log(`Last Confirmation Passed Time: ${lastConfirmationPassedTime}ms`);
+        // console.log(`Time Took To Confirmation: ${timeTookToConfirmation}ms`);
+        if (lastConfirmationPassedTime > maxWaitTimeForDisconnect &&
             timeTookToConfirmation > maxWaitTimeForDisconnect) {
             console.log("Check Your Internet Connection");
 
@@ -146,8 +147,6 @@ class GameEngine {
         }
 
         ctx.save();
-        let canvas = ctx.canvas;
-        ctx.translate(canvas.width / 2, canvas.height / 2);
         const camera = window.camera;
         camera.calZoom(ctx);
 

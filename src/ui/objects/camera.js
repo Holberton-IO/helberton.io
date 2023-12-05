@@ -10,6 +10,7 @@ class Camera {
         this.camPositionOffset = new Point(0, 0);
         this.camPrevPosition = new Point(0, 0);
 
+        this.camPosSet = false;
 
         this.camShakeBuffer = [];
         //
@@ -76,7 +77,7 @@ class Camera {
             if (shake[2]) {
                 this.camRotationOffset += Math.cos(shakeTime * 9) * 0.003 * shakeTime3;
             }
-            console.log( this.camShakeBuffer.length);
+            console.log(this.camShakeBuffer.length);
         }
 
         let limit = 80;
@@ -94,17 +95,27 @@ class Camera {
     }
 
     calZoom(ctx) {
-        const canvas = ctx.canvas;
-        const maxDimension = Math.max(canvas.width, canvas.height);
-        const zoomEdge = maxDimension / window.game.maxZoom;
-        const screenPixels = canvas.width * canvas.height;
-        const blockPixels = screenPixels / window.game.maxBlocksNumber;
-        const zoomBlocks = Math.sqrt(blockPixels) / 10;
-        this.zoom = Math.max(zoomEdge, zoomBlocks);
-        ctx.rotate(this.camRotationOffset);
-        ctx.scale(this.zoom, this.zoom);
+        let maxPixelRatio = GameUtils.calculate_pixel_ratio();
+        let quality = 1;
+        const canvas = window.game.canvas;
 
-        ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);
+
+        if (ctx.canvas === canvas) {
+            const maxDimension = Math.max(canvas.width, canvas.height);
+            const zoomEdge = maxDimension / window.game.maxZoom;
+            const screenPixels = canvas.width * canvas.height;
+            const blockPixels = screenPixels / window.game.maxBlocksNumber;
+            const zoomBlocks = Math.sqrt(blockPixels) / 10;
+            this.zoom = Math.max(zoomEdge, zoomBlocks);
+            ctx.translate(window.game.canvas.width / 2, window.game.canvas.height / 2);
+
+            ctx.rotate(this.camRotationOffset);
+            ctx.scale(this.zoom, this.zoom);
+            ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);
+
+        } else {
+            ctx.setTransform(maxPixelRatio * quality, 0, 0, maxPixelRatio * quality, 0, 0);
+        }
     }
 
 

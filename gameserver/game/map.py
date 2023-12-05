@@ -121,3 +121,4 @@ class Map:
             max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
             rec = Rectangle(min_vec, max_vec)
             self.fill_blocks(rec, player)
+

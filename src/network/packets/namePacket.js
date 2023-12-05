@@ -4,6 +4,7 @@ import Writer from '../utils/writer.js';
 import {PlayerStatus} from "../client.js"
 import Ready from "./ready";
 import Player  from "../../ui/objects/player";
+import Point from "../../ui/objects/point";
 
 class NamePacket extends Packet {
 
@@ -39,7 +40,7 @@ class NamePacket extends Packet {
 
         if (packet.isVerified) {
 
-            const player = new Player(null, packet.userId);
+            const player = new Player(new Point(0,0), packet.userId);
             player.isMyPlayer = true;
 
             client.player = player;

@@ -49,9 +49,9 @@ class PlayerStatePacket extends Packet {
 
         const myPlayer = client.player;
 
-        let player = new Player(null, packet.userId);
-
+        let player = new Player(new Point(0, 0), packet.userId);
         player = window.gameEngine.gameObjects.addPlayer(player);
+        // console.log("PlayerState", player);
 
 
         player.name = packet.playerName;
@@ -60,8 +60,8 @@ class PlayerStatePacket extends Packet {
         player.colorSlightlyBrighter = packet.colorSlightlyBrighter;
         player.colorPattern = packet.colorPattern;
         player.colorPatternEdge = packet.colorPatternEdge;
-        player.position = new Point(packet.playerX, packet.playerY);
-        player.dir = packet.direction;
+        // player.position = new Point(packet.playerX, packet.playerY);
+        // player.dir = packet.direction;
 
         player.hasReceivedPosition = true;
         player.moveRelativeToServerPosNextFrame = true;
@@ -69,11 +69,14 @@ class PlayerStatePacket extends Packet {
 
 
         myPlayer.lastPosHasBeenConfirmed = true;
+
+
         let offset = player.calMoveOffset();
         let newPos = new Point(packet.playerX, packet.playerY);
         let newDir = packet.direction;
         Player.movePlayer(newPos, newDir, offset);
         let doSetPos = true;
+
 
         if (player.isMyPlayer) {
             player.lastPosServerSentTime = Date.now();
@@ -85,13 +88,7 @@ class PlayerStatePacket extends Packet {
                 doSetPos = false;
             }
 
-            //if dir and pos are the first item of lastClientsideMoves
-            //when two movements are made shortly after each other the
-            //previous check (dir && pos) won't suffice, eg:
-            // client makes move #1
-            // client makes move #2
-            // receives move #1 <-- different from current dir & pos
-            // recieves move #2
+
             if (player.clientSideMoves.length > 0) {
                 const lastClientSideMove = player.clientSideMoves.shift()
                 if (lastClientSideMove.dir === newDir
@@ -104,29 +101,26 @@ class PlayerStatePacket extends Packet {
 
             if (doSetPos) {
                 player.myNextDir = newDir;
-                player.changeCurrentDir(newDir,newPos,false,false);
-
+                player.changeCurrentDir(newDir, newPos, false, false);
                 //TODO REQUEST MY WAITING
-                player.sendDirQueue=[];
+                player.sendDirQueue = [];
             }
 
 
-            player.serverPos = newPos;
+            player.serverPos = newPos.clone();
             player.serverDir = newDir;
-        }else
-        {
+        } else {
             player.dir = newDir;
         }
 
         if (doSetPos) {
             player.position = newPos;
-            player.lastPosServerSentTime = Date.now();
         }
 
 
         if (!player.drawPosSet) {
             player.drawPosSet = true;
-            player.drawPosition = new Point(packet.playerX, packet.playerY);
+            player.drawPosition = player.position.clone();
         }
 
     }

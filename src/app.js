@@ -13,6 +13,7 @@ let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let blocks = window.gameEngine.gameObjects.blocks;
 let players = window.gameEngine.gameObjects.players;
+window.game.canvas = canvas;
 let client = null;
 let myPlayer = null;
 
@@ -28,14 +29,12 @@ const draw = () => {
     for (let b of blocks) {
         b.draw(ctx, false);
     }
+
+
     for (let p in players) {
         players[p].draw(ctx);
     }
-    if(myPlayer && myPlayer.hasReceivedPosition) {
 
-        camera.camPosition = myPlayer.position;
-        // console.log(camera.camPosition)
-    }
 
     ctx.restore();
 }
