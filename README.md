@@ -1,5 +1,7 @@
 # Holberton-IO Game
 
+### ```Every move, your choice```
+
 Welcome to Holberton-IO, a territory-claiming game where players compete to have the most land when the game time runs out. Be strategic and watch out for other players who might cross your trail!
 
 ## Table of Contents
@@ -105,8 +107,7 @@ The client-side code is responsible for rendering the game interface, handling u
 
 - **utils:**
   - **math.js:** Implements mathematical functions used on the client side.
-
-### Technologies Used
+### Technologies
 
 #### Python
 
@@ -214,6 +215,6 @@ Feel free to contribute to the Holberton-IO project! Your contributions help enh
 
 Thank you for exploring Holberton-IO! We hope you enjoy the engaging gameplay, strategic challenges, and the real-time multiplayer experience our game has to offer. Whether you're a player claiming territory or a developer contributing to the project, your involvement is what makes Holberton-IO exciting and dynamic.
 
-If you have feedback, suggestions, or if you encounter any issues, please don't hesitate to [open an issue](<repository-url>/issues). We appreciate your input as we strive to make Holberton-IO even better.
+If you have feedback, suggestions, or if you encounter any issues, please don't hesitate to [open an issue](https://github.com/Holberton-IO/helberton.io/issues). We appreciate your input as we strive to make Holberton-IO even better.
 
-Happy gaming and contributing! 🎮✨
+```Happy gaming and contributing :)``` 🎮
