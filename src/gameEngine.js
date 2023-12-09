@@ -12,6 +12,7 @@ class GameEngine {
         this.totalDeltaTimeCap = 0
         this.fps = fps
         this.deltaTime = 1000 / this.fps;
+        this.interpoatedDeltaTime = 1000 / this.fps;
 
 
         this.timesCap = [0, 6.5, 16, 33, 49, 99];
@@ -19,6 +20,9 @@ class GameEngine {
 
         this.processFrames = [];
         this.missedFrames = [];
+
+
+        this.canvanQaulity = 1;
 
 
         this.gameObjects = new GameObjects();
@@ -122,6 +126,16 @@ class GameEngine {
     loop(timeStamp) {
         window.game.timeStamp = timeStamp;
         this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp; // 16
+
+        if(this.currentFrameTimeStamp > this.interpoatedDeltaTime){
+            this.interpoatedDeltaTime = this.currentFrameTimeStamp;
+        }else
+        {
+            this.interpoatedDeltaTime = GameMath.linearInterpolate(this.interpoatedDeltaTime, this.currentFrameTimeStamp, 0.05);
+        }
+
+
+
         this.checkIncreasingInFramesProcess();
         this.checkDecreaseInFramesProcess();
         this.deltaTime = this.currentFrameTimeStamp + this.totalDeltaTimeCap;

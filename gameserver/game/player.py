@@ -48,6 +48,7 @@ class Player:
         self.is_removed_from_game = False
 
         self.start_position = None
+        self.next_tile_progress = 0
 
     @property
     def is_capturing(self):
@@ -94,18 +95,19 @@ class Player:
             return
         if self.is_dead:
             return
+        player_speed = self.game.player_travel_speed
+        self.next_tile_progress += dt * player_speed
+        if self.next_tile_progress > 1:
+            self.next_tile_progress -= 1
+            last_position = self.position.clone()
+            self.position = self.position.get_vector_from_direction(self.direction)
+            if self.position.is_vector_hast_negative() or self.game.map.check_vector_in_walls(self.position):
+                self.position = last_position.clone()
 
-        last_position = self.position.clone()
-        self.position = self.position.get_vector_from_direction(self.direction)
-        if self.position.is_vector_hast_negative() or self.game.map.check_vector_in_walls(self.position):
-            self.position = last_position.clone()
+            self.update_current_block(last_position)
+            self.on_change_position()
+            self.pares_movement_queue()
 
-        self.update_current_block(last_position)
-        self.on_change_position()
-        self.pares_movement_queue()
-        # print("Player Loop: ", self.position, self.direction)
-        # print(self.position,self.movement_queue)
-        # print(self.position, self.movement_queue)
         # TODO Handle Player Movement
         # TODO Handle Player Capture Area
 
@@ -116,8 +118,8 @@ class Player:
         self.current_waiting_blocks_ex_pos = length
 
     def add_waiting_block(self, position):
-        print("Add Waiting Block: ", self.capture_blocks)
-        print("----- -> ", self.position)
+        # print("Add Waiting Block: ", self.capture_blocks)
+        # print("----- -> ", self.position)
         last_block_vec = self.last_capture_block
         if last_block_vec:
             if last_block_vec == position:

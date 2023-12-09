@@ -5,6 +5,7 @@ from gameserver.network.packets.ready import ReadyPacket
 from gameserver.network.packets.fill_area import FillAreaPacket
 from gameserver.network.packets.player_state import PlayerStatePacket
 from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
+from gameserver.network.packets.request_waiting_block import RequestWaitingBlocks
 
 dic = {
     1001: NamePacket,
@@ -14,4 +15,6 @@ dic = {
     1005: WaitingBlocksPacket,
     1006: DirectionPacket,
     1007: PingPacket,
+    1008: None,  # Pong Packet
+    1009: RequestWaitingBlocks,
 }

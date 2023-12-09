@@ -19,6 +19,8 @@ class GameServer:
     viewport_edge_chunk_size = 5
     updates_viewport_rect_size = min_tiles_viewport_rect_size + viewport_edge_chunk_size
 
+    max_undo_event_time = 600
+
     def __new__(cls, *args, **kwargs):
         if GameServer.__instance is None:
             map_size = kwargs.get("map_size", 0)

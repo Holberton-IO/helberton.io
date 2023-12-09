@@ -14,6 +14,11 @@ let ctx = canvas.getContext("2d");
 let blocks = window.gameEngine.gameObjects.blocks;
 let players = window.gameEngine.gameObjects.players;
 window.game.canvas = canvas;
+
+let helperCanvas = document.createElement("canvas");
+let helperCtx = helperCanvas.getContext("2d");
+window.game.helperCtx = helperCtx;
+
 let client = null;
 let myPlayer = null;
 

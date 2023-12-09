@@ -48,3 +48,6 @@ class Rectangle:
         )
         self.min = min_vec
         self.max = max_vec
+
+    def vector_in_rect(self, vector):
+        return self.min.x <= vector.x < self.max.x and self.min.y <= vector.y < self.max.y

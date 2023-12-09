@@ -3,60 +3,15 @@ import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
 import DirectionPacket from "../../network/packets/direction";
 import {log} from "three/nodes";
+import RequestWaitingBlockPacket from "../../network/packets/requestWaitingBlocks";
 
 class Player {
-    checkNextDirAndCamera() {
-
-        if (!this.isMyPlayer) return;
-        const camera = window.camera;
-        if (camera.camPosSet) {
-            camera.camPosition.x = GameMath.linearInterpolate(camera.camPosition.x, this.position.x, 0.03);
-            camera.camPosition.y = GameMath.linearInterpolate(camera.camPosition.y, this.position.y, 0.03);
-
-        } else {
-            camera.camPosition = this.position.clone();
-            camera.camPosSet = true;
-        }
-
-
-        if (this.myNextDir === this.dir) return;
-        const isHorizontal = this.isMovingHorizontally(this.dir);
-        // console.log("Horizontal",this.changeDirAtIsHorizontal,isHorizontal);
-        if (this.changeDirAtIsHorizontal === isHorizontal) return;
-
-        // console.log("Next Frame Passed")
-
-        let changeDirNow = false;
-        const currentCoord = isHorizontal ? this.position.x : this.position.y;
-
-
-        if (GameUtils.isMovingToPositiveDir(this.dir)) {
-            if (this.changeDirAtCoord < currentCoord) changeDirNow = true;
-        } else {
-            if (this.changeDirAtCoord > currentCoord) changeDirNow = true;
-        }
-        if (changeDirNow) {
-            // console.log("Chnage Current  Direction Based On Next Frame")
-            const newPos = this.position.clone();
-            const tooFar = Math.abs(this.changeDirAtCoord - currentCoord);
-            if(isHorizontal)
-                newPos.x = this.changeDirAtCoord;
-            else
-                newPos.y = this.changeDirAtCoord;
-            this.changeCurrentDir(this.myNextDir, newPos, false, false);
-            // console.log(`Before Change Position In Next Frame`, this.position);
-            Player.movePlayer(this.position, this.dir, tooFar);
-            // console.log(`After Change Position In Next Frame`, this.position);
-        }
-
-    }
 
     constructor(position = new Point(0, 0), id) {
         this.id = id
         this.drawPosSet = false;
 
         this.isMyPlayer = false;
-        this.isDead = false;
         this.deathWasCertain = false;
         this.didUncertainDeathLastTick = false;
         this.isDeathTimer = 0;
@@ -90,9 +45,9 @@ class Player {
 
 
         this.isReady = false;
+        this.isDead = false;
 
         ///
-        this.isWaitingForGettingWaitingBlocks = false;
         this.waitingBlocksDuringWaiting = [];
         //
         this.lastPosHasBeenConfirmed = false;
@@ -119,7 +74,50 @@ class Player {
         this.serverDiffPing = 0;
 
 
+        this.isGettingWaitingBlocks = false;
+        this.skipGettingWaitingBlocksRespose = false;
+        this.waitingPushedDuringReceiving = [];
+
     }
+
+
+    updatePlayerDirection(dir) {
+        this.dir = dir;
+    }
+
+    checkNextDirAndCamera() {
+
+        if (!this.isMyPlayer) return;
+
+        const camera = window.camera;
+        camera.moveToPlayer(this)
+
+
+        if (this.myNextDir === this.dir) return;
+        const isHorizontal = this.isMovingHorizontally(this.dir);
+        if (this.changeDirAtIsHorizontal === isHorizontal) return;
+        let changeDirNow = false;
+        const currentCoord = isHorizontal ? this.position.x : this.position.y;
+
+
+        if (GameUtils.isMovingToPositiveDir(this.dir)) {
+            if (this.changeDirAtCoord < currentCoord) changeDirNow = true;
+        } else {
+            if (this.changeDirAtCoord > currentCoord) changeDirNow = true;
+        }
+        if (changeDirNow) {
+            const newPos = this.position.clone();
+            const tooFar = Math.abs(this.changeDirAtCoord - currentCoord);
+            if (isHorizontal)
+                newPos.x = this.changeDirAtCoord;
+            else
+                newPos.y = this.changeDirAtCoord;
+            this.changeCurrentDir(this.myNextDir, newPos);
+            Player.movePlayer(this.position, this.dir, tooFar);
+        }
+
+    }
+
 
     equals(player) {
         return this.id === player.id;
@@ -175,12 +173,37 @@ class Player {
             offset = (Date.now() - this.lastServerPosSentTime) * gameSpeed;
         }
 
-
+        if(this.isMyPlayer) {
+            Player.movePlayer(this.serverPos, this.serverDir, offset);
+            if (this.serverDir === this.dir) {
+                let clientSideDist = 0;
+                if (Player.isMovingHorizontally(this.dir)) {
+                    if (this.position.y === this.serverPos.y) {
+                        if (this.dir === 'right') {
+                            clientSideDist = this.position.x - this.serverPos.x;
+                        }else {
+                            clientSideDist = this.serverPos.x - this.position.x;
+                        }
+                    }
+                }else {
+                    if (this.position.x === this.serverPos.x) {
+                        if (this.dir === 'down') {
+                            clientSideDist = this.position.y - this.serverPos.y;
+                        }else {
+                            clientSideDist = this.serverPos.y - this.position.y;
+                        }
+                    }
+                }
+                clientSideDist = Math.max(0, clientSideDist);
+                offset *= GameMath.linearInterpolate(.5, 1, GameMath.inverseLinearInterpolate(5, 0, clientSideDist));
+            }
+        }
         Player.movePlayer(this.position, this.dir, offset);
         this.moveRelativeToServerPosNextFrame = false;
         this.moveDrawPosToPos();
         this.checkNextDirAndCamera();
 
+        this.drawWaitingBlocks(ctx);
         this.drawPlayerHeadWithEye(ctx);
         this.parseDirQueue();
 
@@ -285,6 +308,113 @@ class Player {
         c.restore();
     }
 
+    drawWaitingBlocks(ctx) {
+        if (this.waitingBlocks.length <= 0) return;
+        const gameSpeed = window.game.gameSpeed;
+        const deltaTime = window.gameEngine.deltaTime;
+
+
+        for (let blockIndex = this.waitingBlocks.length - 1; blockIndex >= 0; blockIndex--) {
+            let block = this.waitingBlocks[blockIndex];
+            let isLastBlock = blockIndex === this.waitingBlocks.length - 1;
+
+            if (!isLastBlock || this.isDead) {
+                let speed = (this.isDead && isLastBlock) ? gameSpeed : 0.02;
+                block.vanishTimer += deltaTime * speed;
+                if (!isLastBlock && (block.vanishTimer > 10)) {
+                    this.waitingBlocks.splice(blockIndex, 1);
+                }
+            }
+
+            let helperCanvas = window.game.helperCtx.canvas;
+            let helperCtx = window.game.helperCtx;
+
+            if (block.blocks.length <= 0) continue;
+
+            const lastDrawPos = isLastBlock ? this.drawPosition : null;
+
+            if (block.vanishTimer > 0 && false) {
+                window.gameEngine.camTransform(helperCtx, true);
+
+
+                this.drawWaitingBlockInCTX([
+                    {ctx: helperCtx, color: this.colorDarker, offset: 5},
+                    {ctx: helperCtx, color: this.colorBrighter, offset: 4},
+                ], block.blocks, lastDrawPos);
+
+
+                helperCtx.globalCompositeOperation = 'destination-out';
+
+                ctx.restore();
+                helperCtx.restore();
+
+                ctx.drawImage(helperCanvas, 0, 0);
+
+                helperCtx.fillStyle = '#c7c7c7';
+                helperCtx.globalCompositeOperation = "source-in";
+                helperCtx.fillRect(0, 0, helperCanvas.width, helperCanvas.height);
+                window.gameEngine.camTransform(ctx);
+
+            }
+            else if (block.vanishTimer < 10) {
+                this.drawWaitingBlockInCTX([
+                    {ctx: ctx, color: this.colorDarker, offset: 6},
+                    {ctx: ctx, color: this.colorBrighter, offset: 4},
+                ], block.blocks, lastDrawPos);
+            }
+
+
+        }
+
+
+    }
+
+
+    drawDiagonalLines(ctx, color, thickness, spaceBetween, offset) {
+        if (thickness <= 0) return;
+        ctx.lineCap = "butt";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+        const viewPortSize = window.game.viewPortRadius;
+        const camera = window.camera;
+        const mixSize = viewPortSize * 20;
+        let xOffset = 0;
+        let yOffset = 0;
+
+
+        // if(camera.camPrevPosition !== null &&
+        //
+        // ){
+        //     xOffset = camera.camPrevPosition.x - camera.camPosition.x;
+        //     yOffset = camera.camPrevPosition.y - camera.camPosition.y;
+        // }
+
+
+    }
+
+    drawWaitingBlockInCTX(callback, blocks, lastPosition) {
+        if (blocks.length <= 0) return;
+
+
+        for (let ctxIndex = 0; ctxIndex < callback.length; ctxIndex++) {
+            let b = callback[ctxIndex];
+            let ctx = b.ctx;
+            let offset = b.offset;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = b.color;
+            ctx.beginPath();
+            ctx.moveTo(blocks[0].x * 10 + offset, blocks[0].y * 10 + offset);
+            for (let i = 1; i < blocks.length; i++) {
+                ctx.lineTo(blocks[i].x * 10 + offset, blocks[i].y * 10 + offset);
+            }
+            if (lastPosition !== null) {
+               ctx.lineTo(lastPosition.x * 10 + offset, lastPosition.y * 10 + offset);
+            }
+            ctx.stroke();
+        }
+    }
 
     isMovingHorizontally(direction = this.dir) {
         return direction === 'left' || direction === 'right';
@@ -355,9 +485,10 @@ class Player {
 
     calMoveOffset() {
         let offset = 0;
+        if (!this.isMyPlayer || this.serverAvgPing <= 50) return offset;
+
         const gameSpeed = window.game.gameSpeed;
         offset = this.serverAvgPing / 2 * gameSpeed;
-        //console.log(offset, "offset");
         return offset;
     }
 
@@ -379,23 +510,27 @@ class Player {
 
 
     addWaitingBlocks(pos = new Point(0, 0)) {
+        console.log("Add Waiting Blocks Called",this.waitingBlocks.length);
         if (this.waitingBlocks.length <= 0) return;
 
-        const lastBlock = this.waitingBlocks[this.waitingBlocks.length - 1].block;
+        const lastBlock = this.waitingBlocks[this.waitingBlocks.length - 1].blocks;
+        console.log("LastBlock Exists",lastBlock.length);
+
         if (lastBlock.length <= 0) return;
 
-        const lastBlockVec = lastBlock[lastBlock.length - 1];
-        lastBlockVec.push(pos);
+        if (!(lastBlock[0].x !== pos.x || lastBlock[0].y !== pos.y)) return;
+        console.log("Before Push",lastBlock.length, lastBlock, pos);
+        lastBlock.push(pos.clone());
+        console.log("After Push",lastBlock.length, lastBlock, pos);
 
-
-        if (this.isMyPlayer && this.isWaitingForGettingWaitingBlocks) {
-            this.waitingBlocksDuringWaiting.push(pos);
+        if (this.isMyPlayer && this.isGettingWaitingBlocks) {
+            this.waitingPushedDuringReceiving.push(pos);
         }
 
     }
 
     changeCurrentDir(dir, pos, addWaitingBlocks = true, clientDecision = true) {
-        this.dir = dir;
+        this.updatePlayerDirection(dir);
         this.myNextDir = dir;
 
         this.position = pos.clone();
@@ -521,6 +656,14 @@ class Player {
                 dir: dir, time: Date.now()
             });
         }
+    }
+
+
+    requestWaitingBlocks() {
+        this.isGettingWaitingBlocks = true;
+        this.waitingPushedDuringReceiving = [];
+        const packet = new RequestWaitingBlockPacket();
+        window.client.send(packet);
     }
 }
 

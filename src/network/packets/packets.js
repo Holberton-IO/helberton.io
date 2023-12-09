@@ -6,6 +6,7 @@ import WaitingBlocksPacket from "./waitingBlocks";
 import DirectionPacket from "./direction";
 import PingPacket from "./ping";
 import PongPacket from "./pong";
+import RequestWaitingBlockPacket from "./requestWaitingBlocks";
 
 const PacketsDictionary = {
     1001: NamePacket,
@@ -15,7 +16,8 @@ const PacketsDictionary = {
     1005: WaitingBlocksPacket,
     1006: DirectionPacket,
     1007: PingPacket,
-    1008: PongPacket
+    1008: PongPacket,
+    1009: RequestWaitingBlockPacket,
 }
 
 

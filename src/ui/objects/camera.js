@@ -100,7 +100,7 @@ class Camera {
         const canvas = window.game.canvas;
 
 
-        if (ctx.canvas === canvas) {
+        if (ctx.canvas === canvas || true) {
             const maxDimension = Math.max(canvas.width, canvas.height);
             const zoomEdge = maxDimension / window.game.maxZoom;
             const screenPixels = canvas.width * canvas.height;
@@ -114,7 +114,20 @@ class Camera {
             ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);
 
         } else {
-            ctx.setTransform(maxPixelRatio * quality, 0, 0, maxPixelRatio * quality, 0, 0);
+            // ctx.setTransform(maxPixelRatio * quality, 0, 0, maxPixelRatio * quality, 0, 0);
+        }
+    }
+
+
+    moveToPlayer(player) {
+        if (!player) return;
+        if (this.camPosSet) {
+            this.camPosition.x = GameMath.linearInterpolate(this.camPosition.x, player.position.x, 0.03);
+            this.camPosition.y = GameMath.linearInterpolate(this.camPosition.y, player.position.y, 0.03);
+
+        } else {
+            this.camPosition = player.position.clone();
+            this.camPosSet = true;
         }
     }
 

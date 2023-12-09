@@ -20,6 +20,7 @@ class GameLoop:
         self.game_server = game_server
         self.is_running = True
         self.thread = Thread(target=self.loop)
+        self.thread.daemon = True
         self.start()
 
     def start(self):
@@ -30,9 +31,12 @@ class GameLoop:
         self.is_running = False
 
     def loop(self):
+
         while self.is_running:
             tick = time.time()
             self.dt = tick - self.lastTick
             self.lastTick = tick
+
+            self.dt *= 1000
             self.game_server.loop(tick, self.dt)
             time.sleep(GameLoop.sleep_time)

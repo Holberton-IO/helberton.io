@@ -39,28 +39,64 @@ class WaitingBlocksPacket extends Packet {
 
 
     handleReceivedPacket(packet, client) {
-        console.log("WaitingBlocksPacket  Packet");
-        console.log(window.gameEngine.gameObjects.players);
-        const myPlayer = window.gameEngine.gameObjects.myPlayer;
+
 
         const playerList = window.gameEngine.gameObjects.players;
         let player = null;
         if (packet.userId in playerList) {
             player = playerList[packet.userId];
-        }
-        else {
+        } else {
             throw new Error("Player Not Found We Need To Send Player Colors");
         }
-        if(myPlayer && myPlayer.equals(player))
-        {
+
+
+
+
+        let replaceStack = false;
+        if (player.isMyPlayer){
+            if (player.skipGettingWaitingBlocksRespose) {
+            player.skipGettingWaitingBlocksRespose = false;
+            player.waitingPushedDuringReceiving = [];
+        }
+        else {
+            if (player.isGettingWaitingBlocks) {
+                player.isGettingWaitingBlocks = false;
+                replaceStack = true;
+                for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {
+                    const vec = player.waitingPushedDuringReceiving[i];
+                    this.blocks.push(vec);
+                }
+                player.waitingPushedDuringReceiving = [];
+            }
+
+            if (player.waitingBlocks.length > 0) {
+                const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
+                if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
+                    player.requestWaitingBlocks();
+                }
+            }
 
         }
-        else
-        {
-            // TODO console.log("SET_TRAIL");
         }
 
 
+        if (replaceStack) {
+            if (player.waitingBlocks.length > 0) {
+                const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
+                lastBlock.blocks = this.blocks;
+                lastBlock.vanishTimer = 0;
+            } else {
+                replaceStack = false;
+            }
+        }
+        if (!replaceStack) {
+            player.waitingBlocks.push({
+                vanishTimer: 0,
+                blocks: this.blocks
+            });
+        }
+
+        console.log("Waiting Blocks", [...player.waitingBlocks]);
 
     }
 }

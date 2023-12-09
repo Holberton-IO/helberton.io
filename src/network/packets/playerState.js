@@ -66,15 +66,14 @@ class PlayerStatePacket extends Packet {
         player.hasReceivedPosition = true;
         player.moveRelativeToServerPosNextFrame = true;
         player.lastServerPosSentTime = Date.now();
-
-
         myPlayer.lastPosHasBeenConfirmed = true;
 
 
         let offset = player.calMoveOffset();
         let newPos = new Point(packet.playerX, packet.playerY);
+        let newPosOffset = newPos.clone();
         let newDir = packet.direction;
-        Player.movePlayer(newPos, newDir, offset);
+        Player.movePlayer(newPosOffset, newDir, offset);
         let doSetPos = true;
 
 
@@ -82,7 +81,7 @@ class PlayerStatePacket extends Packet {
             player.lastPosServerSentTime = Date.now();
 
             // Check If dir and por are close to current
-            const distVector = player.position.distanceVector(newPos);
+            const distVector = player.position.distanceVector(newPosOffset);
             if ((player.dir === newDir || player.myNextDir === newDir) &&
                 distVector.x < 1 && distVector.y < 1) {
                 doSetPos = false;
@@ -103,18 +102,22 @@ class PlayerStatePacket extends Packet {
                 player.myNextDir = newDir;
                 player.changeCurrentDir(newDir, newPos, false, false);
                 //TODO REQUEST MY WAITING
+                player.requestWaitingBlocks();
                 player.sendDirQueue = [];
             }
 
 
-            player.serverPos = newPos.clone();
+            player.serverPos = newPosOffset.clone();
             player.serverDir = newDir;
+
+            // TODO REMOVE BLOCKS
         } else {
-            player.dir = newDir;
+            player.updatePlayerDirection(newDir);
         }
 
         if (doSetPos) {
-            player.position = newPos;
+            player.position = newPosOffset.clone();
+            player.addWaitingBlocks(newPos);
         }
 
 
