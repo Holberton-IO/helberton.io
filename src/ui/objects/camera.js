@@ -1,4 +1,5 @@
 import Point from "./point.js";
+import Rectangle from "./rectangle.js";
 import * as GameUtils from "../utils.js";
 import * as GameMath from "../../utils/math.js";
 
@@ -137,6 +138,19 @@ class Camera {
         this.calCameraOffset();
     }
 
+
+    getViewPortRec(pos){
+        const viewPortRadius = window.game.viewPortRadius * 2;
+        const leftSide = new Point(
+            pos.x - viewPortRadius,
+            pos.y - viewPortRadius
+        )
+        const rightSide = new Point(
+            pos.x + viewPortRadius,
+            pos.y + viewPortRadius
+        )
+        return new Rectangle(leftSide, rightSide);
+    }
 
 }
 

@@ -51,7 +51,6 @@ class PlayerStatePacket extends Packet {
 
         let player = new Player(new Point(0, 0), packet.userId);
         player = window.gameEngine.gameObjects.addPlayer(player);
-        // console.log("PlayerState", player);
 
 
         player.name = packet.playerName;
@@ -60,10 +59,12 @@ class PlayerStatePacket extends Packet {
         player.colorSlightlyBrighter = packet.colorSlightlyBrighter;
         player.colorPattern = packet.colorPattern;
         player.colorPatternEdge = packet.colorPatternEdge;
-        // player.position = new Point(packet.playerX, packet.playerY);
-        // player.dir = packet.direction;
+
 
         player.hasReceivedPosition = true;
+
+        // When Receiving Player State
+        // Next Frame Move Relative To Server Pos
         player.moveRelativeToServerPosNextFrame = true;
         player.lastServerPosSentTime = Date.now();
         myPlayer.lastPosHasBeenConfirmed = true;
@@ -73,54 +74,43 @@ class PlayerStatePacket extends Packet {
         let newPos = new Point(packet.playerX, packet.playerY);
         let newPosOffset = newPos.clone();
         let newDir = packet.direction;
-        Player.movePlayer(newPosOffset, newDir, offset);
-        let doSetPos = true;
+
+        newPosOffset = Player.movePlayer(newPosOffset, newDir, offset);
+        let serverSyncedWithClient = true;
 
 
         if (player.isMyPlayer) {
             player.lastPosServerSentTime = Date.now();
 
-            // Check If dir and por are close to current
-            const distVector = player.position.distanceVector(newPosOffset);
-            if ((player.dir === newDir || player.myNextDir === newDir) &&
-                distVector.x < 1 && distVector.y < 1) {
-                doSetPos = false;
-            }
+            // Check If Server Synced With Client
+            // To Draw This Movement or Ignore It
+            // if server predict the same movement
+            // or the movement is to close to server
+            serverSyncedWithClient = player.checkClientMovementSyncedWithServer(newDir
+            , newPosOffset, newPos);
 
-
-            if (player.clientSideMoves.length > 0) {
-                const lastClientSideMove = player.clientSideMoves.shift()
-                if (lastClientSideMove.dir === newDir
-                    && lastClientSideMove.pos.equals(newPos)) {
-                    doSetPos = false;
-                } else {
-                    player.clientSideMoves = [];
-                }
-            }
-
-            if (doSetPos) {
+            if (serverSyncedWithClient) {
                 player.myNextDir = newDir;
                 player.changeCurrentDir(newDir, newPos, false, false);
-                //TODO REQUEST MY WAITING
                 player.requestWaitingBlocks();
                 player.sendDirQueue = [];
             }
 
-
             player.serverPos = newPosOffset.clone();
             player.serverDir = newDir;
 
-            // TODO REMOVE BLOCKS
+            player.removeBlocksOutsideCamera();
         } else {
             player.updatePlayerDirection(newDir);
         }
 
-        if (doSetPos) {
-            player.position = newPosOffset.clone();
+        if (serverSyncedWithClient) {
+            // player.updatePlayerPosition(newPosOffset.clone());
+            player.position=newPosOffset.clone();
             player.addWaitingBlocks(newPos);
         }
 
-
+        //Start To Handel Draw Position
         if (!player.drawPosSet) {
             player.drawPosSet = true;
             player.drawPosition = player.position.clone();

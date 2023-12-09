@@ -3,6 +3,7 @@ import GameEngine from "./gameEngine";
 import {Client}  from "./network/client";
 import {} from "./globals.js";
 import {} from "./controls.js";
+import {} from "./extensions/arraysExtensions.js";
 
 const camera = new Camera();
 const gameEngine = new GameEngine(60);

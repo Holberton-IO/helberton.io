@@ -11,7 +11,7 @@ app = Flask(__name__)
 sock = Sock()
 CORS(app)
 sock.init_app(app)
-gameserver = GameServer(map_size=40)
+gameserver = GameServer(map_size=20)
 game_loop = GameLoop(gameserver)
 
 

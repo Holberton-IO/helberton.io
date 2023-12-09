@@ -9,6 +9,6 @@ window.onkeyup = (e) => {
     //console.log(keyMapper[e.key]);
     const keyVal = keyMapper[e.key];
     if(keyVal && window.client && window.client.player){
-        window.client.player.changeDir(keyVal);
+        window.client.player.requestChangeDir(keyVal);
     }
 };

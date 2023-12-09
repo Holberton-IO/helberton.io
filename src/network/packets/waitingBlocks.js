@@ -53,30 +53,29 @@ class WaitingBlocksPacket extends Packet {
 
 
         let replaceStack = false;
-        if (player.isMyPlayer){
+        if (player.isMyPlayer) {
             if (player.skipGettingWaitingBlocksRespose) {
-            player.skipGettingWaitingBlocksRespose = false;
-            player.waitingPushedDuringReceiving = [];
-        }
-        else {
-            if (player.isGettingWaitingBlocks) {
-                player.isGettingWaitingBlocks = false;
-                replaceStack = true;
-                for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {
-                    const vec = player.waitingPushedDuringReceiving[i];
-                    this.blocks.push(vec);
-                }
+                player.skipGettingWaitingBlocksRespose = false;
                 player.waitingPushedDuringReceiving = [];
-            }
-
-            if (player.waitingBlocks.length > 0) {
-                const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
-                if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
-                    player.requestWaitingBlocks();
+            } else {
+                if (player.isGettingWaitingBlocks) {
+                    player.isGettingWaitingBlocks = false;
+                    replaceStack = true;
+                    for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {
+                        const vec = player.waitingPushedDuringReceiving[i];
+                        this.blocks.push(vec);
+                    }
+                    player.waitingPushedDuringReceiving = [];
                 }
-            }
 
-        }
+                if (player.waitingBlocks.length > 0) {
+                    const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
+                    if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
+                        player.requestWaitingBlocks();
+                    }
+                }
+
+            }
         }
 
 

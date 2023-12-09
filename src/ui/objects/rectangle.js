@@ -48,6 +48,16 @@ class Rectangle {
             this.min.y > rect.max.y
         );
     }
+
+
+    pointInRect(point) {
+        return (
+            point.x >= this.min.x &&
+            point.x <= this.max.x &&
+            point.y >= this.min.y &&
+            point.y <= this.max.y
+        );
+    }
 }
 
 export default Rectangle;
