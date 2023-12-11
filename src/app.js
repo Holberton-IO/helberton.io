@@ -37,12 +37,9 @@ const draw = () => {
     }
 
     for (let p in players) {
-
         players[p].draw(ctx);
     }
 
-
-    // ctx.restore();
 }
 
 

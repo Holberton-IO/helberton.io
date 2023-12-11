@@ -22,6 +22,12 @@ class GameObjects {
         return player;
     }
 
+
+    removePlayer(player) {
+        if (player.id in this.players)
+            delete this.players[player.id];
+    }
+
     addBlock(block) {
         return Block.getBlockAt(block.position, this.blocks);
     }

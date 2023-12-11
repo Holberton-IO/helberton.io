@@ -116,24 +116,23 @@ class Map:
                 raise Exception("Invalid Vector")
             # Sort the two corners so that `min` is always in the top left.
 
-
             min_vec = Vector(min(vector.x, next_vector.x), min(vector.y, next_vector.y))
             max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
             rec = Rectangle(min_vec, max_vec)
             self.fill_blocks(rec, player)
 
-
     def for_each(self):
         for x in range(self.map_size):
             for y in range(self.map_size):
                 yield x, y
-    def reset_blocks(self,player):
+
+    def reset_blocks(self, player):
         """
         When Player Close The Game We Reset Blocks To Non Captured
         :param player:
         :return:
         """
 
-        for x,y in self.for_each():
+        for x, y in self.for_each():
             if self.blocks[x][y] == player:
                 self.blocks[x][y] = 1

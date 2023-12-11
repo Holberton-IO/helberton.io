@@ -5,7 +5,7 @@ from gameserver.game.map import Map
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
-from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket
+from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket, PlayerRemovedPacket
 
 
 class GameServer:
@@ -45,9 +45,12 @@ class GameServer:
         self.map.reset_blocks(player)
         # Send New Port For All Players
         # TODO HEAVY WORK NEED TO BE OPTIMIZED
+        removed_player_packet = PlayerRemovedPacket(player)
         for p in self.players:
             print("Player State Packet Sent To: ", p.name, p.player_id)
             p.send_player_viewport()
+            p.client.send(removed_player_packet)
+
 
     def add_new_client(self, client):
         self.clients.append(client)
