@@ -2,8 +2,8 @@ from gameserver.network.utils.writer import Writer
 from gameserver.network.utils.reader import Reader
 from gameserver.network.packets import dic
 from gameserver.client import GameClient
+import simple_websocket
 import traceback
-
 
 class Socket:
     def __init__(self, sock, game_server):
@@ -34,6 +34,9 @@ class Socket:
                     continue
 
                 self.on_receive(data)
+
+        except simple_websocket.errors.ConnectionClosed as e:
+            print("Not Error")
         except Exception as e:
             print(e,)
             traceback.print_exc()

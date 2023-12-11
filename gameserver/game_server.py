@@ -41,11 +41,19 @@ class GameServer:
     def remove_player(self, player):
         self.players.remove(player)
 
+        # Notify Player Closed
+        self.map.reset_blocks(player)
+        # Send New Port For All Players
+        # TODO HEAVY WORK NEED TO BE OPTIMIZED
+        for p in self.players:
+            print("Player State Packet Sent To: ", p.name, p.player_id)
+            p.send_player_viewport()
+
     def add_new_client(self, client):
         self.clients.append(client)
 
     def remove_client(self, client):
-        self.players.remove(client.player)
+        self.remove_player(client.player)
         self.clients.remove(client)
 
     def generate_random_id(self):

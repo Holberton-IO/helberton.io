@@ -122,3 +122,18 @@ class Map:
             rec = Rectangle(min_vec, max_vec)
             self.fill_blocks(rec, player)
 
+
+    def for_each(self):
+        for x in range(self.map_size):
+            for y in range(self.map_size):
+                yield x, y
+    def reset_blocks(self,player):
+        """
+        When Player Close The Game We Reset Blocks To Non Captured
+        :param player:
+        :return:
+        """
+
+        for x,y in self.for_each():
+            if self.blocks[x][y] == player:
+                self.blocks[x][y] = 1

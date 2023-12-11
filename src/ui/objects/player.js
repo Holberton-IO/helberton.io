@@ -363,6 +363,8 @@ class Player {
         c.stroke();
 
         c.restore();
+        window.gameEngine.camTransform(ctx);
+
     }
 
     drawWaitingBlocks(ctx) {
@@ -391,6 +393,8 @@ class Player {
             const lastDrawPos = isLastBlock ? this.drawPosition : null;
 
             if (block.vanishTimer > 0 && false) {
+                continue;
+                console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
                 window.gameEngine.camTransform(helperCtx, true);
 
 
@@ -452,7 +456,6 @@ class Player {
     draw(ctx) {
         if (!this.isReady) return;
         if (!this.hasReceivedPosition) return;
-        console.log("Current Dir", this.dir);
         const gameSpeed = window.game.gameSpeed;
         let offset = window.gameEngine.deltaTime * gameSpeed;
 

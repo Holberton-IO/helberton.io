@@ -1,6 +1,6 @@
 import Camera from './ui/objects/camera.js';
 import GameEngine from "./gameEngine";
-import {Client}  from "./network/client";
+import {Client} from "./network/client";
 import {} from "./globals.js";
 import {} from "./controls.js";
 import {} from "./extensions/arraysExtensions.js";
@@ -24,7 +24,7 @@ let client = null;
 let myPlayer = null;
 
 const draw = () => {
-    if(client && client.player)
+    if (client && client.player)
         myPlayer = client.player;
 
     gameEngine.scaleCanvas(ctx);
@@ -36,13 +36,13 @@ const draw = () => {
         b.draw(ctx, false);
     }
 
-
     for (let p in players) {
+
         players[p].draw(ctx);
     }
 
 
-    ctx.restore();
+    // ctx.restore();
 }
 
 

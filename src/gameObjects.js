@@ -15,6 +15,9 @@ class GameObjects {
             return this.players[player.id];
         if (player.isMyPlayer)
             this.myPlayer = player;
+        else{
+            player.isReady = true;
+        }
         this.players[player.id] = player;
         return player;
     }

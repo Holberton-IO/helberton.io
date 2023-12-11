@@ -105,7 +105,6 @@ class PlayerStatePacket extends Packet {
         }
 
         if (serverSyncedWithClient) {
-            // player.updatePlayerPosition(newPosOffset.clone());
             player.position=newPosOffset.clone();
             player.addWaitingBlocks(newPos);
         }
