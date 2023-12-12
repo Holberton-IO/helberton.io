@@ -72,10 +72,14 @@ class ReadyPacket(Packet):
         client.player.join_time = time.time()
 
         # Notify Area Around Player Is Filled
-        client.game_server.map.fill_new_player_blocks(client.player)
+        blocks_rect = client.game_server.map.fill_new_player_blocks(client.player)
+        # Save Player Captured Blocks Into Player Captured Blocks
+        client.game_server.map.players_captured_blocks.add_player(client.player, blocks_rect)
+
 
         # Send Player State To All Players
         client.game_server.broadcast_player_state(client.player)
+
 
         # Send ViewPort To Player
         client.player.send_player_viewport()

@@ -471,3 +471,7 @@ class Player:
             print("Invalid Movement")
             player_state_packet = PlayerStatePacket(self)
             self.client.send(player_state_packet)
+
+    def get_waiting_blocks_vectors(self):
+        for vector in self.capture_blocks:
+            yield vector.clone()

@@ -43,6 +43,10 @@ class GameServer:
 
         # Notify Player Closed
         self.map.reset_blocks(player)
+
+        # Remove Player From Captured Blocks History
+        self.map.players_captured_blocks.remove_player(player)
+
         # Send New Port For All Players
         # TODO HEAVY WORK NEED TO BE OPTIMIZED
         removed_player_packet = PlayerRemovedPacket(player)
@@ -50,7 +54,6 @@ class GameServer:
             print("Player State Packet Sent To: ", p.name, p.player_id)
             p.send_player_viewport()
             p.client.send(removed_player_packet)
-
 
     def add_new_client(self, client):
         self.clients.append(client)
@@ -146,3 +149,11 @@ class GameServer:
     def loop(self, tick, dt):
         for player in self.players:
             player.loop(tick, dt, self)
+
+    def get_non_fillable_blocks(self, ignore_player=None):
+        for player in self.players:
+            if player == ignore_player:
+                continue
+            yield from player.position()
+            if player.is_capturing:
+                yield from player.get_waiting_blocks_vectors()

@@ -1,3 +1,4 @@
+from gameserver.game.system.player_captured_blocks import PlayerCapturedBlocks
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets.fill_area import FillAreaPacket
@@ -9,6 +10,8 @@ class Map:
         self.game = game_server
         self.map_size = map_size
         self.blocks = []
+        self.players_captured_blocks = PlayerCapturedBlocks()
+
         self.create_blocks()
 
     def create_blocks(self):
@@ -60,6 +63,7 @@ class Map:
         max_vec = player.position.add_scalar(blocks_num + 1)
         rect = Rectangle(min_vec, max_vec)
         self.fill_blocks(rect, player)
+        return rect
 
     def is_valid_viewport_around(self, player):
         blocks_num = self.game.updates_viewport_rect_size
@@ -119,6 +123,7 @@ class Map:
             min_vec = Vector(min(vector.x, next_vector.x), min(vector.y, next_vector.y))
             max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
             rec = Rectangle(min_vec, max_vec)
+            print(rec, "Will Filled")
             self.fill_blocks(rec, player)
 
     def for_each(self):
@@ -136,3 +141,68 @@ class Map:
         for x, y in self.for_each():
             if self.blocks[x][y] == player:
                 self.blocks[x][y] = 1
+
+    def create_mask_of_blocks(self, value_of_mask):
+        mask = [[value_of_mask] * self.map_size for i in range(self.map_size)]
+        return mask
+
+    def can_fill_node(self, node, mask, player_capture_blocks, player):
+        if node.x < player_capture_blocks.min.x or \
+                node.y < player_capture_blocks.min.y:
+            return False
+        if node.x >= player_capture_blocks.max.x or \
+                node.y >= player_capture_blocks.max.y:
+            return False
+
+        if mask[node.x][node.y] == 1:
+            return False
+
+        return self.blocks[node.x][node.y] != player
+
+    def update_captured_area(self, player, other_player_locations):
+        player_capture_blocks = self.players_captured_blocks.get_player_blocks(player)
+        player_capture_blocks = Rectangle(
+            player_capture_blocks.min.clone().add_scalar(-1),
+            player_capture_blocks.max.clone().add_scalar(1)
+        )
+        mask = self.create_mask_of_blocks(0)
+        corner_seed = player_capture_blocks.min.clone()
+        nodes = [corner_seed]
+        for position in other_player_locations:
+            nodes.extend(
+                [
+                    position.clone().add(Vector(0, 1)),
+                    position.clone().add(Vector(0, -1)),
+                    position.clone().add(Vector(1, 0)),
+                    position.clone().add(Vector(-1, 0)),
+
+                ]
+            )
+
+        while True:
+            node = nodes.pop()
+            if not node:
+                break
+            if self.can_fill_node(node, mask, player_capture_blocks, player):
+                mask[node.x][node.y] = 1
+                nodes.extend(
+                    [
+                        node.clone().add(Vector(0, 1)),
+                        node.clone().add(Vector(0, -1)),
+                        node.clone().add(Vector(1, 0)),
+                        node.clone().add(Vector(-1, 0)),
+                    ]
+                )
+
+        new_player_capture_blocks = Rectangle(
+            Vector(float("inf"), float("inf")),
+            Vector(float("-inf"), float("-inf"))
+        )
+
+        for x, y in player_capture_blocks.for_each():
+            if mask[x][y] == 0 or self.blocks[x][y] == player:
+                new_player_capture_blocks.expand_to_rect(
+                    Rectangle(Vector(x, y), Vector(x + 1, y + 1))
+                )
+
+        compressed_blocks = self.compress_blocks_in(player_capture_blocks)

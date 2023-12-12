@@ -49,5 +49,21 @@ class Rectangle:
         self.min = min_vec
         self.max = max_vec
 
+    def expand_to_rect(self, other_rectangle):
+        min_vec = Vector(
+            min(self.min.x, other_rectangle.min.x),
+            min(self.min.y, other_rectangle.min.y)
+        )
+        max_vec = Vector(
+            max(self.max.x, other_rectangle.max.x),
+            max(self.max.y, other_rectangle.max.y)
+        )
+        self.min = min_vec
+        self.max = max_vec
+
+
     def vector_in_rect(self, vector):
         return self.min.x <= vector.x < self.max.x and self.min.y <= vector.y < self.max.y
+
+    def clone(self):
+        return Rectangle(self.min.clone(), self.max.clone())

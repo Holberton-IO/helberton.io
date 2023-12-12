@@ -22,13 +22,14 @@ class Vector:
         else:
             raise Exception("Invalid Direction")
 
-        return  direction_vector + self
+        return direction_vector + self
 
-
-
+    def add(self, vector):
+        return Vector(self.x + vector.x, self.y + vector.y)
 
     def is_vector_hast_negative(self):
         return self.x < 0 or self.y < 0
+
     def __add__(self, other):
         return Vector(self.x + other.x, self.y + other.y)
 

@@ -14,12 +14,16 @@ class Column:
 class BlockCompression:
     def __init__(self, block_list):
         self.block_list = block_list
+        self.call_back = None
 
     def collect_section_vertically(self, x, rectangle):
         sections = []
         current_column = None
         for y in range(rectangle.min.y, rectangle.max.y + 1):
             data = -1 if y >= rectangle.max.y else self.block_list[x][y]
+            data = data if self.call_back is None else self.call_back(x,y)
+
+
             if (data != -1 and not current_column) or \
                     (current_column and data != current_column.data):
                 current_column = None
