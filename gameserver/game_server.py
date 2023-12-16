@@ -154,6 +154,6 @@ class GameServer:
         for player in self.players:
             if player == ignore_player:
                 continue
-            yield from player.position()
+            yield player.position
             if player.is_capturing:
-                yield from player.get_waiting_blocks_vectors()
+                yield list(player.get_waiting_blocks_vectors())[0]

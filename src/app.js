@@ -32,6 +32,9 @@ const draw = () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     camera.loop()
     gameEngine.camTransform(ctx);
+
+
+    console.log("Blocks: " + blocks.length);
     for (let b of blocks) {
         b.draw(ctx, false);
     }
@@ -39,6 +42,9 @@ const draw = () => {
     for (let p in players) {
         players[p].draw(ctx);
     }
+
+      if (client && client.player)
+    myPlayer.removeBlocksOutsideCamera();
 
 }
 

@@ -149,19 +149,24 @@ class Player:
         self.capture_blocks.append(position.clone())
         self.update_waiting_blocks_length_ex_pos()
 
+    def send_capture_blocks(self):
+        array_of_other_players = list(self.game.get_non_fillable_blocks(self))
+        compressed_blocks, new_player_blocks = self.game.map.update_captured_area(
+            self, array_of_other_players
+        )
+        self.game.map.players_captured_blocks.update_player_blocks(self, new_player_blocks)
+        for cmp_block in compressed_blocks:
+            self.game.map.notify_blocks_filled(cmp_block["rect"], cmp_block["data"])
+
     def update_current_block(self, last_position: Vector):
         data = self.game.map.get_valid_blocks(self.position)
         if type(data) == Player and data == self and self.is_capturing:
             # We Come Back To Our Blocks
-            # print("[add_waiting_block] Player Come Back To Our Blocks")
             self.add_waiting_block(last_position)
             self.game.map.fill_waiting_blocks(self)
-
+            self.send_capture_blocks()
             self.capture_blocks = []
             self.current_waiting_blocks_ex_pos = 0
-            #     this.#updateCapturedArea();
-            # 				this.game.broadcastPlayerEmptyTrail(this);
-            # 				this.#clearTrailVertices();
 
         """
         if not player.is_capturing: start capturing
