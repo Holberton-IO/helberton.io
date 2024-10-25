@@ -3,7 +3,7 @@ from gameserver.game.vector import Vector
 from gameserver.game.player import Player
 
 
-class PlayerCapturedBlocks:
+class PlayersCapturedBlocks:
     def __init__(self):
         self.players: dict[int, Rectangle] = {}
 

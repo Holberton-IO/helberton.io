@@ -4,16 +4,17 @@ from gameserver.network.utils.writer import Writer
 
 class PlayerRemovedPacket(Packet):
 
+    PACKET_ID = 1010
+
     def __init__(self, player):
         super().__init__()
-        self.packet_id = 1010
+        self.packet_id = self.PACKET_ID
         self.user_id = player.player_id
 
-    @staticmethod
-    def parse_packet(packet):
-        return packet
+    def parse_packet(self):
+       pass
 
-    def handle_packet(self, packet, client):
+    def handle_packet(self, client):
         pass
 
     def finalize(self):

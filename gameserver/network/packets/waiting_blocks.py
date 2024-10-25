@@ -3,21 +3,16 @@ from gameserver.network.utils.writer import Writer
 
 
 class WaitingBlocksPacket(Packet):
-
+    PACKET_ID = 1005
     def __init__(self, player):
         super().__init__()
-        self.packet_id = 1005
+        self.packet_id = self.PACKET_ID
         self.player = player
-    @staticmethod
-    def parse_packet(packet):
-        """
-        On Received Ready Packet We Send User ID and Map Size
-        :param packet:
-        :return:
-        """
-        return packet
 
-    def handle_packet(self, packet, client):
+    def parse_packet(self):
+       pass
+
+    def handle_packet(self, client):
         """On Received Ready Packet"""
         print(client.player.name, "is Recived WaitingBlocksPacket")
 

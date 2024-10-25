@@ -1,9 +1,9 @@
 import Camera from './ui/objects/camera.js';
 import GameEngine from "./gameEngine";
 import {Client} from "./network/client";
-import {} from "./globals.js";
-import {} from "./controls.js";
-import {} from "./extensions/arraysExtensions.js";
+import "./globals.js";
+import "./controls.js";
+import  "./extensions/arraysExtensions.js";
 
 const camera = new Camera();
 const gameEngine = new GameEngine(60);
@@ -52,6 +52,7 @@ gameEngine.setDrawFunction(draw);
 
 
 window.requestAnimationFrame(gameEngine.loop.bind(gameEngine));
+
 client = new Client('ws://127.0.0.1:5000/game', (client) => {
     client.setPlayerName("Test");
 });

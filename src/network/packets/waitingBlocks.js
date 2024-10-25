@@ -18,16 +18,14 @@ class WaitingBlocksPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        p.userId = p.reader.readInt4();
-        const blocksCount = p.reader.readInt2();
+    parsePacket() {
+        const reader = this.reader;
+        this.userId = reader.readInt4();
+        const blocksCount = reader.readInt2();
         for (let i = 0; i < blocksCount; i++) {
-            const vec = new Point(p.reader.readInt2(), p.reader.readInt2());
-            p.blocks.push(vec);
+            const vec = new Point(reader.readInt2(), reader.readInt2());
+            this.blocks.push(vec);
         }
-
-
-        return p;
     }
 
     finalize() {
@@ -38,16 +36,14 @@ class WaitingBlocksPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         const playerList = window.gameEngine.gameObjects.players;
         let player = null;
-        if (packet.userId in playerList) {
-            player = playerList[packet.userId];
+        if (this.userId in playerList) {
+            player = playerList[this.userId];
         } else {
             throw new Error("Player Not Found We Need To Send Player Colors");
         }
-
-
 
 
         let replaceStack = false;

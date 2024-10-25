@@ -25,5 +25,3 @@ window.game = {};
 Object.entries(globals).forEach(([key, value]) => {
     window.game[key] = value;
 });
-
-export {};

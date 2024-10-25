@@ -5,10 +5,10 @@ from gameserver.network.utils.writer import Writer
 
 
 class ReadyPacket(Packet):
-
+    PACKET_ID = 1002
     def __init__(self, user_id=0, map_size=0):
         super().__init__()
-        self.packet_id = 1002
+        self.packet_id = self.PACKET_ID
         self.user_id = user_id
         self.map_size = map_size
         self.player_name = ""
@@ -23,16 +23,11 @@ class ReadyPacket(Packet):
         self.color_pattern = 0
         self.color_patternEdge = 0
 
-    @staticmethod
-    def parse_packet(packet):
-        """
-        On Received Ready Packet We Send User ID and Map Size
-        :param packet:
-        :return:
-        """
-        return packet
+    def parse_packet(self):
+       pass
 
-    def handle_packet(self, packet, client):
+
+    def handle_packet(self, client):
         """On Received Ready Packet"""
         print(client.player.name, "is ready")
 

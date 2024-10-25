@@ -18,12 +18,12 @@ class NamePacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        const nameLength = p.reader.readInt2();
-        p.name = p.reader.readStringFromBytes(nameLength);
-        p.userId = p.reader.readInt4();
-        p.isVerified = p.reader.readInt1() === 1;
-        return p;
+    parsePacket() {
+        const nameLength = this.reader.readInt2();
+        this.name = this.reader.readStringFromBytes(nameLength);
+        this.userId = this.reader.readInt4();
+        this.isVerified = this.reader.readInt1() === 1;
+
     }
 
     finalize() {
@@ -34,18 +34,18 @@ class NamePacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         console.log("Received Name Packet");
 
 
-        if (packet.isVerified) {
+        if (this.isVerified) {
 
-            const player = new Player(new Point(0,0), packet.userId);
+            const player = new Player(new Point(0,0), this.userId);
             player.isMyPlayer = true;
 
             client.player = player;
-            client.isVerified = packet.isVerified;
-            client.username = packet.name;
+            client.isVerified = this.isVerified;
+            client.username = this.name;
             client.playerStatus = PlayerStatus.READY;
             window.gameEngine.gameObjects.addPlayer(player);
 

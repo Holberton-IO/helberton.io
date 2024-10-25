@@ -9,15 +9,15 @@ from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
 from gameserver.network.packets.request_waiting_block import RequestWaitingBlocks
 
 dic = {
-    1001: NamePacket,
-    1002: ReadyPacket,
-    1003: FillAreaPacket,
-    1004: PlayerStatePacket,
-    1005: WaitingBlocksPacket,
-    1006: DirectionPacket,
-    1007: PingPacket,
+    NamePacket.PACKET_ID: NamePacket,
+    ReadyPacket.PACKET_ID: ReadyPacket,
+    FillAreaPacket.PACKET_ID: FillAreaPacket,
+    PlayerStatePacket.PACKET_ID: PlayerStatePacket,
+    WaitingBlocksPacket.PACKET_ID: WaitingBlocksPacket,
+    DirectionPacket.PACKET_ID: DirectionPacket,
+    PingPacket.PACKET_ID: PingPacket,
     1008: None,  # Pong Packet
-    1009: RequestWaitingBlocks,
-    1010: PlayerRemovedPacket,
+    RequestWaitingBlocks.PACKET_ID: RequestWaitingBlocks,
+    PlayerRemovedPacket.PACKET_ID: PlayerRemovedPacket,
     1011: None,  # Stop Drawing Packet
 }

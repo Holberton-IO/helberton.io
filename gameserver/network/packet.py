@@ -2,6 +2,8 @@ from abc import abstractmethod, ABC
 
 
 class Packet(ABC):
+    PACKET_ID = 0
+
     def __init__(self):
         self.data = bytearray()
         self.packet_id = 0
@@ -15,8 +17,7 @@ class Packet(ABC):
     def to_hex(self):
         return self.reader.to_hex_string()
 
-    @staticmethod
-    def parse_packet(packet):
+    def parse_packet(self,):
         raise NotImplementedError
 
     @staticmethod
@@ -25,7 +26,8 @@ class Packet(ABC):
         p.reader = reader
         p.buffer = reader.buffer
         p.packet_size = packet_size
-        return p.parse_packet(p)
+        p.parse_packet()
+        return p
 
-    def handle_packet(self,packet, client):
+    def handle_packet(self, client):
         raise NotImplementedError

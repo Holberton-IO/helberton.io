@@ -14,8 +14,8 @@ class PongPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        return p;
+     parsePacket() {
+
     }
 
     finalize() {
@@ -25,7 +25,7 @@ class PongPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         const myPlayer = client.player;
         const ping = Date.now() - myPlayer.lastPingTime;
         const currentPingDiff = Math.abs(ping - myPlayer.severLastPing);

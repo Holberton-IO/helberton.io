@@ -17,9 +17,8 @@ class PlayerRemovedPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        p.userId = p.reader.readInt4();
-        return p;
+    static parsePacket() {
+        this.userId = this.reader.readInt4();
     }
 
     finalize() {
@@ -30,8 +29,8 @@ class PlayerRemovedPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
-        const player = window.gameEngine.gameObjects.players[packet.userId];
+    handleReceivedPacket(client) {
+        const player = window.gameEngine.gameObjects.players[this.userId];
         if(player)
             window.gameEngine.gameObjects.removePlayer(player);
 

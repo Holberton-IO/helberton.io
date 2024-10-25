@@ -7,28 +7,21 @@ from gameserver.network.utils.writer import Writer
 
 
 class PingPacket(Packet):
+    PACKET_ID = 1007
 
     def __init__(self):
         super().__init__()
-        self.packet_id = 1007
+        self.packet_id = self.PACKET_ID
 
-    @staticmethod
-    def parse_packet(packet):
-        """
-        On Received Ready Packet We Send User ID and Map Size
-        :param packet:
-        :return:
-        """
-        return packet
+    def parse_packet(self):
+        pass
 
-    def handle_packet(self, packet, client):
+    def handle_packet(self, client):
         """On Received Ready Packet"""
         print("Ping Packet Received")
         client.last_ping_time = time.time()
         pong_packet = PongPacket()
         client.send(pong_packet)
-
-
 
     def finalize(self):
         writer = Writer(self.packet_id)

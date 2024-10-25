@@ -17,23 +17,23 @@ class PlayerStatePacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        p.userId = p.reader.readInt4();
-        p.playerName = p.reader.readString();
+    parsePacket() {
+        const reader = this.reader;
+        this.userId = reader.readInt4();
+        this.playerName = reader.readString();
 
-        p.playerX = p.reader.readInt2();
-        p.playerY = p.reader.readInt2();
-        p.direction = p.reader.readString();
+        this.playerX = reader.readInt2();
+        this.playerY = reader.readInt2();
+        this.direction = reader.readString();
 
 
         // Colors
-        p.colorBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorDarker = convertIntColorToHex(p.reader.readInt4());
-        p.colorSlightlyBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorPattern = convertIntColorToHex(p.reader.readInt4());
-        p.colorPatternEdge = convertIntColorToHex(p.reader.readInt4());
+        this.colorBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorDarker = convertIntColorToHex(reader.readInt4());
+        this.colorSlightlyBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorPattern = convertIntColorToHex(reader.readInt4());
+        this.colorPatternEdge = convertIntColorToHex(reader.readInt4());
 
-        return p;
     }
 
     finalize() {
@@ -44,21 +44,21 @@ class PlayerStatePacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         console.log("PlayerState Ready Packet");
 
         const myPlayer = client.player;
 
-        let player = new Player(new Point(0, 0), packet.userId);
+        let player = new Player(new Point(0, 0), this.userId);
         player = window.gameEngine.gameObjects.addPlayer(player);
 
 
-        player.name = packet.playerName;
-        player.colorBrighter = packet.colorBrighter;
-        player.colorDarker = packet.colorDarker;
-        player.colorSlightlyBrighter = packet.colorSlightlyBrighter;
-        player.colorPattern = packet.colorPattern;
-        player.colorPatternEdge = packet.colorPatternEdge;
+        player.name = this.playerName;
+        player.colorBrighter = this.colorBrighter;
+        player.colorDarker = this.colorDarker;
+        player.colorSlightlyBrighter = this.colorSlightlyBrighter;
+        player.colorPattern = this.colorPattern;
+        player.colorPatternEdge = this.colorPatternEdge;
 
 
         player.hasReceivedPosition = true;
@@ -71,9 +71,9 @@ class PlayerStatePacket extends Packet {
 
 
         let offset = player.calMoveOffset();
-        let newPos = new Point(packet.playerX, packet.playerY);
+        let newPos = new Point(this.playerX, this.playerY);
         let newPosOffset = newPos.clone();
-        let newDir = packet.direction;
+        let newDir = this.direction;
 
         newPosOffset = Player.movePlayer(newPosOffset, newDir, offset);
         let serverSyncedWithClient = true;

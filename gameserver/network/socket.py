@@ -18,7 +18,7 @@ class Socket:
         packet_id = r.read_int_2()
         cls = dic[packet_id]
         p = cls.parse_packet_data(packet_size, r, cls)
-        p.handle_packet(p, self.client)
+        p.handle_packet(self.client)
 
     def on_connect(self):
         self.client = GameClient(self, self.game_server)

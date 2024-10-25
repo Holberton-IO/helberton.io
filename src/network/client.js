@@ -59,9 +59,6 @@ class Client {
         this.connectionStatus = ConnectionStatus.OPEN;
         this.playerStatus = PlayerStatus.CONNECTED;
         this.onConnect(this);
-        // let p = new namePacket(this.username);
-
-
 
     }
 
@@ -78,7 +75,7 @@ class Client {
         const packetId = reader.readInt2();
         const packetClass = PacketsDictionary[packetId];
         const packet = packetClass.parsePacketData(packetSize, reader, packetClass);
-        packet.handleReceivedPacket(packet,this);
+        packet.handleReceivedPacket(this);
     }
 
     setPlayerName(name) {

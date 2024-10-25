@@ -15,27 +15,28 @@ class Packet {
     }
 
 
-    toHexString(){
-        if(this.reader === null)
+    toHexString() {
+        if (this.reader === null)
             throw new Error("Reader is null");
 
         return this.reader.toHexString();
     }
 
 
-    static parsePacket(p) {
-         throw new Error("Not implemented");
+    parsePacket() {
+        throw new Error("Not implemented");
     }
 
-    static parsePacketData(packetSize,reader,packet) {
+    static parsePacketData(packetSize, reader, packet) {
         let p = new packet();
         p.reader = reader;
         p.data = reader.data;
         p.packetSize = packetSize;
-        return packet.parsePacket(p);
+        p.parsePacket();
+        return p;
     }
 
-    handleReceivedPacket(packet,client) {
+    handleReceivedPacket(client) {
         throw new Error("Not implemented");
     }
 

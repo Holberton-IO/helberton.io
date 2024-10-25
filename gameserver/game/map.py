@@ -1,4 +1,4 @@
-from gameserver.game.system.player_captured_blocks import PlayerCapturedBlocks
+from gameserver.game.system.player_captured_blocks import PlayersCapturedBlocks
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets.fill_area import FillAreaPacket
@@ -11,7 +11,7 @@ class Map:
         self.map_size = map_size
         self.blocks = []
         self.blocks_mask = []
-        self.players_captured_blocks = PlayerCapturedBlocks()
+        self.players_captured_blocks = PlayersCapturedBlocks()
 
         self.create_blocks()
 

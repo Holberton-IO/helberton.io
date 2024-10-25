@@ -5,28 +5,26 @@ from gameserver.network.utils.writer import Writer
 
 
 class DirectionPacket(Packet):
+    PACKET_ID = 1006
 
     def __init__(self):
         super().__init__()
-        self.packet_id = 1006
+        self.packet_id = self.PACKET_ID
         self.dir = ""
         self.position = None
 
-    @staticmethod
-    def parse_packet(packet):
-        """
-        On Received Ready Packet We Send User ID and Map Size
-        :param packet:
-        :return:
-        """
 
-        packet.dir = packet.reader.read_string()
-        x = packet.reader.read_int_2()
-        y = packet.reader.read_int_2()
-        packet.position = Vector(x, y)
-        return packet
 
-    def handle_packet(self, packet, client):
+    def parse_packet(self):
+        reader = self.reader
+        self.dir = reader.read_string()
+        x = self.reader.read_int_2()
+        y = self.reader.read_int_2()
+        self.position = Vector(x, y)
+
+
+
+    def handle_packet(self, client):
         """On Received Ready Packet"""
         print(client.player.name, "is Changing Direction")
         print("Direction: ", self.dir)

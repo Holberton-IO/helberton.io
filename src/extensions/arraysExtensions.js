@@ -1,5 +1,3 @@
-
-
 Object.defineProperty(Array.prototype, 'getLast', {
     get: function() {
         if (this.length === 0) {

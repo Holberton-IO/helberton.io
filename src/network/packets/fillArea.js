@@ -34,37 +34,38 @@ class FillAreaPacket extends Packet {
         return writer.finalize();
     }
 
-    static parsePacket(p) {
-        p.x = p.reader.readInt2();
-        p.y = p.reader.readInt2();
-        p.width = p.reader.readInt2();
-        p.height = p.reader.readInt2();
+    parsePacket() {
+        const reader= this.reader;
 
-        p.playerId = p.reader.readInt4();
-        p.colorBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorDarker = convertIntColorToHex(p.reader.readInt4());
-        p.colorSlightlyBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorPattern = convertIntColorToHex(p.reader.readInt4());
-        p.colorPatternEdge = convertIntColorToHex(p.reader.readInt4());
+        this.x = reader.readInt2();
+        this.y = reader.readInt2();
+        this.width = reader.readInt2();
+        this.height = reader.readInt2();
 
-        p.rectangle = new Rectangle(new Point(p.x, p.y), new Point(p.x + p.width, p.y + p.height));
+        this.playerId = reader.readInt4();
+        this.colorBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorDarker = convertIntColorToHex(reader.readInt4());
+        this.colorSlightlyBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorPattern = convertIntColorToHex(reader.readInt4());
+        this.colorPatternEdge = convertIntColorToHex(reader.readInt4());
+
+        this.rectangle = new Rectangle(new Point(this.x, this.y), new Point(this.x + this.width, this.y + this.height));
 
 
-        return p;
     }
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         console.log("Received Fill Area Packet");
 
         const colorsWithId = {
-            brighter: packet.colorBrighter,
-            darker: packet.colorDarker,
-            slightlyBrighter: packet.colorSlightlyBrighter,
-            pattern: packet.colorPattern,
-            patternEdge: packet.colorPatternEdge,
-            id: packet.playerId
+            brighter: this.colorBrighter,
+            darker: this.colorDarker,
+            slightlyBrighter: this.colorSlightlyBrighter,
+            pattern: this.colorPattern,
+            patternEdge: this.colorPatternEdge,
+            id: this.playerId
         }
-        Block.convertRectToBlock(packet.rectangle, colorsWithId,window.gameEngine.gameObjects.blocks,
+        Block.convertRectToBlock(this.rectangle, colorsWithId,window.gameEngine.gameObjects.blocks,
             window.gameEngine.gameObjects.myPlayer
             );
 

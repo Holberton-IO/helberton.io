@@ -167,7 +167,8 @@ class GameEngine {
 
     }
 
-    scaleCanvas(ctx, w = GameUtils.getWidth(), h = GameUtils.getHeight()) {
+    scaleCanvas(ctx, w = GameUtils.getWidth(),
+                h = GameUtils.getHeight()) {
         let MAX_PIXEL_RATIO = calculate_pixel_ratio();
         let drawingQuality = 1;
         let c = ctx.canvas;

@@ -28,24 +28,25 @@ class Ready extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        p.userId = p.reader.readInt4();
-        p.mapSize = p.reader.readInt2();
-        p.playerName = p.reader.readString();
 
-        p.playerX = p.reader.readInt2();
-        p.playerY = p.reader.readInt2();
-        p.direction = p.reader.readString();
+    parsePacket() {
+        const reader = this.reader;
+
+        this.userId = reader.readInt4();
+        this.mapSize = reader.readInt2();
+        this.playerName = reader.readString();
+
+        this.playerX = reader.readInt2();
+        this.playerY = reader.readInt2();
+        this.direction = reader.readString();
 
 
         // Colors
-        p.colorBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorDarker = convertIntColorToHex(p.reader.readInt4());
-        p.colorSlightlyBrighter = convertIntColorToHex(p.reader.readInt4());
-        p.colorPattern = convertIntColorToHex(p.reader.readInt4());
-        p.colorPatternEdge = convertIntColorToHex(p.reader.readInt4());
-
-        return p;
+        this.colorBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorDarker = convertIntColorToHex(reader.readInt4());
+        this.colorSlightlyBrighter = convertIntColorToHex(reader.readInt4());
+        this.colorPattern = convertIntColorToHex(reader.readInt4());
+        this.colorPatternEdge = convertIntColorToHex(reader.readInt4());
     }
 
     finalize() {
@@ -56,20 +57,20 @@ class Ready extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
         console.log("Received Ready Packet");
         const player = client.player;
 
-        player.name = packet.playerName;
-        player.colorBrighter = packet.colorBrighter;
-        player.colorDarker = packet.colorDarker;
-        player.colorSlightlyBrighter = packet.colorSlightlyBrighter;
-        player.colorPattern = packet.colorPattern;
-        player.colorPatternEdge = packet.colorPatternEdge;
+        player.name = this.playerName;
+        player.colorBrighter = this.colorBrighter;
+        player.colorDarker = this.colorDarker;
+        player.colorSlightlyBrighter = this.colorSlightlyBrighter;
+        player.colorPattern = this.colorPattern;
+        player.colorPatternEdge = this.colorPatternEdge;
         // player.position = new Point(packet.playerX, packet.playerY);
         // player.dir = packet.direction;
-        console.log("READY",player);
-        window.gameEngine.gameObjects.mapSize = packet.mapSize;
+        console.log("READY", player);
+        window.gameEngine.gameObjects.mapSize = this.mapSize;
         player.isReady = true;
         console.log(window.gameEngine.gameObjects);
 

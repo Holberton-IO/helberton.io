@@ -16,8 +16,7 @@ class DirectionPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        return p;
+    parsePacket() {
     }
 
     finalize() {
@@ -31,7 +30,7 @@ class DirectionPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
     }
 }
 

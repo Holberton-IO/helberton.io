@@ -31,7 +31,6 @@ class GameLoop:
         self.is_running = False
 
     def loop(self):
-
         while self.is_running:
             tick = time.time()
             self.dt = tick - self.lastTick

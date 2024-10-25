@@ -4,11 +4,12 @@ from gameserver.network.utils.writer import Writer
 
 
 class NamePacket(Packet):
+    PACKET_ID = 1001
 
     def __init__(self, name=""):
         super().__init__()
         self.name = name
-        self.packet_id = 1001
+        self.packet_id = self.PACKET_ID
         self.is_verified = False
 
         self.player = None
@@ -17,18 +18,17 @@ class NamePacket(Packet):
     def is_valid(self):
         return 1 if self.is_verified else 0
 
-    @staticmethod
-    def parse_packet(packet):
-        username = packet.reader.read_string()
-        packet.name = username
+    def parse_packet(self):
+        reader = self.reader
+        username = reader.read_string()
+        self.name = username
         # TODO check if username is valid
-        return packet
 
-    def handle_packet(self, packet, client):
-        packet.is_verified = True
-        client.player = Player(client.game_server, client, packet.name)
+    def handle_packet(self, client):
+        self.is_verified = True
+        client.player = Player(client.game_server, client, self.name)
         client.player.player_id = client.game_server.generate_random_id()
-        packet.player = client.player
+        self.player = client.player
 
         client.send(self)
 

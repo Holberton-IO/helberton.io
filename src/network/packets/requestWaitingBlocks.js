@@ -12,9 +12,7 @@ class RequestWaitingBlockPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-
-        return p;
+     parsePacket() {
     }
 
     finalize() {
@@ -25,8 +23,8 @@ class RequestWaitingBlockPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
-        console.log("RequestWaitingBlockPacket", packet);
+    handleReceivedPacket(client) {
+        console.log("RequestWaitingBlockPacket", this);
 
     }
 }

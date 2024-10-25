@@ -14,8 +14,8 @@ class PingPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket(p) {
-        return p;
+    parsePacket() {
+
     }
 
     finalize() {
@@ -25,7 +25,7 @@ class PingPacket extends Packet {
     }
 
 
-    handleReceivedPacket(packet, client) {
+    handleReceivedPacket(client) {
     }
 }
 
