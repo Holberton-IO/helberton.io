@@ -14,7 +14,6 @@ class Camera {
         this.camPosSet = false;
 
         this.camShakeBuffer = [];
-        //
     }
 
 

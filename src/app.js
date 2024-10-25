@@ -7,25 +7,25 @@ import {} from "./extensions/arraysExtensions.js";
 
 const camera = new Camera();
 const gameEngine = new GameEngine(60);
-window.gameEngine = gameEngine;
-window.camera = camera;
 
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-let blocks = window.gameEngine.gameObjects.blocks;
-let players = window.gameEngine.gameObjects.players;
-window.game.canvas = canvas;
+let blocks = gameEngine.gameObjects.blocks;
+let players = gameEngine.gameObjects.players;
 
 let helperCanvas = document.createElement("canvas");
 let helperCtx = helperCanvas.getContext("2d");
+
 window.game.helperCtx = helperCtx;
+window.gameEngine = gameEngine;
+window.camera = camera;
+window.game.canvas = canvas;
 
 let client = null;
 let myPlayer = null;
 
 const draw = () => {
-    if (client && client.player)
-        myPlayer = client.player;
+    if (client && client.player) myPlayer = client.player;
 
     gameEngine.scaleCanvas(ctx);
     ctx.fillStyle = "#3a3428";
@@ -43,8 +43,7 @@ const draw = () => {
         players[p].draw(ctx);
     }
 
-      if (client && client.player)
-    myPlayer.removeBlocksOutsideCamera();
+    if (client && client.player) myPlayer.removeBlocksOutsideCamera();
 
 }
 

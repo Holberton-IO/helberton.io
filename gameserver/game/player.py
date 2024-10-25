@@ -1,3 +1,4 @@
+from gameserver.network.packets.stop_draw_waiting_blocks import StopDrawWaitingBlocksPacket
 from gameserver.utils.colors import Colors
 from gameserver.utils.game_math import *
 from gameserver.game.vector import Vector
@@ -156,7 +157,24 @@ class Player:
         )
         self.game.map.players_captured_blocks.update_player_blocks(self, new_player_blocks)
         for cmp_block in compressed_blocks:
+            for x, y in cmp_block["rect"].for_each():
+                """
+                update map blocks
+                """
+                self.game.map.blocks[x][y] = cmp_block["data"]
             self.game.map.notify_blocks_filled(cmp_block["rect"], cmp_block["data"])
+
+    def clear_waiting_blocks(self):
+        self.capture_blocks = []
+        self.current_waiting_blocks_ex_pos = 0
+
+    def notify_empty_waiting_blocks(self):
+        last_block_vec = self.last_capture_block
+
+        stop_drawing_packet = StopDrawWaitingBlocksPacket(self, last_block_vec)
+        nearby_player_call_back = lambda nearby_player: nearby_player.client.send(stop_drawing_packet)
+        self.game.notify_nearby_players(self, nearby_player_call_back, nearby_player_call_back)
+        print("Notify Empty Waiting Blocks")
 
     def update_current_block(self, last_position: Vector):
         data = self.game.map.get_valid_blocks(self.position)
@@ -165,16 +183,15 @@ class Player:
             self.add_waiting_block(last_position)
             self.game.map.fill_waiting_blocks(self)
             self.send_capture_blocks()
-            self.capture_blocks = []
-            self.current_waiting_blocks_ex_pos = 0
+            self.notify_empty_waiting_blocks()
+            self.clear_waiting_blocks()
 
         """
         if not player.is_capturing: start capturing
         """
-        if type(data) == int and data == 1 or data != self:
+        if isinstance(data, int) and data == 1 or data != self:
             if not self.is_capturing:
                 # print("[add_waiting_block] Player Exit For Occupied Area")
-
                 self.add_waiting_block(self.position)
                 self.game.broadcast_player_waiting_blocks(self)
                 return
@@ -388,7 +405,7 @@ class Player:
     def generate_state_packet(self):
         return PlayerStatePacket(self)
 
-    def player_see_this_player(self):
+    def players_see_this_player(self):
         for player in self.other_players_in_viewport:
             yield player
 

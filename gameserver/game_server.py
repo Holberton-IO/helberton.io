@@ -143,7 +143,7 @@ class GameServer:
 
     def broadcast_player_waiting_blocks(self, player):
         packet = WaitingBlocksPacket(player)
-        for nearby_player in player.player_see_this_player():
+        for nearby_player in player.players_see_this_player():
             nearby_player.client.send(packet)
 
     def loop(self, tick, dt):
@@ -157,3 +157,10 @@ class GameServer:
             yield player.position
             if player.is_capturing:
                 yield list(player.get_waiting_blocks_vectors())[0]
+
+    def notify_nearby_players(self, player, callback_if_myself, callback_if_not_myself):
+        for nearby_player in player.players_see_this_player():
+            if nearby_player == player:
+                callback_if_myself(nearby_player)
+            else:
+                callback_if_not_myself(nearby_player)

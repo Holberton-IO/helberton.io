@@ -8,6 +8,7 @@ import PingPacket from "./ping";
 import PongPacket from "./pong";
 import RequestWaitingBlockPacket from "./requestWaitingBlocks";
 import PlayerRemovedPacket from "./playerRemoved";
+import StopDrawingWaitingBlocksPacket from "./stopDrawingWaitingBlocks";
 
 const PacketsDictionary = {
     1001: NamePacket,
@@ -20,6 +21,7 @@ const PacketsDictionary = {
     1008: PongPacket,
     1009: RequestWaitingBlockPacket,
     1010: PlayerRemovedPacket,
+    1011: StopDrawingWaitingBlocksPacket,
 }
 
 

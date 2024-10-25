@@ -19,4 +19,5 @@ dic = {
     1008: None,  # Pong Packet
     1009: RequestWaitingBlocks,
     1010: PlayerRemovedPacket,
+    1011: None,  # Stop Drawing Packet
 }

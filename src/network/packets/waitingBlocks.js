@@ -39,8 +39,6 @@ class WaitingBlocksPacket extends Packet {
 
 
     handleReceivedPacket(packet, client) {
-
-
         const playerList = window.gameEngine.gameObjects.players;
         let player = null;
         if (packet.userId in playerList) {
@@ -58,6 +56,8 @@ class WaitingBlocksPacket extends Packet {
                 player.skipGettingWaitingBlocksRespose = false;
                 player.waitingPushedDuringReceiving = [];
             } else {
+
+                // If Player Requesting Waiting Blocks vai RequestWaitingBlocks Packet
                 if (player.isGettingWaitingBlocks) {
                     player.isGettingWaitingBlocks = false;
                     replaceStack = true;
@@ -74,7 +74,6 @@ class WaitingBlocksPacket extends Packet {
                         player.requestWaitingBlocks();
                     }
                 }
-
             }
         }
 
