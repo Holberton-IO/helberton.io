@@ -87,10 +87,17 @@ class PlayerStatePacket extends Packet {
             // if server predict the same movement
             // or the movement is to close to server
             serverSyncedWithClient = player.checkClientMovementSyncedWithServer(newDir
-            , newPosOffset, newPos);
+                , newPosOffset, newPos);
 
             if (serverSyncedWithClient) {
-                player.myNextDir = newDir;
+                /***
+                 Here We Found That Server and Client not Synced
+                 So We Need To Sync Them
+                 1- Change Player Direction
+                 2- Change Player Position
+                 3- Request Waiting Blocks From Server
+                 4- Clear Send Dir Queue
+                 */
                 player.changeCurrentDir(newDir, newPos, false, false);
                 player.requestWaitingBlocks();
                 player.sendDirQueue = [];
@@ -105,7 +112,7 @@ class PlayerStatePacket extends Packet {
         }
 
         if (serverSyncedWithClient) {
-            player.position=newPosOffset.clone();
+            player.position = newPosOffset.clone();
             player.addWaitingBlocks(newPos);
         }
 

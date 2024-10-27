@@ -29,10 +29,8 @@ class Socket:
         try:
             while self.is_alive:
                 data = self.sock.receive()
-
                 if type(data) == str:
                     continue
-
                 self.on_receive(data)
 
         except simple_websocket.errors.ConnectionClosed as e:

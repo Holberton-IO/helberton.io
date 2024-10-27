@@ -1,4 +1,9 @@
 from abc import abstractmethod, ABC
+from typing import Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from gameserver.client import GameClient
+    from gameserver.network.utils.reader import Reader
 
 
 class Packet(ABC):
@@ -8,7 +13,7 @@ class Packet(ABC):
         self.data = bytearray()
         self.packet_id = 0
         self.packet_size = 0
-        self.reader = None
+        self.reader: Optional[Reader] = None
 
     @abstractmethod
     def finalize(self):
@@ -17,11 +22,11 @@ class Packet(ABC):
     def to_hex(self):
         return self.reader.to_hex_string()
 
-    def parse_packet(self,):
+    def parse_packet(self, ):
         raise NotImplementedError
 
     @staticmethod
-    def parse_packet_data(packet_size, reader, packet):
+    def parse_packet_data(packet_size, reader, packet: 'Callable[[],Packet]'):
         p = packet()
         p.reader = reader
         p.buffer = reader.buffer
@@ -29,5 +34,5 @@ class Packet(ABC):
         p.parse_packet()
         return p
 
-    def handle_packet(self, client):
+    def handle_packet(self, client: 'GameClient'):
         raise NotImplementedError

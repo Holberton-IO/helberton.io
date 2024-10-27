@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from gameserver.game.system.player_captured_blocks import PlayersCapturedBlocks
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets.fill_area import FillAreaPacket
 from gameserver.utils.block_compressions import BlockCompression
+
+if TYPE_CHECKING:
+    from gameserver.game.player import Player
 
 
 class Map:
@@ -35,7 +40,7 @@ class Map:
             raise Exception("Vector is not in map")
         return self.blocks[vector.x][vector.y]
 
-    def fill_blocks(self, rect, player):
+    def fill_blocks(self, rect, player: 'Player'):
         rect = rect.clamp(Rectangle(
             Vector(0, 0),
             Vector(self.map_size, self.map_size)
@@ -65,7 +70,7 @@ class Map:
         for cmp_block in compressed_blocks:
             yield cmp_block
 
-    def fill_new_player_blocks(self, player):
+    def fill_new_player_blocks(self, player: 'Player'):
         blocks_num = self.game.new_player_blocks
         initial_reversed_blocks = (blocks_num * 2) + 1
         initial_reversed_blocks *= initial_reversed_blocks

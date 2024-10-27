@@ -58,3 +58,16 @@ class Vector:
     def set_y(self, pos):
         self.y = pos.y
         return self
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+
+    def is_in_same_horizontal_line_with(self, other):
+        return self.y == other.y
+
+    def is_in_same_vertical_line_with(self, other):
+        return self.x == other.x
+
+    def is_horizontal_or_vertical_with(self, other):
+        return self.is_in_same_horizontal_line_with(other) or self.is_in_same_vertical_line_with(other)

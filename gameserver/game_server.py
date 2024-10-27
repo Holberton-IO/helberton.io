@@ -7,6 +7,11 @@ from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
 from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket, PlayerRemovedPacket
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from game.map import Map
+
 
 class GameServer:
     __instance = None
@@ -21,11 +26,26 @@ class GameServer:
 
     max_undo_event_time = 600
 
+    '''
+         ------------------------------
+        |        Coming Events         |
+        |    ----------------------    |
+        |   |                      |   |
+        |   |                      |   |
+        |   |   Main Viewport      |   |
+        |   |   (min_tiles_view)   |   |
+        |   |                      |   |
+        |   |                      |   |
+        |    ----------------------    |
+        |                              |
+         ------------------------------
+    '''
+
     def __new__(cls, *args, **kwargs):
         if GameServer.__instance is None:
             map_size = kwargs.get("map_size", 0)
             GameServer.__instance = object.__new__(cls)
-            GameServer.__instance.map = Map(map_size, GameServer.__instance)
+            GameServer.__instance.map: Map = Map(map_size, GameServer.__instance)
 
         return GameServer.__instance
 
@@ -63,7 +83,7 @@ class GameServer:
         self.clients.remove(client)
 
     def generate_random_id(self):
-        # TODO We Need To Handle if ID Exceed 2 bytes (65535)
+        # TODO We Need To Handle if ID Exceed 4 bytes (2**31 - 1)
         self.player_count += 1
         return self.player_count + 1
 
@@ -132,7 +152,7 @@ class GameServer:
                 yield p
 
     def get_overlapping_waiting_blocks_players_pos(self, pos):
-        rec = Rectangle(pos, pos)
+        rec = Rectangle(pos.clone(), pos.clone())
         yield from self.get_overlapping_waiting_blocks_players_rec(rec)
 
     def broadcast_player_state(self, player):

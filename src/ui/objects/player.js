@@ -110,7 +110,19 @@ class Player {
         if (controls === 1) return 'up'; else if (controls === 3) return 'down'; else if (controls === 4) return 'left'; else if (controls === 2) return 'right'; else return '';
     }
 
-
+   /**
+     * Verifies if the client's predicted player movement is synchronized with the server's authoritative state.
+     * This function checks the alignment of the player's current or next direction and position against the server's updates.
+     * It is critical for maintaining gameplay integrity by ensuring that all movements rendered client-side are accurate and acknowledged by the server.
+     * This helps prevent discrepancies that can affect game dynamics, such as rubberbanding or desyncs.
+     *
+     * - The function compares the latest direction and position (factoring in calculated offsets for lag) received from the server.
+     * - Returns false if the client’s predictions are confirmed by the server (i.e., no update or correction needed),
+     *   which means the player's state on the client matches the server's data.
+     * - Returns true if discrepancies are found, signaling the need for the client to update its local state based on the latest server information.
+     *
+     * Use this function to ensure that the gameplay remains fluid and consistent, avoiding interruptions due to network latency or processing delays.
+     */
     checkClientMovementSyncedWithServer(newDir, newPosOffset, newPos) {
         // Check If dir and por are close to current
         const distVector = this.position.distanceVector(newPosOffset);
@@ -144,6 +156,9 @@ class Player {
     /**
      * Calculate Move Offset Based On Ping And Game Speed
      * If Player Is Not My Player Or Ping Is Less Than 50 Return 0
+     * 50 ms is the minimum ping to consider the player is synced with the server
+     * so if not my player no need to calculate offset but if my player and ping is bigger than 50
+     * ping [round trip] / 2 * gameSpeed = offset
      * @returns {number}
      */
     calMoveOffset() {
@@ -151,7 +166,7 @@ class Player {
         if (!this.isMyPlayer || this.serverAvgPing <= 50) return offset;
 
         const gameSpeed = window.game.gameSpeed;
-        offset = this.serverAvgPing / 2 * gameSpeed;
+        offset = (this.serverAvgPing / 2) * gameSpeed;
         return offset;
     }
 

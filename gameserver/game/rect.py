@@ -26,16 +26,14 @@ class Rectangle:
                 yield x, y
 
     def is_rect_overlap(self, rect):
-        return self.min.x < rect.max.x and \
-               self.max.x > rect.min.x and \
-               self.min.y < rect.max.y and \
-               self.max.y > rect.min.y
+        if self.min.x > rect.max.x or self.max.x < rect.min.x:
+            return False
+        if self.min.y > rect.max.y or self.max.y < rect.min.y:
+            return False
+        return True
 
     def is_not_rect_overlap(self, rect):
-        return self.max.x < rect.min.x or \
-               self.min.x > rect.max.x or \
-               self.max.y < rect.min.y or \
-               self.min.y > rect.max.y
+        return not self.is_rect_overlap(rect)
 
     def expand_to(self, vector):
         min_vec = Vector(
@@ -61,9 +59,12 @@ class Rectangle:
         self.min = min_vec
         self.max = max_vec
 
-
     def vector_in_rect(self, vector):
         return self.min.x <= vector.x < self.max.x and self.min.y <= vector.y < self.max.y
 
     def clone(self):
         return Rectangle(self.min.clone(), self.max.clone())
+
+
+    def same_as(self, other):
+        return self.min == other.min and self.max == other.max

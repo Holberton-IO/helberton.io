@@ -3,6 +3,11 @@ import time
 from gameserver.network.packet import Packet
 from gameserver.network.utils.writer import Writer
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from gameserver.client import GameClient
+
 
 class ReadyPacket(Packet):
     PACKET_ID = 1002
@@ -24,17 +29,14 @@ class ReadyPacket(Packet):
         self.color_patternEdge = 0
 
     def parse_packet(self):
-       pass
+        pass
 
-
-    def handle_packet(self, client):
+    def handle_packet(self, client: 'GameClient'):
         """On Received Ready Packet"""
         print(client.player.name, "is ready")
 
-        #self.user_id = client.game_server.generate_random_id()
         self.map_size = client.game_server.map.map_size
         self.player_name = client.player.name
-        #client.player.player_id = self.user_id
         self.user_id = client.player.player_id
 
         # Add Player To Game Server
@@ -50,7 +52,7 @@ class ReadyPacket(Packet):
         self.player_y = client.player.position.y
         self.player_direction = client.player.direction
         print("On Ready Packet", self.player_x, self.player_y, self.player_direction)
-        # (30,5)
+
         """
         Set Player Colors
         """
@@ -71,17 +73,15 @@ class ReadyPacket(Packet):
         # Save Player Captured Blocks Into Player Captured Blocks
         client.game_server.map.players_captured_blocks.add_player(client.player, blocks_rect)
 
-
         # Send Player State To All Players
         client.game_server.broadcast_player_state(client.player)
-
 
         # Send ViewPort To Player
         client.player.send_player_viewport()
 
         # Send Ready To Start
         client.send(self)
-        client.player.is_send_ready_packet = True
+        client.player.is_send_ready_packet = True # To Start Player Movement [ Loop ]
 
     def finalize(self):
         writer = Writer(self.packet_id)

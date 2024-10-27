@@ -8,6 +8,11 @@ from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
 from gameserver.game.line import Line
 from gameserver.utils.game import *
 
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from gameserver.game.vector import Vector
+
 
 class Player:
     def __init__(self, game_server, client, name="", player_id=""):
@@ -21,7 +26,7 @@ class Player:
 
         self.name = name
         self.player_id = player_id
-        self.position = None
+        self.position: Optional['Vector'] = None
         self.last_edge_check_position = None
 
         self.direction = 0
@@ -203,6 +208,12 @@ class Player:
         if player.is_dead:
             return
 
+        """
+         Add This Player To Current Player Viewport 
+         this means that player will receive updates from this player
+         and this player will receive updates from this player 
+        
+        """
         self.players_in_viewport.add(player)
         player.other_players_in_viewport.add(self)
         self.client.send(player.generate_state_packet())
@@ -225,8 +236,14 @@ class Player:
         # TODO SEND REMOVED FROM VIEWPORT PACKET (IMPORTANT)
 
     def update_player_viewport(self):
-        # list = [youssef]
+        # Consider All Players In Viewport As Left Players
         left_players = set(self.players_in_viewport)
+
+        """ 
+          If Current Player Viewport Overlaps With Other Players Waiting Blocks
+          Mark This Player As In Viewport Of Current Player
+        
+        """
 
         for player in self.game.get_overlapping_waiting_blocks_players_rec(self.get_viewport()):
             left_players.discard(player)
@@ -265,7 +282,7 @@ class Player:
 
         # Check if player touches waiting blocks of other players
         for other_player in self.game.get_overlapping_waiting_blocks_players_pos(self.position):
-            is_my_self = other_player == self
+            is_my_self = other_player != self
             if not other_player.check_point_in_capture_area(self.position, is_my_self):
                 continue
 
@@ -289,10 +306,11 @@ class Player:
         # TODO DELAY IN SENDING EDGES
         self.send_required_edge_blocks()
 
-    def check_point_in_capture_area(self, point, include_last_block=False):
+    def check_point_in_capture_area(self, point, include_last_block=True):
         if not self.is_capturing:
             if include_last_block:
                 return point == self.position
+            return False
 
         # Check if point is in capture blocks
         offset = 1 if include_last_block else 2
@@ -359,7 +377,8 @@ class Player:
         chunk = None
         if self.position.x >= self.last_edge_check_position.x + chunk_size:
             chunk = Rectangle(
-                Vector(self.position.x + viewport_size, self.last_edge_check_position.y - viewport_size - chunk_size),
+                Vector(self.position.x + viewport_size,
+                       self.last_edge_check_position.y - viewport_size - chunk_size),
                 Vector(chunk_size, (viewport_size + chunk_size) * 2)
             )
             self.last_edge_check_position.x = self.position.x

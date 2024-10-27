@@ -25,7 +25,7 @@ class NamePacket(Packet):
         # TODO check if username is valid
 
     def handle_packet(self, client):
-        self.is_verified = True
+        self.is_verified = True # TODO check if username is valid
         client.player = Player(client.game_server, client, self.name)
         client.player.player_id = client.game_server.generate_random_id()
         self.player = client.player
