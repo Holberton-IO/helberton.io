@@ -131,6 +131,10 @@ class Camera {
         }
     }
 
+    moveToAbsolutePosition(pos) {
+        this.camPosition = pos;
+    }
+
 
     loop() {
         this.camPrevPosition = this.camPosition;

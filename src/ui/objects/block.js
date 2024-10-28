@@ -1,7 +1,7 @@
 import Point from "./point.js";
 import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
-import Rectangle from "./rectangle.js";
+import Animation from "../animation.js";
 
 class Block {
     constructor(p) {
@@ -9,50 +9,52 @@ class Block {
 
         this.currentBlock = -1;
         this.nextBlock = -1;
-
-
-        this.animDirection = 0;
-        this.animProgress = 0;
-        this.animDelay = 0;
-
         this.colorsWithId = null;
-
         this.lastSetTime = Date.now()
+        this.animation = new Animation(0, 1, 0.003);
+
     }
+
 
     setBlockId(id, delay) {
         this.lastSetTime = Date.now();
+
+        // If there is no delay for the animation
         if (!delay) {
             this.currentBlock = this.nextBlock = id;
-            this.animDirection = 0;
-            this.animProgress = 1;
+            this.animation.completeAndStop();
         } else {
 
-            this.animDelay = delay;
+            // Set the delay
+            this.animation.delay = delay;
 
             let isCurrentBlock = id === this.currentBlock;
             let isNextBlock = id === this.nextBlock;
 
+
             if (isCurrentBlock && isNextBlock) {
-                if (this.animDirection === -1) {
-                    this.animDirection = 1;
+                // If the current block is the same as the next block
+                // Then we don't need to do anything
+                if (this.animation.isGoingBackward()) {
+                    this.animation.setForward();
                 }
-            }
-
-            if (isCurrentBlock && !isNextBlock) {
-                this.animDirection = 1;
-                this.nextBlock = this.currentBlock;
-            }
-
-            if (!isCurrentBlock && isNextBlock) {
-                if (this.animDirection === 1) {
-                    this.animDirection = -1;
-                }
-            }
-
-            if (!isCurrentBlock && !isNextBlock) {
+            } else if (!isCurrentBlock && !isNextBlock) {
+                // if we need to change the block
+                // then we need to set the next block to the id
                 this.nextBlock = id;
-                this.animDirection = -1;
+                this.animation.setBackward();
+            }
+
+                // this two cases can happen
+            // during the animation new block is set
+            else if (isCurrentBlock && !isNextBlock) {
+                // cancel the animation and set the next block to the id
+                this.nextBlock = this.currentBlock;
+                this.animation.setForward()
+            } else if (!isCurrentBlock && isNextBlock) {
+                // reverse the animation to set the current block to the id of next block
+                // in handleAnimation we will set the current block to the next block
+                if (this.animation.isGoingForward()) this.animation.setBackward()
             }
         }
 
@@ -71,69 +73,60 @@ class Block {
     }
 
     handleAnimation() {
-        if (this.animDelay > 0) {
-            this.animDelay -= window.gameEngine.deltaTime;
-        } else {
-            this.animProgress += window.gameEngine.deltaTime * this.animDirection * 0.003;
-        }
-
-        if (this.animProgress > 1) {
-            this.animProgress = 1;
-            this.animDirection = 0;
-        }
-
-        if (this.animProgress < 0) {
-            this.animProgress = 0;
-            this.animDirection = 1;
+        this.animation.update(window.gameEngine.deltaTime);
+        const progress = this.animation.getProgress();
+        if (progress <= 0) {
             this.currentBlock = this.nextBlock;
-            return false
+            return false;
         }
         return true;
     }
 
+    calBlockGap(position, size) {
+        return new Point(position.x * size, position.y * size);
+    }
+
 
     drawBorderBlock(ctx, color, size) {
-        if (this.currentBlock !== 0)
-            return;
+        if (this.currentBlock !== 0) return;
 
         ctx.fillStyle = color;
         // Calculate the new position Base Of the size
-        const newP = window.game.calBlocksGap(this.position, size);
+        const newP = this.calBlockGap(this.position, size);
         ctx.fillRect(newP.x, newP.y, size, size);
     }
 
     drawEmptyBlock(ctx, darkColor, brightColor, size) {
-        if (this.currentBlock !== 1)
-            return;
+        if (this.currentBlock !== 1) return;
 
 
-        const sizeFactor = 10 / 7;
+        const sizeFactor = 10 / size;
         const newS = size * sizeFactor; // 10
         let animProgress = 0;
 
-        const newP = window.game.calBlocksGap(this.position, newS);
+        const newP = this.calBlockGap(this.position, newS);
         const spacingTwenty = GameMath.calPercentage(newS, 0.2);
         const spacingTen = GameMath.calPercentage(newS, 0.1); // 1
         const spacingNinty = GameMath.calPercentage(newS, 0.9);
 
 
         /////////////////////// SHADOW ////////////////////////
-        if (this.animProgress > .8) {
+        if (this.animation.progress > .8) {
             GameUtils.drawInCtxRec(ctx, newP, size, darkColor, spacingTwenty);
         }
 
         ctx.fillStyle = brightColor;
-        if (this.animProgress === 1) {
+        if (this.animation.progress === 1) {
             GameUtils.drawInCtxRec(ctx, newP, size, brightColor, spacingTen);
-        } else if (this.animProgress < .4) {
-            animProgress = this.animProgress * 2.5;
+        } else if (this.animation.progress < .4) {
+            animProgress = this.animation.progress * 2.5;
             ctx.beginPath();
             ctx.moveTo(newP.x + spacingTwenty, newP.y + GameMath.linearInterpolate(spacingNinty, spacingTwenty, animProgress));
             ctx.lineTo(newP.x + spacingTwenty, newP.y + spacingNinty);
             ctx.lineTo(newP.x + GameMath.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingNinty);
             ctx.fill();
-        } else if (this.animProgress < 0.8) {
-            animProgress = this.animProgress * 2.5 - 1;
+        } else if (this.animation.progress < 0.8) {
+            animProgress = this.animation.progress * 2.5 - 1;
             ctx.beginPath();
             ctx.moveTo(newP.x + spacingTwenty, newP.y + spacingTwenty);
             ctx.lineTo(newP.x + spacingTwenty, newP.y + 9);
@@ -143,7 +136,7 @@ class Block {
             ctx.fill();
         } else {
 
-            animProgress = this.animProgress * 5 - 4;
+            animProgress = this.animation.progress * 5 - 4;
             GameUtils.drawInCtxRec(ctx, newP, size, brightColor, GameMath.linearInterpolate(2, 1, animProgress));
         }
     }
@@ -151,8 +144,7 @@ class Block {
     drawRegularBlock(ctx, darkColor, brightColor, size) {
 
 
-        if (this.currentBlock < 2)
-            return;
+        if (this.currentBlock < 2) return;
 
         if (this.colorsWithId === null) {
             return;
@@ -163,33 +155,33 @@ class Block {
         let dcolor = this.colorsWithId.patternEdge;
 
 
-        const sizeFactor = 10 / 9;
+        const sizeFactor = 10 / size;
         const newS = size * sizeFactor; // 10
         let animProgress = 0;
 
-        const newP = window.game.calBlocksGap(this.position, newS);
+        const newP = this.calBlockGap(this.position, newS);
         const spacingTwenty = GameMath.calPercentage(newS, 0.2);
         const spacingTen = GameMath.calPercentage(newS, 0.1); // 1
         const spacingNinty = GameMath.calPercentage(newS, 0.9);
 
-        if (this.animProgress > 0.8) {
+        if (this.animation.progress > 0.8) {
             ctx.fillStyle = dcolor;
             ctx.fillRect(newP.x + spacingTen, newP.y + spacingTen, size, size);
         }
 
 
         ctx.fillStyle = bcolor;
-        if (this.animProgress === 1) {
+        if (this.animation.progress === 1) {
             GameUtils.drawInCtxRec(ctx, newP, size, bcolor, spacingTen);
-        } else if (this.animProgress < .4) {
-            animProgress = this.animProgress * 2.5;
+        } else if (this.animation.progress < .4) {
+            animProgress = this.animation.progress * 2.5;
             ctx.beginPath();
             ctx.moveTo(newP.x + spacingTen, newP.y + GameMath.linearInterpolate(newS, spacingTen, animProgress));
             ctx.lineTo(newP.x + spacingTen, newP.y + newS);
             ctx.lineTo(newP.x + GameMath.linearInterpolate(spacingTen, newS, animProgress), newP.y + newS);
             ctx.fill();
-        } else if (this.animProgress < 0.8) {
-            animProgress = this.animProgress * 2.5 - 1;
+        } else if (this.animation.progress < 0.8) {
+            animProgress = this.animation.progress * 2.5 - 1;
             ctx.beginPath();
             ctx.moveTo(newP.x + spacingTen, newP.y + spacingTen);
             ctx.lineTo(newP.x + spacingTen, newP.y + newS);
@@ -199,7 +191,7 @@ class Block {
             ctx.fill();
         } else {
 
-            animProgress = this.animProgress * 5 - 4;
+            animProgress = this.animation.progress * 5 - 4;
             GameUtils.drawInCtxRec(ctx, newP, size, bcolor, GameMath.linearInterpolate(1, 0, animProgress));
         }
 
@@ -210,6 +202,7 @@ class Block {
             console.log("not in camera");
             return;
         }
+
         let canDraw = this.handleAnimation();
         if (!canDraw) {
             return;
@@ -218,13 +211,12 @@ class Block {
         this.drawBorderBlock(ctx, "#420707", 10);
         this.drawEmptyBlock(ctx, "#2d2926", "#4e463f", 7);
         this.drawRegularBlock(ctx, "#2d2926", "#4e463f", 9);
-        //Ocuupited Block
     }
 
 
     static convertRectToBlock(rect, colorsWithId, listOfBlocks, myPlayer) {
-
         const viewPortRadius = window.game.viewPortRadius;
+
         if (myPlayer) {
             rect.min.x = Math.max(rect.min.x, Math.round(myPlayer.position.x - viewPortRadius));
             rect.min.y = Math.max(rect.min.y, Math.round(myPlayer.position.y - viewPortRadius));
@@ -239,7 +231,6 @@ class Block {
             block.setBlockId(colorsWithId.id, Math.random() * 400);
         }
 
-        // console.log(listOfBlocks);
     }
 
 }

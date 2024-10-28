@@ -3,7 +3,8 @@ import GameEngine from "./gameEngine";
 import {Client} from "./network/client";
 import "./globals.js";
 import "./controls.js";
-import  "./extensions/arraysExtensions.js";
+import "./extensions/arraysExtensions.js";
+
 
 const camera = new Camera();
 const gameEngine = new GameEngine(60);
@@ -34,7 +35,7 @@ const draw = () => {
     gameEngine.camTransform(ctx);
 
 
-    console.log("Blocks: " + blocks.length);
+    // console.log("Blocks: " + blocks.length);
     for (let b of blocks) {
         b.draw(ctx, false);
     }

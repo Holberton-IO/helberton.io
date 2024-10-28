@@ -11,9 +11,6 @@ const globals = {
     drawingOffset: 10,
     calDrawingOffset: (p) => {
         return new Point(p.x * globals.drawingOffset, p.y * globals.drawingOffset);
-    },
-    calBlocksGap: (p, size) => {
-        return new Point(p.x * size, p.y * size);
     }
 };
 

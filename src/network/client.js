@@ -42,7 +42,7 @@ class Client {
 
     send(packet) {
 
-        console.log("Sending Packet ->>>>>" +packet.constructor.name);
+        // console.log("Sending Packet ->>>>>" +packet.constructor.name);
         this.ws.send(packet);
     }
 

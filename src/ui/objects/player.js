@@ -409,7 +409,7 @@ class Player {
 
             if (block.vanishTimer > 0 && false) {
                 continue;
-                console.log("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+
                 window.gameEngine.camTransform(helperCtx, true);
 
 

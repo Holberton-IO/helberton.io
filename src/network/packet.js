@@ -29,7 +29,7 @@ class Packet {
 
     static parsePacketData(packetSize, reader, packet) {
         let p = new packet();
-        console.log("Received Packet <-----: " + p.constructor.name);
+        // console.log("Received Packet <-----: " + p.constructor.name);
 
         p.reader = reader;
         p.data = reader.data;
