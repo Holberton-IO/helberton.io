@@ -46,47 +46,67 @@ class WaitingBlocksPacket extends Packet {
         }
 
 
-        let replaceStack = false;
+        let replaceWaitingBlocks = false;
         if (player.isMyPlayer) {
+
+
+            // some cases we need to skip the response
             if (player.skipGettingWaitingBlocksRespose) {
                 player.skipGettingWaitingBlocksRespose = false;
                 player.waitingPushedDuringReceiving = [];
             } else {
 
                 // If Player Requesting Waiting Blocks vai RequestWaitingBlocks Packet
+                // the RequestWaitingBlocks could happen if we found server and client blocks are not synced
+                // in Player State Packet
                 if (player.isGettingWaitingBlocks) {
                     player.isGettingWaitingBlocks = false;
-                    replaceStack = true;
+
+                    // Player Requesting Waiting Blocks From Server So We Need To Replace The Waiting Blocks
+                    replaceWaitingBlocks = true;
+
+
+                    // Push Player Movement During Receiving Waiting Blocks
                     for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {
                         const vec = player.waitingPushedDuringReceiving[i];
                         this.blocks.push(vec);
                     }
+
                     player.waitingPushedDuringReceiving = [];
                 }
 
+
+
+                // If Player Waiting Blocks Are Empty We Need To Request Waiting Blocks
+                // possible that player received stop drawing blocks
+                // possible that initial waiting blocks are empty game just started
+
                 if (player.waitingBlocks.length > 0) {
-                    const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
+                    const lastBlock = player.waitingBlocks.getLast;
                     if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
+                        // this call will cause to replace the waiting blocks with the new blocks coming from server
                         player.requestWaitingBlocks();
+
                     }
                 }
             }
         }
 
 
-        if (replaceStack) {
+        if (replaceWaitingBlocks) {
             if (player.waitingBlocks.length > 0) {
-                const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];
-                lastBlock.blocks = this.blocks;
+                const lastBlock = player.waitingBlocks.getLast;
+                lastBlock.blocks = [...this.blocks];
                 lastBlock.vanishTimer = 0;
             } else {
-                replaceStack = false;
+                replaceWaitingBlocks = false;
             }
         }
-        if (!replaceStack) {
+
+        if (!replaceWaitingBlocks) {
             player.waitingBlocks.push({
                 vanishTimer: 0,
-                blocks: this.blocks
+                blocks: [...this.blocks]
             });
         }
 

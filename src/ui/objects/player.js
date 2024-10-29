@@ -5,6 +5,7 @@ import DirectionPacket from "../../network/packets/direction";
 import {log} from "three/nodes";
 import RequestWaitingBlockPacket from "../../network/packets/requestWaitingBlocks";
 
+
 class Player {
 
     constructor(position = new Point(1, 1), id) {
@@ -26,7 +27,6 @@ class Player {
         this.lastChangedDirPos = new Point(0, 0);
 
 
-        this.waitingBlocks = [];
         this.name = "";
 
 
@@ -48,6 +48,13 @@ class Player {
         this.isDead = false;
 
         ///
+        /**
+         * waitingBlocks can be updated vai two messaged only
+         * 1- WaitingBlocksPacket [if player requested waiting blocks]
+         * 2- StopDrawingWaitingBlocksPacket [if player received to stop drawing waiting blocks request is sent to server]
+         * @type {*[]}
+         */
+        this.waitingBlocks = [];
         this.waitingBlocksDuringWaiting = [];
         //
         this.lastPosHasBeenConfirmed = false;
@@ -77,6 +84,11 @@ class Player {
         this.isGettingWaitingBlocks = false;
         this.skipGettingWaitingBlocksRespose = false;
         this.waitingPushedDuringReceiving = [];
+
+
+        // animation and drawing
+        this.nameAlphaTimer = 0;
+        this.isDeadTimer = 0;
 
     }
 
@@ -110,7 +122,7 @@ class Player {
         if (controls === 1) return 'up'; else if (controls === 3) return 'down'; else if (controls === 4) return 'left'; else if (controls === 2) return 'right'; else return '';
     }
 
-   /**
+    /**
      * Verifies if the client's predicted player movement is synchronized with the server's authoritative state.
      * This function checks the alignment of the player's current or next direction and position against the server's updates.
      * It is critical for maintaining gameplay integrity by ensuring that all movements rendered client-side are accurate and acknowledged by the server.
@@ -178,6 +190,8 @@ class Player {
         if (!(lastBlock[0].x !== pos.x || lastBlock[0].y !== pos.y)) return;
         lastBlock.push(pos.clone());
 
+
+        // If Player Change his Direction During Receiving Waiting Blocks
         if (this.isMyPlayer && this.isGettingWaitingBlocks) {
             this.waitingPushedDuringReceiving.push(pos);
         }
@@ -395,6 +409,8 @@ class Player {
             let block = this.waitingBlocks[blockIndex];
             let isLastBlock = blockIndex === this.waitingBlocks.length - 1;
 
+
+            // remove Top Block From Waiting Blocks If It's Vanish Timer Is More Than 10
             if (!isLastBlock || this.isDead) {
                 let speed = (this.isDead && isLastBlock) ? gameSpeed : 0.02;
                 block.vanishTimer += deltaTime * speed;
@@ -410,9 +426,7 @@ class Player {
 
             const lastDrawPos = isLastBlock ? this.drawPosition : null;
 
-            if (block.vanishTimer > 0 && false) {
-                continue;
-
+            if (block.vanishTimer > 0) {
                 window.gameEngine.camTransform(helperCtx, true);
 
 
@@ -447,12 +461,12 @@ class Player {
 
     }
 
-    drawWaitingBlockInCTX(callback, blocks, lastPosition) {
+    drawWaitingBlockInCTX(contexts, blocks, lastPosition) {
         if (blocks.length <= 0) return;
 
 
-        for (let ctxIndex = 0; ctxIndex < callback.length; ctxIndex++) {
-            let b = callback[ctxIndex];
+        for (let ctxIndex = 0; ctxIndex < contexts.length; ctxIndex++) {
+            let b = contexts[ctxIndex];
             let ctx = b.ctx;
             let offset = b.offset;
             ctx.lineCap = "round";
@@ -525,10 +539,61 @@ class Player {
         this.checkNextDirAndCamera();
         this.drawWaitingBlocks(ctx);
         this.drawPlayerHeadWithEye(ctx);
+        this.drawPlayerName(ctx)
         this.parseDirQueue();
 
     }
 
+
+    drawPlayerName(ctx) {
+        this.nameAlphaTimer += window.gameEngine.deltaTime * 0.001;
+        const userNameSize = 6;
+        ctx.font = `${userNameSize}px Arial, Helvetica, sans-serif`;
+        let myAlpha = 1;
+        let deadAlpha = 1;
+        if (this.isMyPlayer) {
+            myAlpha = 9 - this.nameAlphaTimer;
+        }
+        if (this.isDead) {
+            deadAlpha = 1 - this.isDeadTimer;
+        }
+        let alpha = Math.min(myAlpha, deadAlpha);
+        // if (alpha <= 0) return;
+
+        ctx.save();
+        // ctx.globalAlpha = GameMath.clamp(alpha, 0, 1);
+        let realNameWidth = ctx.measureText(this.name).width;
+        let nameWidth = Math.max(100, realNameWidth);
+
+        const maxNamePos = new Point((this.drawPosition.x * 10) + 5 - (nameWidth / 2), this.drawPosition.y * 10 - 5);
+        // center the width i we have a space
+
+
+        const namePos = new Point(maxNamePos.x, maxNamePos.y);
+        const distanceToMax = this.drawPosition.multiply(10).distanceVector(maxNamePos).abs();
+        namePos.x = Math.abs(distanceToMax.x - realNameWidth)/2 + maxNamePos.x;
+
+
+        ctx.rect(namePos.x - 4, namePos.y - userNameSize * 1.2, nameWidth + 8, userNameSize * 2);
+        ctx.clip();
+
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = ctx.shadowOffsetY = 2;
+        ctx.fillStyle = this.colorBrighter;
+        ctx.fillText(this.name, namePos.x, namePos.y);
+
+        ctx.shadowColor = this.colorDarker;
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = ctx.shadowOffsetY = 0.8;
+        ctx.fillText(this.name, namePos.x, namePos.y);
+
+        ctx.restore();
+
+
+    }
+
+    ///////////////////////////////////
 
     checkIfPositionSentEarlier(pos) {
         return false; // TODO: Fix This
@@ -560,10 +625,6 @@ class Player {
         const gameSpeed = window.game.gameSpeed;
         const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;
         const minTimeToWaitToSendDir = 0.7 / gameSpeed;
-
-        if (true) {
-            //check Player Socket Connection
-        }
 
 
         // Prevent Sending Same Dir
@@ -610,8 +671,10 @@ class Player {
         if (GameUtils.isMovingToPositiveDir(dir)) {
             if (blockProgress < .45)
                 changeDirectionCurrentFrame = true;
+
         }
         else if (blockProgress > .55)
+
             changeDirectionCurrentFrame = true;
 
 
@@ -680,7 +743,13 @@ class Player {
 
     /**
      * Request Waiting Blocks For Two Reasons
-     * 1- If server thinks player movement then some waiting blocks were missed so we request it
+     * 1- If server thinks during player movement then some waiting blocks were missed so we request it
+
+     the RequestWaitingBlocks could happen if we found server and client blocks are not synced
+     in Player State Packet
+
+
+
      */
     requestWaitingBlocks() {
         this.isGettingWaitingBlocks = true;

@@ -1,32 +1,33 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
-
-/***/ "./src/app.js":
-/*!********************!*\
-  !*** ./src/app.js ***!
-  \********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ui_objects_camera_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/camera.js */ \"./src/ui/objects/camera.js\");\n/* harmony import */ var _gameEngine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./gameEngine */ \"./src/gameEngine.js\");\n/* harmony import */ var _network_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./network/client */ \"./src/network/client.js\");\n/* harmony import */ var _globals_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./globals.js */ \"./src/globals.js\");\n/* harmony import */ var _controls_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./controls.js */ \"./src/controls.js\");\n/* harmony import */ var _controls_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_controls_js__WEBPACK_IMPORTED_MODULE_4__);\n/* harmony import */ var _extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./extensions/arraysExtensions.js */ \"./src/extensions/arraysExtensions.js\");\n/* harmony import */ var _extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5__);\n\n\n\n\n\n\n\nconst camera = new _ui_objects_camera_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"]();\nconst gameEngine = new _gameEngine__WEBPACK_IMPORTED_MODULE_1__[\"default\"](60);\n\nlet canvas = document.getElementById(\"canvas\");\nlet ctx = canvas.getContext(\"2d\");\nlet blocks = gameEngine.gameObjects.blocks;\nlet players = gameEngine.gameObjects.players;\n\nlet helperCanvas = document.createElement(\"canvas\");\nlet helperCtx = helperCanvas.getContext(\"2d\");\n\nwindow.game.helperCtx = helperCtx;\nwindow.gameEngine = gameEngine;\nwindow.camera = camera;\nwindow.game.canvas = canvas;\n\nlet client = null;\nlet myPlayer = null;\n\nconst draw = () => {\n    if (client && client.player) myPlayer = client.player;\n\n    gameEngine.scaleCanvas(ctx);\n    ctx.fillStyle = \"#3a3428\";\n    ctx.fillRect(0, 0, canvas.width, canvas.height);\n    camera.loop()\n    gameEngine.camTransform(ctx);\n\n\n    console.log(\"Blocks: \" + blocks.length);\n    for (let b of blocks) {\n        b.draw(ctx, false);\n    }\n\n    for (let p in players) {\n        players[p].draw(ctx);\n    }\n\n    if (client && client.player) myPlayer.removeBlocksOutsideCamera();\n\n}\n\n\ngameEngine.setDrawFunction(draw);\n\n\nwindow.requestAnimationFrame(gameEngine.loop.bind(gameEngine));\n\nclient = new _network_client__WEBPACK_IMPORTED_MODULE_2__.Client('ws://127.0.0.1:5000/game', (client) => {\n    client.setPlayerName(\"Test\");\n});\n\n\n\n\n//# sourceURL=webpack:///./src/app.js?");
-
-/***/ }),
 
 /***/ "./src/controls.js":
 /*!*************************!*\
   !*** ./src/controls.js ***!
   \*************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-eval("const keyMapper = { //In Circle Way\n    ArrowUp: 1,\n    ArrowDown: 3,\n    ArrowLeft: 4,\n    ArrowRight: 2,\n}\n\nwindow.onkeyup = (e) => {\n    //console.log(keyMapper[e.key]);\n    const keyVal = keyMapper[e.key];\n    if(keyVal && window.client && window.client.player){\n        window.client.player.requestChangeDir(keyVal);\n    }\n};\n\n\n//# sourceURL=webpack:///./src/controls.js?");
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ui_objects_player__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/player */ "./src/ui/objects/player.js");
+
+
+const keyMapper = { //In Circle Way
+    ArrowUp: 1,
+    ArrowDown: 3,
+    ArrowLeft: 4,
+    ArrowRight: 2,
+}
+
+window.onkeyup = (e) => {
+    //console.log(keyMapper[e.key]);
+    const keyVal = keyMapper[e.key];
+    if(keyVal && window.client && window.client.player){
+        const dir = _ui_objects_player__WEBPACK_IMPORTED_MODULE_0__["default"].mapControlsToDir(keyVal);
+        window.client.player.requestChangeDir(dir);
+    }
+};
+
 
 /***/ }),
 
@@ -36,7 +37,25 @@ eval("const keyMapper = { //In Circle Way\n    ArrowUp: 1,\n    ArrowDown: 3,\n 
   \********************************************/
 /***/ (() => {
 
-eval("Object.defineProperty(Array.prototype, 'getLast', {\n    get: function() {\n        if (this.length === 0) {\n            throw new Error(\"No elements in array\");\n        }\n        return this[this.length - 1];\n    }\n});\n\n\nObject.defineProperty(Array.prototype, 'first', {\n    get: function() {\n        if (this.length === 0) {\n            throw new Error(\"No elements in array\");\n        }\n        return this[0];\n    }\n});\n\n\n//# sourceURL=webpack:///./src/extensions/arraysExtensions.js?");
+Object.defineProperty(Array.prototype, 'getLast', {
+    get: function() {
+        if (this.length === 0) {
+            throw new Error("No elements in array");
+        }
+        return this[this.length - 1];
+    }
+});
+
+
+Object.defineProperty(Array.prototype, 'first', {
+    get: function() {
+        if (this.length === 0) {
+            throw new Error("No elements in array");
+        }
+        return this[0];
+    }
+});
+
 
 /***/ }),
 
@@ -47,7 +66,199 @@ eval("Object.defineProperty(Array.prototype, 'getLast', {\n    get: function() {
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/math.js */ \"./src/utils/math.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _gameObjects_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./gameObjects.js */ \"./src/gameObjects.js\");\n/* harmony import */ var _network_packets_ping__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./network/packets/ping */ \"./src/network/packets/ping.js\");\n\n\n\n\n\n\n\nclass GameEngine {\n    constructor(fps) {\n        this.lastFrameTimeStamp = 0\n        this.currentFrameTimeStamp = 0\n        this.totalDeltaTimeCap = 0\n        this.fps = fps\n        this.deltaTime = 1000 / this.fps;\n        this.interpoatedDeltaTime = 1000 / this.fps;\n\n\n        this.timesCap = [0, 6.5, 16, 33, 49, 99];\n        this.currentCapIndex = 0;\n\n        this.processFrames = [];\n        this.missedFrames = [];\n\n\n        this.canvanQaulity = 1;\n\n\n        this.gameObjects = new _gameObjects_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"]();\n\n        this.drawFunction = () => {\n        };\n    }\n\n    setDrawFunction(drawFunction) {\n        this.drawFunction = drawFunction;\n    }\n\n\n    getCap(cap) {\n        return this.timesCap[_utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(cap, 0, this.timesCap.length - 1)];\n    }\n\n    checkIncreasingInFramesProcess() {\n        // This function checks if the game is running at the right speed.\n        // If the game is running too fast, it will decrease the currentCapIndex.\n        // if currentFrameTimeStamp < 90% of the currentCapIndex, then decrease the currentCapIndex.\n        if (this.currentFrameTimeStamp < _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(\n            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex - 1),\n            0.9\n        )) {\n            this.processFrames.push(Date.now());\n\n            // If Draw More than 190 frames in 10 seconds, then remove the first frame.\n            while (this.processFrames.length > 190) {\n                if (Date.now() - this.processFrames[0] > 10_000) {\n                    this.processFrames.splice(0, 1)\n                } else {\n                    // if first frame happen in less than 10 seconds, decrease the currentCapIndex.\n                    this.currentCapIndex--;\n                    this.processFrames = [];\n                    this.currentCapIndex = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(this.currentCapIndex, 0, this.timesCap.length - 1);\n                }\n            }\n        }\n    }\n\n    checkDecreaseInFramesProcess() {\n        // This function checks if the game is running at the right speed.\n        // If the game is running too slow, it will increase the currentCapIndex.\n        // if currentFrameTimeStamp > 5% of the currentCapIndex, then increase the currentCapIndex.\n        if (this.currentFrameTimeStamp > _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(\n            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex + 1),\n            0.05\n        )) {\n            this.missedFrames.push(Date.now());\n            this.processFrames = [];\n            // If Draw Less than 5 frames in 5 seconds, then remove the first frame.\n            while (this.missedFrames.length > 5) {\n                if (Date.now() - this.missedFrames[0] > 5_000) {\n                    this.missedFrames.splice(0, 1)\n                } else {\n                    // if first frame happen in less than 5 seconds, increase the currentCapIndex.\n                    this.currentCapIndex++;\n                    this.missedFrames = [];\n                    this.currentCapIndex = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(this.currentCapIndex, 0, this.timesCap.length - 1);\n                }\n            }\n        }\n    }\n\n\n    handleServerTiming(timeStamp) {\n        if (!window.client || !window.client.player)\n            return;\n        const myPlayer = window.client.player;\n        const maxWaitTimeForDisconnect = window.game.maxWaitingSocketTime;\n        const clientSideSetPosPassedTime = Date.now() - myPlayer.lastMyPostSetClientSendTime;\n        const lastConfirmationPassedTime = Date.now() - myPlayer.lastConfirmedTimeForPos;\n        const serverSideSetPosPassed = Date.now() - myPlayer.lastPosServerSentTime;\n\n        const timeTookToConfirmation = serverSideSetPosPassed - clientSideSetPosPassedTime;\n\n        // console.log(`Last Confirmation Passed Time: ${lastConfirmationPassedTime}ms`);\n        // console.log(`Time Took To Confirmation: ${timeTookToConfirmation}ms`);\n        if (lastConfirmationPassedTime > maxWaitTimeForDisconnect &&\n            timeTookToConfirmation > maxWaitTimeForDisconnect) {\n            console.log(\"Check Your Internet Connection\");\n\n        }else {\n\n        }\n\n        const maxPingTime = myPlayer.waitingForPing ? 1_0000: 5_000;\n        const pingPassedTime = Date.now() - myPlayer.lastPingTime;\n        if(pingPassedTime > maxPingTime) {\n            myPlayer.waitingForPing = true;\n            myPlayer.lastPingTime = Date.now();\n            const pingPacket = new _network_packets_ping__WEBPACK_IMPORTED_MODULE_3__[\"default\"]();\n            window.client.send(pingPacket);\n        }\n\n\n\n    }\n\n    loop(timeStamp) {\n        window.game.timeStamp = timeStamp;\n        this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp; // 16\n\n        if(this.currentFrameTimeStamp > this.interpoatedDeltaTime){\n            this.interpoatedDeltaTime = this.currentFrameTimeStamp;\n        }else\n        {\n            this.interpoatedDeltaTime = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(this.interpoatedDeltaTime, this.currentFrameTimeStamp, 0.05);\n        }\n\n\n\n        this.checkIncreasingInFramesProcess();\n        this.checkDecreaseInFramesProcess();\n        this.deltaTime = this.currentFrameTimeStamp + this.totalDeltaTimeCap;\n        // console.log(this.deltaTime, this.gameObjects.blocks.length);\n        this.lastFrameTimeStamp = timeStamp;\n        if (this.deltaTime < this.getCap(this.currentCapIndex)) {\n            this.totalDeltaTimeCap += this.currentFrameTimeStamp;\n\n        } else {\n            this.totalDeltaTimeCap = 0;\n            this.drawFunction();\n        }\n\n\n        this.handleServerTiming(timeStamp);\n        window.requestAnimationFrame(this.loop.bind(this));\n    }\n\n\n    camTransform(ctx, changeSize = false) {\n        if (changeSize) {\n            this.scaleCanvas(ctx);\n        }\n\n        ctx.save();\n        const camera = window.camera;\n        camera.calZoom(ctx);\n\n\n    }\n\n    scaleCanvas(ctx, w = _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.getWidth(),\n                h = _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.getHeight()) {\n        let MAX_PIXEL_RATIO = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.calculate_pixel_ratio)();\n        let drawingQuality = 1;\n        let c = ctx.canvas;\n        c.width = w * drawingQuality * MAX_PIXEL_RATIO;\n        c.height = h * drawingQuality * MAX_PIXEL_RATIO;\n        let styleRatio = 1;\n        c.style.width = w * styleRatio + \"px\";\n        c.style.height = h * styleRatio + \"px\";\n    }\n\n}\n\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GameEngine);\n\n//# sourceURL=webpack:///./src/gameEngine.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/math.js */ "./src/utils/math.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _gameObjects_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./gameObjects.js */ "./src/gameObjects.js");
+/* harmony import */ var _network_packets_ping__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./network/packets/ping */ "./src/network/packets/ping.js");
+
+
+
+
+
+
+
+class GameEngine {
+    constructor(fps) {
+        this.lastFrameTimeStamp = 0
+        this.currentFrameTimeStamp = 0
+        this.totalDeltaTimeCap = 0
+        this.fps = fps
+        this.deltaTime = 1000 / this.fps;
+        this.interpoatedDeltaTime = 1000 / this.fps;
+
+
+        this.timesCap = [0, 6.5, 16, 33, 49, 99];
+        this.currentCapIndex = 0;
+
+        this.processFrames = [];
+        this.missedFrames = [];
+
+
+        this.canvanQaulity = 1;
+
+
+        this.gameObjects = new _gameObjects_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
+
+        this.drawFunction = () => {
+        };
+    }
+
+    setDrawFunction(drawFunction) {
+        this.drawFunction = drawFunction;
+    }
+
+
+    getCap(cap) {
+        return this.timesCap[_utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(cap, 0, this.timesCap.length - 1)];
+    }
+
+    checkIncreasingInFramesProcess() {
+        // This function checks if the game is running at the right speed.
+        // If the game is running too fast, it will decrease the currentCapIndex.
+        // if currentFrameTimeStamp < 90% of the currentCapIndex, then decrease the currentCapIndex.
+        if (this.currentFrameTimeStamp < _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(
+            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex - 1),
+            0.9
+        )) {
+            this.processFrames.push(Date.now());
+
+            // If Draw More than 190 frames in 10 seconds, then remove the first frame.
+            while (this.processFrames.length > 190) {
+                if (Date.now() - this.processFrames[0] > 10_000) {
+                    this.processFrames.splice(0, 1)
+                } else {
+                    // if first frame happen in less than 10 seconds, decrease the currentCapIndex.
+                    this.currentCapIndex--;
+                    this.processFrames = [];
+                    this.currentCapIndex = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(this.currentCapIndex, 0, this.timesCap.length - 1);
+                }
+            }
+        }
+    }
+
+    checkDecreaseInFramesProcess() {
+        // This function checks if the game is running at the right speed.
+        // If the game is running too slow, it will increase the currentCapIndex.
+        // if currentFrameTimeStamp > 5% of the currentCapIndex, then increase the currentCapIndex.
+        if (this.currentFrameTimeStamp > _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(
+            this.getCap(this.currentCapIndex), this.getCap(this.currentCapIndex + 1),
+            0.05
+        )) {
+            this.missedFrames.push(Date.now());
+            this.processFrames = [];
+            // If Draw Less than 5 frames in 5 seconds, then remove the first frame.
+            while (this.missedFrames.length > 5) {
+                if (Date.now() - this.missedFrames[0] > 5_000) {
+                    this.missedFrames.splice(0, 1)
+                } else {
+                    // if first frame happen in less than 5 seconds, increase the currentCapIndex.
+                    this.currentCapIndex++;
+                    this.missedFrames = [];
+                    this.currentCapIndex = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.clamp(this.currentCapIndex, 0, this.timesCap.length - 1);
+                }
+            }
+        }
+    }
+
+
+    handleServerTiming(timeStamp) {
+        if (!window.client || !window.client.player)
+            return;
+        const myPlayer = window.client.player;
+        const maxWaitTimeForDisconnect = window.game.maxWaitingSocketTime;
+        const clientSideSetPosPassedTime = Date.now() - myPlayer.lastMyPostSetClientSendTime;
+        const lastConfirmationPassedTime = Date.now() - myPlayer.lastConfirmedTimeForPos;
+        const serverSideSetPosPassed = Date.now() - myPlayer.lastPosServerSentTime;
+
+        const timeTookToConfirmation = serverSideSetPosPassed - clientSideSetPosPassedTime;
+
+        // console.log(`Last Confirmation Passed Time: ${lastConfirmationPassedTime}ms`);
+        // console.log(`Time Took To Confirmation: ${timeTookToConfirmation}ms`);
+        if (lastConfirmationPassedTime > maxWaitTimeForDisconnect &&
+            timeTookToConfirmation > maxWaitTimeForDisconnect) {
+            console.log("Check Your Internet Connection");
+
+        }else {
+
+        }
+
+        const maxPingTime = myPlayer.waitingForPing ? 1_0000: 5_000;
+        const pingPassedTime = Date.now() - myPlayer.lastPingTime;
+        if(pingPassedTime > maxPingTime) {
+            myPlayer.waitingForPing = true;
+            myPlayer.lastPingTime = Date.now();
+            const pingPacket = new _network_packets_ping__WEBPACK_IMPORTED_MODULE_3__["default"]();
+            window.client.send(pingPacket);
+        }
+
+
+
+    }
+
+    loop(timeStamp) {
+        window.game.timeStamp = timeStamp;
+        this.currentFrameTimeStamp = timeStamp - this.lastFrameTimeStamp; // 16
+
+        if(this.currentFrameTimeStamp > this.interpoatedDeltaTime){
+            this.interpoatedDeltaTime = this.currentFrameTimeStamp;
+        }else
+        {
+            this.interpoatedDeltaTime = _utils_math_js__WEBPACK_IMPORTED_MODULE_0__.linearInterpolate(this.interpoatedDeltaTime, this.currentFrameTimeStamp, 0.05);
+        }
+
+
+
+        this.checkIncreasingInFramesProcess();
+        this.checkDecreaseInFramesProcess();
+        this.deltaTime = this.currentFrameTimeStamp + this.totalDeltaTimeCap;
+        // console.log(this.deltaTime, this.gameObjects.blocks.length);
+        this.lastFrameTimeStamp = timeStamp;
+        if (this.deltaTime < this.getCap(this.currentCapIndex)) {
+            this.totalDeltaTimeCap += this.currentFrameTimeStamp;
+
+        } else {
+            this.totalDeltaTimeCap = 0;
+            this.drawFunction();
+        }
+
+
+        this.handleServerTiming(timeStamp);
+        window.requestAnimationFrame(this.loop.bind(this));
+    }
+
+
+    camTransform(ctx, changeSize = false) {
+        if (changeSize) {
+            this.scaleCanvas(ctx);
+        }
+
+        ctx.save();
+        const camera = window.camera;
+        camera.calZoom(ctx);
+
+
+    }
+
+    scaleCanvas(ctx, w = _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.getWidth(),
+                h = _ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.getHeight()) {
+        let MAX_PIXEL_RATIO = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_1__.calculate_pixel_ratio)();
+        let drawingQuality = 1;
+        let c = ctx.canvas;
+        c.width = w * drawingQuality * MAX_PIXEL_RATIO;
+        c.height = h * drawingQuality * MAX_PIXEL_RATIO;
+        let styleRatio = 1;
+        c.style.width = w * styleRatio + "px";
+        c.style.height = h * styleRatio + "px";
+    }
+
+}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GameEngine);
 
 /***/ }),
 
@@ -58,7 +269,54 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _ui_objects_block_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/block.js */ \"./src/ui/objects/block.js\");\n\n\nclass GameObjects {\n    constructor() {\n        this.players = {};\n        this.blocks = [];\n        this.myPlayer = null;\n        this.mapSize = 0;\n    }\n\n\n\n    addPlayer(player) {\n        if (player.id in this.players)\n            return this.players[player.id];\n        if (player.isMyPlayer)\n            this.myPlayer = player;\n        else\n            player.isReady = true;\n\n        this.players[player.id] = player;\n        return player;\n    }\n\n\n    removePlayer(player) {\n        if (player.id in this.players)\n            delete this.players[player.id];\n    }\n\n    addBlock(block) {\n        return _ui_objects_block_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"].getBlockAt(block.position, this.blocks);\n    }\n\n\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GameObjects);\n\n//# sourceURL=webpack:///./src/gameObjects.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _ui_objects_block_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/block.js */ "./src/ui/objects/block.js");
+
+
+class GameObjects {
+    constructor() {
+        this.players = {};
+        this.blocks = [];
+        this.myPlayer = null;
+        this.mapSize = 0;
+    }
+
+
+    /***
+     * Add Player To Game Objects
+     *  if player is already in the game objects return the player
+     *  if player is my player set it to my player
+     *  else set player to ready as it is already in the game
+     */
+    addPlayer(player) {
+        if (player.id in this.players)
+            return this.players[player.id];
+        if (player.isMyPlayer)
+            this.myPlayer = player;
+        else
+            player.isReady = true;
+
+        this.players[player.id] = player;
+        return player;
+    }
+
+
+    removePlayer(player) {
+        if (player.id in this.players)
+            delete this.players[player.id];
+    }
+
+    addBlock(block) {
+        return _ui_objects_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].getBlockAt(block.position, this.blocks);
+    }
+
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GameObjects);
 
 /***/ }),
 
@@ -69,7 +327,33 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/point.js */ \"./src/ui/objects/point.js\");\n\n\nconst globals = {\n    timeStamp: 0,\n    gameSpeed: 0.006,\n    viewPortRadius: 30,\n    maxZoom: 430,\n    maxBlocksNumber: 2500, //1100 50 * 50\n    usernameLength: 6,\n    maxWaitingSocketTime: 1_000,\n    drawingOffset: 10,\n    calDrawingOffset: (p) => {\n        return new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](p.x * globals.drawingOffset, p.y * globals.drawingOffset);\n    },\n    calBlocksGap: (p, size) => {\n        return new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](p.x * size, p.y * size);\n    }\n};\n\n\n\n\nwindow.game = {};\n// Adding to window object\nObject.entries(globals).forEach(([key, value]) => {\n    window.game[key] = value;\n});\n\n\n//# sourceURL=webpack:///./src/globals.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/point.js */ "./src/ui/objects/point.js");
+
+
+const globals = {
+    timeStamp: 0,
+    gameSpeed: 0.006,
+    viewPortRadius: 30,
+    maxZoom: 430,
+    maxBlocksNumber: 2500, //1100 50 * 50
+    usernameLength: 6,
+    maxWaitingSocketTime: 1_000,
+    drawingOffset: 10,
+    calDrawingOffset: (p) => {
+        return new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_0__["default"](p.x * globals.drawingOffset, p.y * globals.drawingOffset);
+    }
+};
+
+
+
+
+window.game = {};
+// Adding to window object
+Object.entries(globals).forEach(([key, value]) => {
+    window.game[key] = value;
+});
+
 
 /***/ }),
 
@@ -80,7 +364,106 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _ui_
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   Client: () => (/* binding */ Client),\n/* harmony export */   ConnectionStatus: () => (/* binding */ ConnectionStatus),\n/* harmony export */   PlayerStatus: () => (/* binding */ PlayerStatus)\n/* harmony export */ });\n/* harmony import */ var _socket_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./socket.js */ \"./src/network/socket.js\");\n/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/reader.js */ \"./src/network/utils/reader.js\");\n/* harmony import */ var _packets_packets__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./packets/packets */ \"./src/network/packets/packets.js\");\n/* harmony import */ var _packets_namePacket_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./packets/namePacket.js */ \"./src/network/packets/namePacket.js\");\n\n\n\n\n\nconst ConnectionStatus = {\n    CONNECTING: 0,\n    OPEN: 1,\n    CLOSING: 2,\n    CLOSED: 3\n};\n\nconst PlayerStatus = {\n    WAITING: -1,\n    CONNECTED: 0,\n    READY: 1,\n    PLAYING: 2,\n    DISCONNECTED: 3\n};\n\n\n\n\n\nclass Client {\n    constructor(server,onConnect, ) {\n        window.client = this;\n        this.server = server;\n        this.ws = new _socket_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](this.server, this);\n        this.ws.iniSocket();\n        this.onConnect = onConnect;\n\n\n        this.connectionStatus = ConnectionStatus.CONNECTING;\n        this.playerStatus = PlayerStatus.WAITING;\n        this.username = \"\";\n        this.player = null;\n\n\n    }\n\n\n    send(packet) {\n\n        console.log(\"Sending Packet ->>>>>\" +packet.constructor.name);\n        this.ws.send(packet);\n    }\n\n    onReceive(messageEvent) {\n        if (typeof messageEvent.data !== \"object\")\n            return;\n\n        this.packetHandler(messageEvent.data);\n\n\n    }\n\n    onOpen(onOpenEvent) {\n        console.log(\"Connected to server\");\n        console.log(onOpenEvent);\n        this.connectionStatus = ConnectionStatus.OPEN;\n        this.playerStatus = PlayerStatus.CONNECTED;\n        this.onConnect(this);\n\n    }\n\n    onClose(onCloseEvent) {\n        console.log(\"OnClose to server\");\n        console.log(onCloseEvent);\n        this.connectionStatus = ConnectionStatus.CLOSED;\n    }\n\n    packetHandler(data) {\n        let x = new Uint8Array(data);\n        const reader = new _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](x);\n        const packetSize = reader.readInt2();\n        const packetId = reader.readInt2();\n        const packetClass = _packets_packets__WEBPACK_IMPORTED_MODULE_2__[\"default\"][packetId];\n        const packet = packetClass.parsePacketData(packetSize, reader, packetClass);\n        packet.handleReceivedPacket(this);\n    }\n\n    setPlayerName(name) {\n        let p = new _packets_namePacket_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"](name);\n        this.send(p);\n    }\n\n}\n\n\n\n//# sourceURL=webpack:///./src/network/client.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Client: () => (/* binding */ Client),
+/* harmony export */   ConnectionStatus: () => (/* binding */ ConnectionStatus),
+/* harmony export */   PlayerStatus: () => (/* binding */ PlayerStatus)
+/* harmony export */ });
+/* harmony import */ var _socket_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./socket.js */ "./src/network/socket.js");
+/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/reader.js */ "./src/network/utils/reader.js");
+/* harmony import */ var _packets_packets__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./packets/packets */ "./src/network/packets/packets.js");
+/* harmony import */ var _packets_namePacket_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./packets/namePacket.js */ "./src/network/packets/namePacket.js");
+
+
+
+
+
+const ConnectionStatus = {
+    CONNECTING: 0,
+    OPEN: 1,
+    CLOSING: 2,
+    CLOSED: 3
+};
+
+const PlayerStatus = {
+    WAITING: -1,
+    CONNECTED: 0,
+    READY: 1,
+    PLAYING: 2,
+    DISCONNECTED: 3
+};
+
+
+
+
+
+class Client {
+    constructor(server,onConnect, ) {
+        window.client = this;
+        this.server = server;
+        this.ws = new _socket_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.server, this);
+        this.ws.iniSocket();
+        this.onConnect = onConnect;
+
+
+        this.connectionStatus = ConnectionStatus.CONNECTING;
+        this.playerStatus = PlayerStatus.WAITING;
+        this.username = "";
+        this.player = null;
+
+
+    }
+
+
+    send(packet) {
+
+        // console.log("Sending Packet ->>>>>" +packet.constructor.name);
+        this.ws.send(packet);
+    }
+
+    onReceive(messageEvent) {
+        if (typeof messageEvent.data !== "object")
+            return;
+
+        this.packetHandler(messageEvent.data);
+
+
+    }
+
+    onOpen(onOpenEvent) {
+        console.log("Connected to server");
+        console.log(onOpenEvent);
+        this.connectionStatus = ConnectionStatus.OPEN;
+        this.playerStatus = PlayerStatus.CONNECTED;
+        this.onConnect(this);
+
+    }
+
+    onClose(onCloseEvent) {
+        console.log("OnClose to server");
+        console.log(onCloseEvent);
+        this.connectionStatus = ConnectionStatus.CLOSED;
+    }
+
+    packetHandler(data) {
+        let x = new Uint8Array(data);
+        const reader = new _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__["default"](x);
+        const packetSize = reader.readInt2();
+        const packetId = reader.readInt2();
+        const packetClass = _packets_packets__WEBPACK_IMPORTED_MODULE_2__["default"][packetId];
+        const packet = packetClass.parsePacketData(packetSize, reader, packetClass);
+        packet.handleReceivedPacket(this);
+    }
+
+    setPlayerName(name) {
+        let p = new _packets_namePacket_js__WEBPACK_IMPORTED_MODULE_3__["default"](name);
+        this.send(p);
+    }
+
+}
+
+
 
 /***/ }),
 
@@ -91,7 +474,63 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/reader.js */ \"./src/network/utils/reader.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/writer.js */ \"./src/network/utils/writer.js\");\n\n\n\nclass Packet {\n    constructor() {\n        this.data = null;\n        this.packetId = -1;\n        this.packetSize = 0;\n        this.reader = null\n    }\n\n\n    setPacketData(data) {\n        this.data = data;\n    }\n\n\n    toHexString() {\n        if (this.reader === null)\n            throw new Error(\"Reader is null\");\n\n        return this.reader.toHexString();\n    }\n\n\n    parsePacket() {\n        throw new Error(\"Not implemented\");\n    }\n\n    static parsePacketData(packetSize, reader, packet) {\n        let p = new packet();\n        console.log(\"Received Packet <-----: \" + p.constructor.name);\n\n        p.reader = reader;\n        p.data = reader.data;\n        p.packetSize = packetSize;\n        p.parsePacket();\n        return p;\n    }\n\n    handleReceivedPacket(client) {\n        throw new Error(\"Not implemented\");\n    }\n\n    finalize() {\n        throw new Error(\"Not implemented\");\n    }\n\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Packet);\n\n//# sourceURL=webpack:///./src/network/packet.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/reader.js */ "./src/network/utils/reader.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/writer.js */ "./src/network/utils/writer.js");
+
+
+
+class Packet {
+    constructor() {
+        this.data = null;
+        this.packetId = -1;
+        this.packetSize = 0;
+        this.reader = null
+    }
+
+
+    setPacketData(data) {
+        this.data = data;
+    }
+
+
+    toHexString() {
+        if (this.reader === null)
+            throw new Error("Reader is null");
+
+        return this.reader.toHexString();
+    }
+
+
+    parsePacket() {
+        throw new Error("Not implemented");
+    }
+
+    static parsePacketData(packetSize, reader, packet) {
+        let p = new packet();
+        // console.log("Received Packet <-----: " + p.constructor.name);
+
+        p.reader = reader;
+        p.data = reader.data;
+        p.packetSize = packetSize;
+        p.parsePacket();
+        return p;
+    }
+
+    handleReceivedPacket(client) {
+        throw new Error("Not implemented");
+    }
+
+    finalize() {
+        throw new Error("Not implemented");
+    }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Packet);
 
 /***/ }),
 
@@ -102,7 +541,52 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass DirectionPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor(direction, position) {\n        super();\n        this.dir = direction;\n        this.packetId = 1006;\n        this.position = position;\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        writer.writeStringInBytes(this.dir);\n        writer.writeIntInBytes(this.position.x, 2);\n        writer.writeIntInBytes(this.position.y, 2);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DirectionPacket);\n\n//# sourceURL=webpack:///./src/network/packets/direction.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class DirectionPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor(direction, position) {
+        super();
+        this.dir = direction;
+        this.packetId = 1006;
+        this.position = position;
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        writer.writeStringInBytes(this.dir);
+        writer.writeIntInBytes(this.position.x, 2);
+        writer.writeIntInBytes(this.position.y, 2);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DirectionPacket);
 
 /***/ }),
 
@@ -113,7 +597,92 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/reader.js */ \"./src/network/utils/reader.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_rectangle_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/objects/rectangle.js */ \"./src/ui/objects/rectangle.js\");\n/* harmony import */ var _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point.js */ \"./src/ui/objects/point.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_block__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../ui/objects/block */ \"./src/ui/objects/block.js\");\n\n\n\n\n\n\n\n\nclass FillAreaPacket extends _packet__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n    constructor() {\n        super();\n        this.packetId = 1003;\n        // Shape\n        this.rectangle = null;\n        this.width = 0;\n        this.height = 0;\n        this.x = 0;\n        this.y = 0;\n\n        // Colors\n        this.colorBrighter = 0;\n        this.colorDarker = 0;\n        this.colorSlightlyBrighter = 0\n        this.colorPattern = 0\n        this.colorPatternEdge = 0\n        this.playerId = 0;\n\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n    parsePacket() {\n        const reader= this.reader;\n\n        this.x = reader.readInt2();\n        this.y = reader.readInt2();\n        this.width = reader.readInt2();\n        this.height = reader.readInt2();\n\n        this.playerId = reader.readInt4();\n        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());\n        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());\n        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());\n        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());\n        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());\n\n        this.rectangle = new _ui_objects_rectangle_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"](new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"](this.x, this.y), new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__[\"default\"](this.x + this.width, this.y + this.height));\n\n\n    }\n\n    handleReceivedPacket(client) {\n        console.log(\"Received Fill Area Packet\");\n\n        const colorsWithId = {\n            brighter: this.colorBrighter,\n            darker: this.colorDarker,\n            slightlyBrighter: this.colorSlightlyBrighter,\n            pattern: this.colorPattern,\n            patternEdge: this.colorPatternEdge,\n            id: this.playerId\n        }\n        _ui_objects_block__WEBPACK_IMPORTED_MODULE_6__[\"default\"].convertRectToBlock(this.rectangle, colorsWithId,window.gameEngine.gameObjects.blocks,\n            window.gameEngine.gameObjects.myPlayer\n            );\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FillAreaPacket);\n\n//# sourceURL=webpack:///./src/network/packets/fillArea.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet */ "./src/network/packet.js");
+/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/reader.js */ "./src/network/utils/reader.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_rectangle_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/objects/rectangle.js */ "./src/ui/objects/rectangle.js");
+/* harmony import */ var _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point.js */ "./src/ui/objects/point.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_block__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../ui/objects/block */ "./src/ui/objects/block.js");
+
+
+
+
+
+
+
+
+class FillAreaPacket extends _packet__WEBPACK_IMPORTED_MODULE_0__["default"] {
+    constructor() {
+        super();
+        this.packetId = 1003;
+        // Shape
+        this.rectangle = null;
+        this.width = 0;
+        this.height = 0;
+        this.x = 0;
+        this.y = 0;
+
+        // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
+        this.playerId = 0;
+
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+    parsePacket() {
+        const reader= this.reader;
+
+        this.x = reader.readInt2();
+        this.y = reader.readInt2();
+        this.width = reader.readInt2();
+        this.height = reader.readInt2();
+
+        this.playerId = reader.readInt4();
+        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());
+        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());
+        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());
+        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());
+        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_5__.convertIntColorToHex)(reader.readInt4());
+
+        this.rectangle = new _ui_objects_rectangle_js__WEBPACK_IMPORTED_MODULE_3__["default"](new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__["default"](this.x, this.y), new _ui_objects_point_js__WEBPACK_IMPORTED_MODULE_4__["default"](this.x + this.width, this.y + this.height));
+
+
+    }
+
+    handleReceivedPacket(client) {
+        console.log("Received Fill Area Packet");
+
+        const colorsWithId = {
+            brighter: this.colorBrighter,
+            darker: this.colorDarker,
+            slightlyBrighter: this.colorSlightlyBrighter,
+            pattern: this.colorPattern,
+            patternEdge: this.colorPatternEdge,
+            id: this.playerId
+        }
+        _ui_objects_block__WEBPACK_IMPORTED_MODULE_6__["default"].convertRectToBlock(this.rectangle, colorsWithId,window.gameEngine.gameObjects.blocks,
+            window.gameEngine.gameObjects.myPlayer
+            );
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FillAreaPacket);
 
 /***/ }),
 
@@ -124,7 +693,76 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/reader.js */ \"./src/network/utils/reader.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _client_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../client.js */ \"./src/network/client.js\");\n/* harmony import */ var _ready__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ready */ \"./src/network/packets/ready.js\");\n/* harmony import */ var _ui_objects_player__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../ui/objects/player */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\n\nclass NamePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor(name) {\n        super();\n        this.name = name;\n        this.packetId = 1001;\n        this.isVerified = false;\n        this.userId = 0;\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n        const nameLength = this.reader.readInt2();\n        this.name = this.reader.readStringFromBytes(nameLength);\n        this.userId = this.reader.readInt4();\n        this.isVerified = this.reader.readInt1() === 1;\n\n    }\n\n    finalize() {\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"](this.packetId);\n        writer.writeStringInBytes(this.name);\n        writer.writeIntInBytes(this.isVerified ? 1 : 0, 1)\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        console.log(\"Received Name Packet\");\n\n\n        if (this.isVerified) {\n\n            const player = new _ui_objects_player__WEBPACK_IMPORTED_MODULE_5__[\"default\"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_6__[\"default\"](0,0), this.userId);\n            player.isMyPlayer = true;\n\n            client.player = player;\n            client.isVerified = this.isVerified;\n            client.username = this.name;\n            client.playerStatus = _client_js__WEBPACK_IMPORTED_MODULE_3__.PlayerStatus.READY;\n            window.gameEngine.gameObjects.addPlayer(player);\n\n            client.send(new _ready__WEBPACK_IMPORTED_MODULE_4__[\"default\"]());\n        }else\n        {\n            //TODO Handle Not Verified Name\n        }\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NamePacket);\n\n//# sourceURL=webpack:///./src/network/packets/namePacket.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_reader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/reader.js */ "./src/network/utils/reader.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _client_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../client.js */ "./src/network/client.js");
+/* harmony import */ var _ready__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ready */ "./src/network/packets/ready.js");
+/* harmony import */ var _ui_objects_player__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../ui/objects/player */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+
+class NamePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor(name) {
+        super();
+        this.name = name;
+        this.packetId = 1001;
+        this.isVerified = false;
+        this.userId = 0;
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+        const nameLength = this.reader.readInt2();
+        this.name = this.reader.readStringFromBytes(nameLength);
+        this.userId = this.reader.readInt4();
+        this.isVerified = this.reader.readInt1() === 1;
+
+    }
+
+    finalize() {
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_2__["default"](this.packetId);
+        writer.writeStringInBytes(this.name);
+        writer.writeIntInBytes(this.isVerified ? 1 : 0, 1)
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+
+        if (this.isVerified) {
+
+            const player = new _ui_objects_player__WEBPACK_IMPORTED_MODULE_5__["default"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_6__["default"](0,0), this.userId);
+            player.isMyPlayer = true;
+
+            client.player = player;
+            client.isVerified = this.isVerified;
+            client.username = this.name;
+            client.playerStatus = _client_js__WEBPACK_IMPORTED_MODULE_3__.PlayerStatus.READY;
+            window.gameEngine.gameObjects.addPlayer(player);
+
+            client.send(new _ready__WEBPACK_IMPORTED_MODULE_4__["default"]());
+        }else
+        {
+            //TODO Handle Not Verified Name
+        }
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NamePacket);
 
 /***/ }),
 
@@ -135,7 +773,49 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _namePacket__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./namePacket */ \"./src/network/packets/namePacket.js\");\n/* harmony import */ var _ready__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ready */ \"./src/network/packets/ready.js\");\n/* harmony import */ var _fillArea__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./fillArea */ \"./src/network/packets/fillArea.js\");\n/* harmony import */ var _playerState__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./playerState */ \"./src/network/packets/playerState.js\");\n/* harmony import */ var _waitingBlocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./waitingBlocks */ \"./src/network/packets/waitingBlocks.js\");\n/* harmony import */ var _direction__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./direction */ \"./src/network/packets/direction.js\");\n/* harmony import */ var _ping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ping */ \"./src/network/packets/ping.js\");\n/* harmony import */ var _pong__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pong */ \"./src/network/packets/pong.js\");\n/* harmony import */ var _requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./requestWaitingBlocks */ \"./src/network/packets/requestWaitingBlocks.js\");\n/* harmony import */ var _playerRemoved__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./playerRemoved */ \"./src/network/packets/playerRemoved.js\");\n/* harmony import */ var _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stopDrawingWaitingBlocks */ \"./src/network/packets/stopDrawingWaitingBlocks.js\");\n\n\n\n\n\n\n\n\n\n\n\n\nconst PacketsDictionary = {\n    1001: _namePacket__WEBPACK_IMPORTED_MODULE_0__[\"default\"],\n    1004: _playerState__WEBPACK_IMPORTED_MODULE_3__[\"default\"],\n    1002: _ready__WEBPACK_IMPORTED_MODULE_1__[\"default\"],\n    1003: _fillArea__WEBPACK_IMPORTED_MODULE_2__[\"default\"],\n    1005: _waitingBlocks__WEBPACK_IMPORTED_MODULE_4__[\"default\"],\n    1006: _direction__WEBPACK_IMPORTED_MODULE_5__[\"default\"],\n    1007: _ping__WEBPACK_IMPORTED_MODULE_6__[\"default\"],\n    1008: _pong__WEBPACK_IMPORTED_MODULE_7__[\"default\"],\n    1009: _requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_8__[\"default\"],\n    1010: _playerRemoved__WEBPACK_IMPORTED_MODULE_9__[\"default\"],\n    1011: _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__[\"default\"],\n}\n\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PacketsDictionary);\n\n//# sourceURL=webpack:///./src/network/packets/packets.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _namePacket__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./namePacket */ "./src/network/packets/namePacket.js");
+/* harmony import */ var _ready__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ready */ "./src/network/packets/ready.js");
+/* harmony import */ var _fillArea__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./fillArea */ "./src/network/packets/fillArea.js");
+/* harmony import */ var _playerState__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./playerState */ "./src/network/packets/playerState.js");
+/* harmony import */ var _waitingBlocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./waitingBlocks */ "./src/network/packets/waitingBlocks.js");
+/* harmony import */ var _direction__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./direction */ "./src/network/packets/direction.js");
+/* harmony import */ var _ping__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./ping */ "./src/network/packets/ping.js");
+/* harmony import */ var _pong__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pong */ "./src/network/packets/pong.js");
+/* harmony import */ var _requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./requestWaitingBlocks */ "./src/network/packets/requestWaitingBlocks.js");
+/* harmony import */ var _playerRemoved__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./playerRemoved */ "./src/network/packets/playerRemoved.js");
+/* harmony import */ var _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stopDrawingWaitingBlocks */ "./src/network/packets/stopDrawingWaitingBlocks.js");
+
+
+
+
+
+
+
+
+
+
+
+
+const PacketsDictionary = {
+    1001: _namePacket__WEBPACK_IMPORTED_MODULE_0__["default"],
+    1004: _playerState__WEBPACK_IMPORTED_MODULE_3__["default"],
+    1002: _ready__WEBPACK_IMPORTED_MODULE_1__["default"],
+    1003: _fillArea__WEBPACK_IMPORTED_MODULE_2__["default"],
+    1005: _waitingBlocks__WEBPACK_IMPORTED_MODULE_4__["default"],
+    1006: _direction__WEBPACK_IMPORTED_MODULE_5__["default"],
+    1007: _ping__WEBPACK_IMPORTED_MODULE_6__["default"],
+    1008: _pong__WEBPACK_IMPORTED_MODULE_7__["default"],
+    1009: _requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_8__["default"],
+    1010: _playerRemoved__WEBPACK_IMPORTED_MODULE_9__["default"],
+    1011: _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__["default"],
+}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PacketsDictionary);
 
 /***/ }),
 
@@ -146,7 +826,47 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass PingPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.packetId = 1007;\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n\n    }\n\n    finalize() {\n        // Handle Server Request\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PingPacket);\n\n//# sourceURL=webpack:///./src/network/packets/ping.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class PingPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1007;
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+
+    }
+
+    finalize() {
+        // Handle Server Request
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PingPacket);
 
 /***/ }),
 
@@ -157,7 +877,55 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass PlayerRemovedPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.userId = null;\n        this.packetId = 1010;\n        this.player = null;\n\n    }\n\n\n    // Handel Server Response\n    static parsePacket() {\n        this.userId = this.reader.readInt4();\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        const player = window.gameEngine.gameObjects.players[this.userId];\n        if(player)\n            window.gameEngine.gameObjects.removePlayer(player);\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerRemovedPacket);\n\n//# sourceURL=webpack:///./src/network/packets/playerRemoved.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class PlayerRemovedPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.userId = null;
+        this.packetId = 1010;
+        this.player = null;
+
+    }
+
+
+    // Handel Server Response
+    static parsePacket() {
+        this.userId = this.reader.readInt4();
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        const player = window.gameEngine.gameObjects.players[this.userId];
+        if(player)
+            window.gameEngine.gameObjects.removePlayer(player);
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerRemovedPacket);
 
 /***/ }),
 
@@ -168,7 +936,147 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor(userId, mapSize) {\n        super();\n        this.userId = userId;\n        this.packetId = 1004;\n        this.player = null;\n\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n        const reader = this.reader;\n        this.userId = reader.readInt4();\n        this.playerName = reader.readString();\n\n        this.playerX = reader.readInt2();\n        this.playerY = reader.readInt2();\n        this.direction = reader.readString();\n\n\n        // Colors\n        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        console.log(\"PlayerState Ready Packet\");\n\n        const myPlayer = client.player;\n\n        let player = new _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__[\"default\"](0, 0), this.userId);\n        player = window.gameEngine.gameObjects.addPlayer(player);\n\n\n        player.name = this.playerName;\n        player.colorBrighter = this.colorBrighter;\n        player.colorDarker = this.colorDarker;\n        player.colorSlightlyBrighter = this.colorSlightlyBrighter;\n        player.colorPattern = this.colorPattern;\n        player.colorPatternEdge = this.colorPatternEdge;\n\n\n        player.hasReceivedPosition = true;\n\n        // When Receiving Player State\n        // Next Frame Move Relative To Server Pos\n        player.moveRelativeToServerPosNextFrame = true;\n        player.lastServerPosSentTime = Date.now();\n        myPlayer.lastPosHasBeenConfirmed = true;\n\n\n        let offset = player.calMoveOffset();\n        let newPos = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__[\"default\"](this.playerX, this.playerY);\n        let newPosOffset = newPos.clone();\n        let newDir = this.direction;\n\n        newPosOffset = _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"].movePlayer(newPosOffset, newDir, offset);\n        let serverSyncedWithClient = true;\n\n\n        if (player.isMyPlayer) {\n            player.lastPosServerSentTime = Date.now();\n\n            // Check If Server Synced With Client\n            // To Draw This Movement or Ignore It\n            // if server predict the same movement\n            // or the movement is to close to server\n            serverSyncedWithClient = player.checkClientMovementSyncedWithServer(newDir\n                , newPosOffset, newPos);\n\n            if (serverSyncedWithClient) {\n                /***\n                 Here We Found That Server and Client not Synced\n                 So We Need To Sync Them\n                 1- Change Player Direction\n                 2- Change Player Position\n                 3- Request Waiting Blocks From Server\n                 4- Clear Send Dir Queue\n                 */\n                player.changeCurrentDir(newDir, newPos, false, false);\n                player.requestWaitingBlocks();\n                player.sendDirQueue = [];\n            }\n\n            player.serverPos = newPosOffset.clone();\n            player.serverDir = newDir;\n\n            player.removeBlocksOutsideCamera();\n        } else {\n            player.updatePlayerDirection(newDir);\n        }\n\n        if (serverSyncedWithClient) {\n            player.position = newPosOffset.clone();\n            player.addWaitingBlocks(newPos);\n        }\n\n        //Start To Handel Draw Position\n        if (!player.drawPosSet) {\n            player.drawPosSet = true;\n            player.drawPosition = player.position.clone();\n        }\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerStatePacket);\n\n//# sourceURL=webpack:///./src/network/packets/playerState.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor(userId, mapSize) {
+        super();
+        this.userId = userId;
+        this.packetId = 1004;
+        this.player = null;
+
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+        const reader = this.reader;
+        this.userId = reader.readInt4();
+        this.playerName = reader.readString();
+
+        this.playerX = reader.readInt2();
+        this.playerY = reader.readInt2();
+        this.direction = reader.readString();
+
+
+        // Colors
+        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        console.log("PlayerState Ready Packet");
+
+        const myPlayer = client.player;
+
+        let player = new _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__["default"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__["default"](0, 0), this.userId);
+        player = window.gameEngine.gameObjects.addPlayer(player);
+
+
+        player.name = this.playerName;
+        player.colorBrighter = this.colorBrighter;
+        player.colorDarker = this.colorDarker;
+        player.colorSlightlyBrighter = this.colorSlightlyBrighter;
+        player.colorPattern = this.colorPattern;
+        player.colorPatternEdge = this.colorPatternEdge;
+
+
+
+
+        // When Receiving Player State
+        // Next Frame Move Relative To Server Pos
+        player.hasReceivedPosition = true;
+        player.moveRelativeToServerPosNextFrame = true;
+        player.lastServerPosSentTime = Date.now();
+
+        // current player consider that his last position has been confirmed
+        myPlayer.lastPosHasBeenConfirmed = true;
+
+
+        let offset = player.calMoveOffset();
+        let newPos = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__["default"](this.playerX, this.playerY);
+        let newPosOffset = newPos.clone();
+        let newDir = this.direction;
+
+        newPosOffset = _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__["default"].movePlayer(newPosOffset, newDir, offset);
+        let clientServerNeedsSync = true;
+
+
+        if (player.isMyPlayer) {
+            player.lastPosServerSentTime = Date.now();
+
+            // Check If Server Synced With Client
+            // To Draw This Movement or Ignore It
+            // if server predict the same movement
+            // or the movement is to close to server
+            clientServerNeedsSync = player.checkClientMovementSyncedWithServer(newDir
+                , newPosOffset, newPos);
+
+            if (clientServerNeedsSync) {
+                /***
+                 Here We Found That Server and Client not Synced
+                 So We Need To Sync Them
+                 1- Change Player Direction
+                 2- Change Player Position
+                 3- Request Waiting Blocks From Server
+                 4- Clear Send Dir Queue
+                 */
+                player.changeCurrentDir(newDir, newPos, false, false);
+                player.requestWaitingBlocks();
+                player.sendDirQueue = [];
+            }
+
+            player.serverPos = newPosOffset.clone();
+            player.serverDir = newDir;
+
+            player.removeBlocksOutsideCamera();
+        } else {
+            player.updatePlayerDirection(newDir);
+        }
+
+        if (clientServerNeedsSync) {
+            player.position = newPosOffset.clone();
+            player.addWaitingBlocks(newPos);
+        }
+
+        //Start To Handel Draw Position
+        if (!player.drawPosSet) {
+            // if we don't draw this player before set draw position
+            player.drawPosSet = true;
+            player.drawPosition = player.position.clone();
+        }
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerStatePacket);
 
 /***/ }),
 
@@ -179,7 +1087,57 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n/* harmony import */ var _utils_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/math */ \"./src/utils/math.js\");\n\n\n\n\n\n\n\nclass PongPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.packetId = 1008;\n    }\n\n\n    // Handel Server Response\n     parsePacket() {\n\n    }\n\n    finalize() {\n        // Handle Server Request\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        const myPlayer = client.player;\n        const ping = Date.now() - myPlayer.lastPingTime;\n        const currentPingDiff = Math.abs(ping - myPlayer.severLastPing);\n        myPlayer.serverPingDiff = Math.max(myPlayer.serverPingDiff, currentPingDiff);\n        myPlayer.serverPingDiff = _utils_math__WEBPACK_IMPORTED_MODULE_5__.linearInterpolate(currentPingDiff, myPlayer.serverPingDiff, 0.5);\n        myPlayer.serverAvgPing = _utils_math__WEBPACK_IMPORTED_MODULE_5__.linearInterpolate(myPlayer.serverAvgPing, ping, 0.5);\n        myPlayer.severLastPing = ping;\n        myPlayer.lastPingTime = Date.now();\n        myPlayer.waitingForPing = false;\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PongPacket);\n\n//# sourceURL=webpack:///./src/network/packets/pong.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+/* harmony import */ var _utils_math__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/math */ "./src/utils/math.js");
+
+
+
+
+
+
+
+class PongPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1008;
+    }
+
+
+    // Handel Server Response
+     parsePacket() {
+
+    }
+
+    finalize() {
+        // Handle Server Request
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        const myPlayer = client.player;
+        const ping = Date.now() - myPlayer.lastPingTime;
+        const currentPingDiff = Math.abs(ping - myPlayer.severLastPing);
+        myPlayer.serverPingDiff = Math.max(myPlayer.serverPingDiff, currentPingDiff);
+        myPlayer.serverPingDiff = _utils_math__WEBPACK_IMPORTED_MODULE_5__.linearInterpolate(currentPingDiff, myPlayer.serverPingDiff, 0.5);
+        myPlayer.serverAvgPing = _utils_math__WEBPACK_IMPORTED_MODULE_5__.linearInterpolate(myPlayer.serverAvgPing, ping, 0.5);
+        myPlayer.severLastPing = ping;
+        myPlayer.lastPingTime = Date.now();
+        myPlayer.waitingForPing = false;
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PongPacket);
 
 /***/ }),
 
@@ -190,7 +1148,92 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass Ready extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor(userId, mapSize) {\n        super();\n        this.userId = userId;\n        this.packetId = 1002;\n        this.mapSize = mapSize;\n        this.playerName = \"\";\n        this.playerX = 0;\n        this.playerY = 0;\n        this.direction = 0;\n\n\n        // Colors\n        this.colorBrighter = 0;\n        this.colorDarker = 0;\n        this.colorSlightlyBrighter = 0\n        this.colorPattern = 0\n        this.colorPatternEdge = 0\n    }\n\n\n    // Handel Server Response\n\n    parsePacket() {\n        const reader = this.reader;\n\n        this.userId = reader.readInt4();\n        this.mapSize = reader.readInt2();\n        this.playerName = reader.readString();\n\n        this.playerX = reader.readInt2();\n        this.playerY = reader.readInt2();\n        this.direction = reader.readString();\n\n\n        // Colors\n        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        console.log(\"Received Ready Packet\");\n        const player = client.player;\n\n        player.name = this.playerName;\n        player.colorBrighter = this.colorBrighter;\n        player.colorDarker = this.colorDarker;\n        player.colorSlightlyBrighter = this.colorSlightlyBrighter;\n        player.colorPattern = this.colorPattern;\n        player.colorPatternEdge = this.colorPatternEdge;\n        // player.position = new Point(packet.playerX, packet.playerY);\n        // player.dir = packet.direction;\n        console.log(\"READY\", player);\n        window.gameEngine.gameObjects.mapSize = this.mapSize;\n        player.isReady = true;\n        console.log(window.gameEngine.gameObjects);\n\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Ready);\n\n//# sourceURL=webpack:///./src/network/packets/ready.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class Ready extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor(userId, mapSize) {
+        super();
+        this.userId = userId;
+        this.packetId = 1002;
+        this.mapSize = mapSize;
+        this.playerName = "";
+        this.playerX = 0;
+        this.playerY = 0;
+        this.direction = 0;
+
+
+        // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
+    }
+
+
+    // Handel Server Response
+
+    parsePacket() {
+        const reader = this.reader;
+
+        this.userId = reader.readInt4();
+        this.mapSize = reader.readInt2();
+        this.playerName = reader.readString();
+
+        this.playerX = reader.readInt2();
+        this.playerY = reader.readInt2();
+        this.direction = reader.readString();
+
+
+        // Colors
+        this.colorBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorDarker = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorSlightlyBrighter = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+        this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        console.log("Received Ready Packet");
+        const player = client.player;
+
+        player.name = this.playerName;
+        player.colorBrighter = this.colorBrighter;
+        player.colorDarker = this.colorDarker;
+        player.colorSlightlyBrighter = this.colorSlightlyBrighter;
+        player.colorPattern = this.colorPattern;
+        player.colorPatternEdge = this.colorPatternEdge;
+        window.gameEngine.gameObjects.mapSize = this.mapSize;
+        player.isReady = true;
+
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Ready);
 
 /***/ }),
 
@@ -201,7 +1244,41 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n\n\n\nclass RequestWaitingBlockPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.packetId = 1009;\n\n\n    }\n\n\n    // Handel Server Response\n     parsePacket() {\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        console.log(\"RequestWaitingBlockPacket\", this);\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RequestWaitingBlockPacket);\n\n//# sourceURL=webpack:///./src/network/packets/requestWaitingBlocks.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+
+
+
+class RequestWaitingBlockPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1009;
+
+
+    }
+
+    // Handel Server Response
+     parsePacket() {
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+    handleReceivedPacket(client) {
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RequestWaitingBlockPacket);
 
 /***/ }),
 
@@ -212,7 +1289,81 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\nclass StopDrawingWaitingBlocksPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.packetId = 1011;\n        this.player = null;\n        this.userId = null;\n        this.lastBlock = null;\n\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n        this.userId = this.reader.readInt4();\n        const vec = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_2__[\"default\"](this.reader.readInt2(), this.reader.readInt2());\n        this.lastBlock = vec;\n\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        const playerList = window.gameEngine.gameObjects.players;\n        let player = null;\n        if (this.userId in playerList) {\n            player = playerList[this.userId];\n        } else {\n            throw new Error(\"Player Not Found We Need To Send Player Colors\");\n        }\n\n        if (player.waitingBlocks.length > 0) {\n            const playerWaitingBlocks = player.waitingBlocks.getLast.blocks;\n            if (playerWaitingBlocks.length > 0) {\n                playerWaitingBlocks.push(this.lastBlock);\n            }\n        }\n\n        if (player.isMyPlayer && player.isGettingWaitingBlocks) {\n            player.skipGettingWaitingBlocksRespose = true;\n        }\n\n        player.waitingBlocks.push({\n            vanishTimer: 0,\n            blocks: []\n        });\n\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (StopDrawingWaitingBlocksPacket);\n\n//# sourceURL=webpack:///./src/network/packets/stopDrawingWaitingBlocks.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+class StopDrawingWaitingBlocksPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1011;
+        this.player = null;
+        this.userId = null;
+        this.lastBlock = null;
+
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+        this.userId = this.reader.readInt4();
+        const vec = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_2__["default"](this.reader.readInt2(), this.reader.readInt2());
+        this.lastBlock = vec;
+
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        const playerList = window.gameEngine.gameObjects.players;
+        let player = null;
+        if (this.userId in playerList) {
+            player = playerList[this.userId];
+        } else {
+            throw new Error("Player Not Found We Need To Send Player Colors");
+        }
+
+
+
+        if (player.waitingBlocks.length > 0) {
+            const playerWaitingBlocks = player.waitingBlocks.getLast.blocks;
+            if (playerWaitingBlocks.length > 0) {
+                playerWaitingBlocks.push(this.lastBlock);
+            }
+        }
+
+
+        // if player received to stop drawing waiting blocks request is sent to server
+        // we need to skip the response
+        if (player.isMyPlayer && player.isGettingWaitingBlocks) {
+            player.skipGettingWaitingBlocksRespose = true;
+        }
+
+        player.waitingBlocks.push({
+            vanishTimer: 0,
+            blocks: []
+        });
+
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (StopDrawingWaitingBlocksPacket);
 
 /***/ }),
 
@@ -223,7 +1374,133 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ \"./src/network/packet.js\");\n/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ \"./src/network/utils/writer.js\");\n/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ \"./src/ui/objects/player.js\");\n/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ \"./src/ui/objects/point.js\");\n\n\n\n\n\n\n\nclass WaitingBlocksPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"] {\n\n    constructor() {\n        super();\n        this.packetId = 1005;\n        this.player = null;\n        this.userId = null;\n        this.blocks = [];\n\n    }\n\n\n    // Handel Server Response\n    parsePacket() {\n        const reader = this.reader;\n        this.userId = reader.readInt4();\n        const blocksCount = reader.readInt2();\n        for (let i = 0; i < blocksCount; i++) {\n            const vec = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__[\"default\"](reader.readInt2(), reader.readInt2());\n            this.blocks.push(vec);\n        }\n    }\n\n    finalize() {\n        // Handle Server Request\n        // Send Empty Packet As Ask For Ready\n        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](this.packetId);\n        return writer.finalize();\n    }\n\n\n    handleReceivedPacket(client) {\n        const playerList = window.gameEngine.gameObjects.players;\n        let player = null;\n        if (this.userId in playerList) {\n            player = playerList[this.userId];\n        } else {\n            throw new Error(\"Player Not Found We Need To Send Player Colors\");\n        }\n\n\n        let replaceStack = false;\n        if (player.isMyPlayer) {\n            if (player.skipGettingWaitingBlocksRespose) {\n                player.skipGettingWaitingBlocksRespose = false;\n                player.waitingPushedDuringReceiving = [];\n            } else {\n\n                // If Player Requesting Waiting Blocks vai RequestWaitingBlocks Packet\n                if (player.isGettingWaitingBlocks) {\n                    player.isGettingWaitingBlocks = false;\n                    replaceStack = true;\n                    for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {\n                        const vec = player.waitingPushedDuringReceiving[i];\n                        this.blocks.push(vec);\n                    }\n                    player.waitingPushedDuringReceiving = [];\n                }\n\n                if (player.waitingBlocks.length > 0) {\n                    const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];\n                    if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {\n                        player.requestWaitingBlocks();\n                    }\n                }\n            }\n        }\n\n\n        if (replaceStack) {\n            if (player.waitingBlocks.length > 0) {\n                const lastBlock = player.waitingBlocks[player.waitingBlocks.length - 1];\n                lastBlock.blocks = this.blocks;\n                lastBlock.vanishTimer = 0;\n            } else {\n                replaceStack = false;\n            }\n        }\n        if (!replaceStack) {\n            player.waitingBlocks.push({\n                vanishTimer: 0,\n                blocks: this.blocks\n            });\n        }\n\n        console.log(\"Waiting Blocks\", [...player.waitingBlocks]);\n\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WaitingBlocksPacket);\n\n//# sourceURL=webpack:///./src/network/packets/waitingBlocks.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+
+class WaitingBlocksPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1005;
+        this.player = null;
+        this.userId = null;
+        this.blocks = [];
+
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+        const reader = this.reader;
+        this.userId = reader.readInt4();
+        const blocksCount = reader.readInt2();
+        for (let i = 0; i < blocksCount; i++) {
+            const vec = new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__["default"](reader.readInt2(), reader.readInt2());
+            this.blocks.push(vec);
+        }
+    }
+
+    finalize() {
+        // Handle Server Request
+        // Send Empty Packet As Ask For Ready
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        const playerList = window.gameEngine.gameObjects.players;
+        let player = null;
+        if (this.userId in playerList) {
+            player = playerList[this.userId];
+        } else {
+            throw new Error("Player Not Found We Need To Send Player Colors");
+        }
+
+
+        let replaceWaitingBlocks = false;
+        if (player.isMyPlayer) {
+
+
+            // some cases we need to skip the response
+            if (player.skipGettingWaitingBlocksRespose) {
+                player.skipGettingWaitingBlocksRespose = false;
+                player.waitingPushedDuringReceiving = [];
+            } else {
+
+                // If Player Requesting Waiting Blocks vai RequestWaitingBlocks Packet
+                // the RequestWaitingBlocks could happen if we found server and client blocks are not synced
+                // in Player State Packet
+                if (player.isGettingWaitingBlocks) {
+                    player.isGettingWaitingBlocks = false;
+
+                    // Player Requesting Waiting Blocks From Server So We Need To Replace The Waiting Blocks
+                    replaceWaitingBlocks = true;
+
+
+                    // Push Player Movement During Receiving Waiting Blocks
+                    for (let i = 0; i < player.waitingPushedDuringReceiving.length; i++) {
+                        const vec = player.waitingPushedDuringReceiving[i];
+                        this.blocks.push(vec);
+                    }
+
+                    player.waitingPushedDuringReceiving = [];
+                }
+
+
+
+                // If Player Waiting Blocks Are Empty We Need To Request Waiting Blocks
+                // possible that player received stop drawing blocks
+                // possible that initial waiting blocks are empty game just started
+
+                if (player.waitingBlocks.length > 0) {
+                    const lastBlock = player.waitingBlocks.getLast;
+                    if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
+                        // this call will cause to replace the waiting blocks with the new blocks coming from server
+                        player.requestWaitingBlocks();
+
+                    }
+                }
+            }
+        }
+
+
+        if (replaceWaitingBlocks) {
+            if (player.waitingBlocks.length > 0) {
+                const lastBlock = player.waitingBlocks.getLast;
+                lastBlock.blocks = [...this.blocks];
+                lastBlock.vanishTimer = 0;
+            } else {
+                replaceWaitingBlocks = false;
+            }
+        }
+
+        if (!replaceWaitingBlocks) {
+            player.waitingBlocks.push({
+                vanishTimer: 0,
+                blocks: [...this.blocks]
+            });
+        }
+
+        console.log("Waiting Blocks", [...player.waitingBlocks]);
+
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (WaitingBlocksPacket);
 
 /***/ }),
 
@@ -234,7 +1511,35 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\nclass Socket{\n    constructor(server,client) {\n        this.server = server;\n        this.onReceive = client.onReceive.bind(client);\n        this.onOpen = client.onOpen.bind(client);\n        this.onClose = client.onClose.bind(client);\n        this.ws = null;\n    }\n\n    iniSocket() {\n        this.ws = new WebSocket(this.server);\n        let ws = this.ws;\n        ws.binaryType = \"arraybuffer\";\n        ws.onopen = this.onOpen;\n        ws.onmessage = this.onReceive;\n        ws.onclose = this.onClose;\n    }\n\n    send(packet) {\n        this.ws.send(packet.finalize());\n    }\n\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Socket);\n\n//# sourceURL=webpack:///./src/network/socket.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class Socket{
+    constructor(server,client) {
+        this.server = server;
+        this.onReceive = client.onReceive.bind(client);
+        this.onOpen = client.onOpen.bind(client);
+        this.onClose = client.onClose.bind(client);
+        this.ws = null;
+    }
+
+    iniSocket() {
+        this.ws = new WebSocket(this.server);
+        let ws = this.ws;
+        ws.binaryType = "arraybuffer";
+        ws.onopen = this.onOpen;
+        ws.onmessage = this.onReceive;
+        ws.onclose = this.onClose;
+    }
+
+    send(packet) {
+        this.ws.send(packet.finalize());
+    }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Socket);
 
 /***/ }),
 
@@ -245,7 +1550,59 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   bytesToInt: () => (/* binding */ bytesToInt),\n/* harmony export */   intToBytes: () => (/* binding */ intToBytes),\n/* harmony export */   toHexString: () => (/* binding */ toHexString)\n/* harmony export */ });\nconst intToBytes = (value, byteorder = 'little', signed = false, numBytes = 4) => {\n    const littleEndian = (byteorder === 'little');\n    const bytes = new Uint8Array(numBytes);\n    const view = new DataView(bytes.buffer);\n\n    if (signed && value < 0) {\n        // Convert negative value to 2's complement representation\n        value = (1 << (8 * numBytes)) + value;\n    }\n\n    for (let i = 0; i < numBytes; i++) {\n        const shift = littleEndian ? i * 8 : (numBytes - 1 - i) * 8;\n        view.setUint8(i, (value >> shift) & 0xFF);\n    }\n\n    return bytes;\n}\nconst bytesToInt = (bytes, byteorder = 'little', signed = false) => {\n    const view = new DataView(bytes.buffer);\n    const littleEndian = (byteorder === 'little');\n\n    if (bytes.length <= 0 || bytes.length > 8) {\n        throw new Error('Unsupported number of bytes');\n    }\n    let value = 0;\n\n    for (let i = 0; i < bytes.length; i++) {\n        const shift = littleEndian ? i * 8 : (bytes.length - 1 - i) * 8;\n        value |= view.getUint8(i) << shift;\n    }\n    if (signed) {\n        const signBit = 1 << (8 * bytes.length - 1);\n        if (value & signBit) {\n            value = value - (signBit << 1);\n        }\n    }\n    return value;\n}\n\n\nconst toHexString = (data) => {\n    return Array.from(data)\n        .map(byte => '0x' + byte.toString(16).padStart(2, '0'))\n        .join(' ');\n}\n\n\n\n//# sourceURL=webpack:///./src/network/utils/bytesUtils.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   bytesToInt: () => (/* binding */ bytesToInt),
+/* harmony export */   intToBytes: () => (/* binding */ intToBytes),
+/* harmony export */   toHexString: () => (/* binding */ toHexString)
+/* harmony export */ });
+const intToBytes = (value, byteorder = 'little', signed = false, numBytes = 4) => {
+    const littleEndian = (byteorder === 'little');
+    const bytes = new Uint8Array(numBytes);
+    const view = new DataView(bytes.buffer);
+
+    if (signed && value < 0) {
+        // Convert negative value to 2's complement representation
+        value = (1 << (8 * numBytes)) + value;
+    }
+
+    for (let i = 0; i < numBytes; i++) {
+        const shift = littleEndian ? i * 8 : (numBytes - 1 - i) * 8;
+        view.setUint8(i, (value >> shift) & 0xFF);
+    }
+
+    return bytes;
+}
+const bytesToInt = (bytes, byteorder = 'little', signed = false) => {
+    const view = new DataView(bytes.buffer);
+    const littleEndian = (byteorder === 'little');
+
+    if (bytes.length <= 0 || bytes.length > 8) {
+        throw new Error('Unsupported number of bytes');
+    }
+    let value = 0;
+
+    for (let i = 0; i < bytes.length; i++) {
+        const shift = littleEndian ? i * 8 : (bytes.length - 1 - i) * 8;
+        value |= view.getUint8(i) << shift;
+    }
+    if (signed) {
+        const signBit = 1 << (8 * bytes.length - 1);
+        if (value & signBit) {
+            value = value - (signBit << 1);
+        }
+    }
+    return value;
+}
+
+
+const toHexString = (data) => {
+    return Array.from(data)
+        .map(byte => '0x' + byte.toString(16).padStart(2, '0'))
+        .join(' ');
+}
+
+
 
 /***/ }),
 
@@ -256,7 +1613,66 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bytesUtils.js */ \"./src/network/utils/bytesUtils.js\");\n\n\n\nclass Reader {\n    constructor(data) {\n        this.data = data;\n        this.position = 0;\n    }\n\n    readIntFromBytes(bytesNumber = 2) {\n        const bytes = this.data.slice(this.position, this.position + bytesNumber);\n        this.position += bytesNumber;\n        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.bytesToInt)(bytes, 'little', false);\n    }\n\n    readStringFromBytes(stringLength) {\n        const bytes = this.data.slice(this.position, this.position + stringLength);\n        this.position += stringLength;\n        return new TextDecoder().decode(bytes);\n    }\n\n    readString() {\n        const stringLength = this.readInt2();\n        return this.readStringFromBytes(stringLength);\n    }\n\n\n    readInt1() {\n        return this.readIntFromBytes(1);\n    }\n    readInt4() {\n        return this.readIntFromBytes(4);\n    }\n    readInt2() {\n        return this.readIntFromBytes(2);\n    }\n    readInt8() {\n        return this.readIntFromBytes(8);\n    }\n    readInt16() {\n        return this.readIntFromBytes(16);\n    }\n    readInt32() {\n        return this.readIntFromBytes(32);\n    }\n\n\n    toHexString()\n    {\n        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.toHexString)(this.data);\n    }\n\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Reader);\n\n//# sourceURL=webpack:///./src/network/utils/reader.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bytesUtils.js */ "./src/network/utils/bytesUtils.js");
+
+
+
+class Reader {
+    constructor(data) {
+        this.data = data;
+        this.position = 0;
+    }
+
+    readIntFromBytes(bytesNumber = 2) {
+        const bytes = this.data.slice(this.position, this.position + bytesNumber);
+        this.position += bytesNumber;
+        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.bytesToInt)(bytes, 'little', false);
+    }
+
+    readStringFromBytes(stringLength) {
+        const bytes = this.data.slice(this.position, this.position + stringLength);
+        this.position += stringLength;
+        return new TextDecoder().decode(bytes);
+    }
+
+    readString() {
+        const stringLength = this.readInt2();
+        return this.readStringFromBytes(stringLength);
+    }
+
+
+    readInt1() {
+        return this.readIntFromBytes(1);
+    }
+    readInt4() {
+        return this.readIntFromBytes(4);
+    }
+    readInt2() {
+        return this.readIntFromBytes(2);
+    }
+    readInt8() {
+        return this.readIntFromBytes(8);
+    }
+    readInt16() {
+        return this.readIntFromBytes(16);
+    }
+    readInt32() {
+        return this.readIntFromBytes(32);
+    }
+
+
+    toHexString()
+    {
+        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.toHexString)(this.data);
+    }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Reader);
 
 /***/ }),
 
@@ -267,7 +1683,163 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bytesUtils.js */ \"./src/network/utils/bytesUtils.js\");\n\n\nclass Writer {\n    // Infinity\n    constructor(packetId = -1) {\n        this.packetSize = 20;\n        this.packetId = packetId;\n\n        this.data = new Uint8Array(this.packetSize);\n        this.position = 0;\n        this.setPacketId();\n    }\n\n    setPacketId() {\n        this.position = 2;\n        this.writeIntInBytes(this.packetId);\n        this.updatePacketSize()\n\n    }\n\n    updatePacketSize() {\n        this.packetSize = this.position;\n        const currentOffset = this.position;\n        this.position = 0;\n        const b = (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.intToBytes)(this.packetSize, 'little', false, 2);\n        this.data.set(b, this.position);\n        this.position = currentOffset;\n    }\n\n    writeIntInBytes(number, bytesNumber = 2) {\n        let bytes = (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.intToBytes)(number, 'little', false, bytesNumber);\n        this.ensureCapacity(bytesNumber);\n        this.data.set(bytes, this.position);\n        this.position += bytesNumber;\n        this.updatePacketSize();\n    }\n\n\n    writeStringInBytes(string) {\n        let stringLength = string.length;\n        this.writeIntInBytes(stringLength, 2);\n        let bytes = new TextEncoder().encode(string);\n        this.ensureCapacity(stringLength);\n        this.data.set(bytes, this.position);\n        this.position += stringLength;\n        this.updatePacketSize();\n    }\n\n    ensureCapacity(requiredSize) {\n\n        if (this.position + requiredSize > this.data.length) {\n            const newSize = requiredSize + (this.data.length) * 2;\n            const newData = new Uint8Array(newSize);\n            newData.set(this.data);\n            this.data = newData;\n        }\n\n    }\n\n    finalize() {\n        return this.data.slice(0, this.position);\n    }\n\n    toHexString() {\n        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.toHexString)(this.finalize());\n    }\n\n\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Writer);\n\n//# sourceURL=webpack:///./src/network/utils/writer.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bytesUtils.js */ "./src/network/utils/bytesUtils.js");
+
+
+class Writer {
+    // Infinity
+    constructor(packetId = -1) {
+        this.packetSize = 20;
+        this.packetId = packetId;
+
+        this.data = new Uint8Array(this.packetSize);
+        this.position = 0;
+        this.setPacketId();
+    }
+
+    setPacketId() {
+        this.position = 2;
+        this.writeIntInBytes(this.packetId);
+        this.updatePacketSize()
+
+    }
+
+    updatePacketSize() {
+        this.packetSize = this.position;
+        const currentOffset = this.position;
+        this.position = 0;
+        const b = (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.intToBytes)(this.packetSize, 'little', false, 2);
+        this.data.set(b, this.position);
+        this.position = currentOffset;
+    }
+
+    writeIntInBytes(number, bytesNumber = 2) {
+        let bytes = (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.intToBytes)(number, 'little', false, bytesNumber);
+        this.ensureCapacity(bytesNumber);
+        this.data.set(bytes, this.position);
+        this.position += bytesNumber;
+        this.updatePacketSize();
+    }
+
+
+    writeStringInBytes(string) {
+        let stringLength = string.length;
+        this.writeIntInBytes(stringLength, 2);
+        let bytes = new TextEncoder().encode(string);
+        this.ensureCapacity(stringLength);
+        this.data.set(bytes, this.position);
+        this.position += stringLength;
+        this.updatePacketSize();
+    }
+
+    ensureCapacity(requiredSize) {
+
+        if (this.position + requiredSize > this.data.length) {
+            const newSize = requiredSize + (this.data.length) * 2;
+            const newData = new Uint8Array(newSize);
+            newData.set(this.data);
+            this.data = newData;
+        }
+
+    }
+
+    finalize() {
+        return this.data.slice(0, this.position);
+    }
+
+    toHexString() {
+        return (0,_bytesUtils_js__WEBPACK_IMPORTED_MODULE_0__.toHexString)(this.finalize());
+    }
+
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Writer);
+
+/***/ }),
+
+/***/ "./src/ui/animation.js":
+/*!*****************************!*\
+  !*** ./src/ui/animation.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class Animation {
+    constructor(startValue, endValue, duration) {
+        this.startValue = startValue;
+        this.endValue = endValue;
+        this.duration = duration;
+        this.progress = 0; // Ranges from 0 to 1
+        this.direction = 0; // 0 for idle, 1 for forward, -1 for backward
+        this.delay = 0;
+    }
+
+    update(deltaTime) {
+        // Handle the delay before starting the animation
+        if (this.delay > 0) {
+            this.delay -= deltaTime;
+            return;
+        }
+
+        if (this.direction === 0) return; // If idle, do nothing
+
+        this.progress += (deltaTime * this.duration) * this.direction;
+
+        if (this.progress >= 1) {
+            this.progress = 1;
+            this.direction = 0; // Stop the animation
+        } else if (this.progress <= 0) {
+            this.progress = 0;
+            this.direction = 1; // Stop the animation
+        }
+    }
+
+    setForward() {
+        this.direction = 1;
+    }
+
+    setBackward() {
+        this.direction = -1;
+    }
+
+    isAnimating() {
+        return this.direction !== 0 || this.delay > 0;
+    }
+
+    getProgress() {
+        return this.progress;
+    }
+
+    completeAndStop() {
+        this.progress = 1;
+        this.direction = 0;
+    }
+
+    isGoingForward() {
+        return this.direction === 1;
+    }
+    isGoingBackward() {
+        return this.direction === -1;
+    }
+
+    isIdle() {
+        return this.direction === 0;
+    }
+
+    isComplete() {
+        return this.progress === 1;
+    }
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Animation);
 
 /***/ }),
 
@@ -278,7 +1850,254 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ \"./src/ui/objects/point.js\");\n/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/math.js */ \"./src/utils/math.js\");\n/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _rectangle_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./rectangle.js */ \"./src/ui/objects/rectangle.js\");\n\n\n\n\n\nclass Block {\n    constructor(p) {\n        this.position = p\n\n        this.currentBlock = -1;\n        this.nextBlock = -1;\n\n\n        this.animDirection = 0;\n        this.animProgress = 0;\n        this.animDelay = 0;\n\n        this.colorsWithId = null;\n\n        this.lastSetTime = Date.now()\n    }\n\n    setBlockId(id, delay) {\n        this.lastSetTime = Date.now();\n        if (!delay) {\n            this.currentBlock = this.nextBlock = id;\n            this.animDirection = 0;\n            this.animProgress = 1;\n        } else {\n\n            this.animDelay = delay;\n\n            let isCurrentBlock = id === this.currentBlock;\n            let isNextBlock = id === this.nextBlock;\n\n            if (isCurrentBlock && isNextBlock) {\n                if (this.animDirection === -1) {\n                    this.animDirection = 1;\n                }\n            }\n\n            if (isCurrentBlock && !isNextBlock) {\n                this.animDirection = 1;\n                this.nextBlock = this.currentBlock;\n            }\n\n            if (!isCurrentBlock && isNextBlock) {\n                if (this.animDirection === 1) {\n                    this.animDirection = -1;\n                }\n            }\n\n            if (!isCurrentBlock && !isNextBlock) {\n                this.nextBlock = id;\n                this.animDirection = -1;\n            }\n        }\n\n    }\n\n    static getBlockAt(p, blocks) {\n        for (let block of blocks) {\n            if (block.position.equals(p)) {\n                return block;\n            }\n        }\n        let block = new Block(p);\n        blocks.push(block);\n        return block;\n\n    }\n\n    handleAnimation() {\n        if (this.animDelay > 0) {\n            this.animDelay -= window.gameEngine.deltaTime;\n        } else {\n            this.animProgress += window.gameEngine.deltaTime * this.animDirection * 0.003;\n        }\n\n        if (this.animProgress > 1) {\n            this.animProgress = 1;\n            this.animDirection = 0;\n        }\n\n        if (this.animProgress < 0) {\n            this.animProgress = 0;\n            this.animDirection = 1;\n            this.currentBlock = this.nextBlock;\n            return false\n        }\n        return true;\n    }\n\n\n    drawBorderBlock(ctx, color, size) {\n        if (this.currentBlock !== 0)\n            return;\n\n        ctx.fillStyle = color;\n        // Calculate the new position Base Of the size\n        const newP = window.game.calBlocksGap(this.position, size);\n        ctx.fillRect(newP.x, newP.y, size, size);\n    }\n\n    drawEmptyBlock(ctx, darkColor, brightColor, size) {\n        if (this.currentBlock !== 1)\n            return;\n\n\n        const sizeFactor = 10 / 7;\n        const newS = size * sizeFactor; // 10\n        let animProgress = 0;\n\n        const newP = window.game.calBlocksGap(this.position, newS);\n        const spacingTwenty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.2);\n        const spacingTen = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.1); // 1\n        const spacingNinty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.9);\n\n\n        /////////////////////// SHADOW ////////////////////////\n        if (this.animProgress > .8) {\n            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, darkColor, spacingTwenty);\n        }\n\n        ctx.fillStyle = brightColor;\n        if (this.animProgress === 1) {\n            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, brightColor, spacingTen);\n        } else if (this.animProgress < .4) {\n            animProgress = this.animProgress * 2.5;\n            ctx.beginPath();\n            ctx.moveTo(newP.x + spacingTwenty, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingNinty, spacingTwenty, animProgress));\n            ctx.lineTo(newP.x + spacingTwenty, newP.y + spacingNinty);\n            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingNinty);\n            ctx.fill();\n        } else if (this.animProgress < 0.8) {\n            animProgress = this.animProgress * 2.5 - 1;\n            ctx.beginPath();\n            ctx.moveTo(newP.x + spacingTwenty, newP.y + spacingTwenty);\n            ctx.lineTo(newP.x + spacingTwenty, newP.y + 9);\n            ctx.lineTo(newP.x + spacingNinty, newP.y + spacingNinty);\n            ctx.lineTo(newP.x + spacingNinty, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingNinty, spacingTwenty, animProgress));\n            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingTwenty);\n            ctx.fill();\n        } else {\n\n            animProgress = this.animProgress * 5 - 4;\n            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, brightColor, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(2, 1, animProgress));\n        }\n    }\n\n    drawRegularBlock(ctx, darkColor, brightColor, size) {\n\n\n        if (this.currentBlock < 2)\n            return;\n\n        if (this.colorsWithId === null) {\n            return;\n        }\n\n\n        let bcolor = this.colorsWithId.pattern;\n        let dcolor = this.colorsWithId.patternEdge;\n\n\n        const sizeFactor = 10 / 9;\n        const newS = size * sizeFactor; // 10\n        let animProgress = 0;\n\n        const newP = window.game.calBlocksGap(this.position, newS);\n        const spacingTwenty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.2);\n        const spacingTen = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.1); // 1\n        const spacingNinty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.9);\n\n        if (this.animProgress > 0.8) {\n            ctx.fillStyle = dcolor;\n            ctx.fillRect(newP.x + spacingTen, newP.y + spacingTen, size, size);\n        }\n\n\n        ctx.fillStyle = bcolor;\n        if (this.animProgress === 1) {\n            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, bcolor, spacingTen);\n        } else if (this.animProgress < .4) {\n            animProgress = this.animProgress * 2.5;\n            ctx.beginPath();\n            ctx.moveTo(newP.x + spacingTen, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(newS, spacingTen, animProgress));\n            ctx.lineTo(newP.x + spacingTen, newP.y + newS);\n            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTen, newS, animProgress), newP.y + newS);\n            ctx.fill();\n        } else if (this.animProgress < 0.8) {\n            animProgress = this.animProgress * 2.5 - 1;\n            ctx.beginPath();\n            ctx.moveTo(newP.x + spacingTen, newP.y + spacingTen);\n            ctx.lineTo(newP.x + spacingTen, newP.y + newS);\n            ctx.lineTo(newP.x + newS, newP.y + newS);\n            ctx.lineTo(newP.x + newS, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(newS, spacingTen, animProgress));\n            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTen, newS, animProgress), newP.y + spacingTen);\n            ctx.fill();\n        } else {\n\n            animProgress = this.animProgress * 5 - 4;\n            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, bcolor, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(1, 0, animProgress));\n        }\n\n    }\n\n    draw(ctx, checkViewport) {\n        if (checkViewport && window.camera.checkObjectInCamera(this.position)) {\n            console.log(\"not in camera\");\n            return;\n        }\n        let canDraw = this.handleAnimation();\n        if (!canDraw) {\n            return;\n        }\n\n        this.drawBorderBlock(ctx, \"#420707\", 10);\n        this.drawEmptyBlock(ctx, \"#2d2926\", \"#4e463f\", 7);\n        this.drawRegularBlock(ctx, \"#2d2926\", \"#4e463f\", 9);\n        //Ocuupited Block\n    }\n\n\n    static convertRectToBlock(rect, colorsWithId, listOfBlocks, myPlayer) {\n\n        const viewPortRadius = window.game.viewPortRadius;\n        if (myPlayer) {\n            rect.min.x = Math.max(rect.min.x, Math.round(myPlayer.position.x - viewPortRadius));\n            rect.min.y = Math.max(rect.min.y, Math.round(myPlayer.position.y - viewPortRadius));\n\n            rect.max.x = Math.min(rect.max.x, Math.round(myPlayer.position.x + viewPortRadius));\n            rect.max.y = Math.min(rect.max.y, Math.round(myPlayer.position.y + viewPortRadius));\n        }\n\n        for (let {x, y} of rect.for_each()) {\n            let block = Block.getBlockAt(new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](x, y), listOfBlocks);\n            block.colorsWithId = colorsWithId;\n            block.setBlockId(colorsWithId.id, Math.random() * 400);\n        }\n\n        // console.log(listOfBlocks);\n    }\n\n}\n\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Block);\n\n//# sourceURL=webpack:///./src/ui/objects/block.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ "./src/ui/objects/point.js");
+/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/math.js */ "./src/utils/math.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _animation_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../animation.js */ "./src/ui/animation.js");
+
+
+
+
+
+class Block {
+    constructor(p) {
+        this.position = p
+
+        this.currentBlock = -1;
+        this.nextBlock = -1;
+        this.colorsWithId = null;
+        this.lastSetTime = Date.now()
+        this.animation = new _animation_js__WEBPACK_IMPORTED_MODULE_3__["default"](0, 1, 0.003);
+
+    }
+
+
+    setBlockId(id, delay) {
+        this.lastSetTime = Date.now();
+
+        // If there is no delay for the animation
+        if (!delay) {
+            this.currentBlock = this.nextBlock = id;
+            this.animation.completeAndStop();
+        } else {
+
+            // Set the delay
+            this.animation.delay = delay;
+
+            let isCurrentBlock = id === this.currentBlock;
+            let isNextBlock = id === this.nextBlock;
+
+
+            if (isCurrentBlock && isNextBlock) {
+                // If the current block is the same as the next block
+                // Then we don't need to do anything
+                if (this.animation.isGoingBackward()) {
+                    this.animation.setForward();
+                }
+            } else if (!isCurrentBlock && !isNextBlock) {
+                // if we need to change the block
+                // then we need to set the next block to the id
+                this.nextBlock = id;
+                this.animation.setBackward();
+            }
+
+                // this two cases can happen
+            // during the animation new block is set
+            else if (isCurrentBlock && !isNextBlock) {
+                // cancel the animation and set the next block to the id
+                this.nextBlock = this.currentBlock;
+                this.animation.setForward()
+            } else if (!isCurrentBlock && isNextBlock) {
+                // reverse the animation to set the current block to the id of next block
+                // in handleAnimation we will set the current block to the next block
+                if (this.animation.isGoingForward()) this.animation.setBackward()
+            }
+        }
+
+    }
+
+    static getBlockAt(p, blocks) {
+        for (let block of blocks) {
+            if (block.position.equals(p)) {
+                return block;
+            }
+        }
+        let block = new Block(p);
+        blocks.push(block);
+        return block;
+
+    }
+
+    handleAnimation() {
+        this.animation.update(window.gameEngine.deltaTime);
+        const progress = this.animation.getProgress();
+        if (progress <= 0) {
+            this.currentBlock = this.nextBlock;
+            return false;
+        }
+        return true;
+    }
+
+    calBlockGap(position, size) {
+        return new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](position.x * size, position.y * size);
+    }
+
+
+    drawBorderBlock(ctx, color, size) {
+        if (this.currentBlock !== 0) return;
+
+        ctx.fillStyle = color;
+        // Calculate the new position Base Of the size
+        const newP = this.calBlockGap(this.position, size);
+        ctx.fillRect(newP.x, newP.y, size, size);
+    }
+
+    drawEmptyBlock(ctx, darkColor, brightColor, size) {
+        if (this.currentBlock !== 1) return;
+
+
+        const sizeFactor = 10 / size;
+        const newS = size * sizeFactor; // 10
+        let animProgress = 0;
+
+        const newP = this.calBlockGap(this.position, newS);
+        const spacingTwenty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.2);
+        const spacingTen = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.1); // 1
+        const spacingNinty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.9);
+
+
+        /////////////////////// SHADOW ////////////////////////
+        if (this.animation.progress > .8) {
+            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, darkColor, spacingTwenty);
+        }
+
+        ctx.fillStyle = brightColor;
+        if (this.animation.progress === 1) {
+            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, brightColor, spacingTen);
+        } else if (this.animation.progress < .4) {
+            animProgress = this.animation.progress * 2.5;
+            ctx.beginPath();
+            ctx.moveTo(newP.x + spacingTwenty, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingNinty, spacingTwenty, animProgress));
+            ctx.lineTo(newP.x + spacingTwenty, newP.y + spacingNinty);
+            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingNinty);
+            ctx.fill();
+        } else if (this.animation.progress < 0.8) {
+            animProgress = this.animation.progress * 2.5 - 1;
+            ctx.beginPath();
+            ctx.moveTo(newP.x + spacingTwenty, newP.y + spacingTwenty);
+            ctx.lineTo(newP.x + spacingTwenty, newP.y + 9);
+            ctx.lineTo(newP.x + spacingNinty, newP.y + spacingNinty);
+            ctx.lineTo(newP.x + spacingNinty, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingNinty, spacingTwenty, animProgress));
+            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingTwenty);
+            ctx.fill();
+        } else {
+
+            animProgress = this.animation.progress * 5 - 4;
+            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, brightColor, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(2, 1, animProgress));
+        }
+    }
+
+    drawRegularBlock(ctx, darkColor, brightColor, size) {
+
+
+        if (this.currentBlock < 2) return;
+
+        if (this.colorsWithId === null) {
+            return;
+        }
+
+
+        let bcolor = this.colorsWithId.pattern;
+        let dcolor = this.colorsWithId.patternEdge;
+
+
+        const sizeFactor = 10 / size;
+        const newS = size * sizeFactor; // 10
+        let animProgress = 0;
+
+        const newP = this.calBlockGap(this.position, newS);
+        const spacingTwenty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.2);
+        const spacingTen = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.1); // 1
+        const spacingNinty = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.calPercentage(newS, 0.9);
+
+        if (this.animation.progress > 0.8) {
+            ctx.fillStyle = dcolor;
+            ctx.fillRect(newP.x + spacingTen, newP.y + spacingTen, size, size);
+        }
+
+
+        ctx.fillStyle = bcolor;
+        if (this.animation.progress === 1) {
+            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, bcolor, spacingTen);
+        } else if (this.animation.progress < .4) {
+            animProgress = this.animation.progress * 2.5;
+            ctx.beginPath();
+            ctx.moveTo(newP.x + spacingTen, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(newS, spacingTen, animProgress));
+            ctx.lineTo(newP.x + spacingTen, newP.y + newS);
+            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTen, newS, animProgress), newP.y + newS);
+            ctx.fill();
+        } else if (this.animation.progress < 0.8) {
+            animProgress = this.animation.progress * 2.5 - 1;
+            ctx.beginPath();
+            ctx.moveTo(newP.x + spacingTen, newP.y + spacingTen);
+            ctx.lineTo(newP.x + spacingTen, newP.y + newS);
+            ctx.lineTo(newP.x + newS, newP.y + newS);
+            ctx.lineTo(newP.x + newS, newP.y + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(newS, spacingTen, animProgress));
+            ctx.lineTo(newP.x + _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(spacingTen, newS, animProgress), newP.y + spacingTen);
+            ctx.fill();
+        } else {
+
+            animProgress = this.animation.progress * 5 - 4;
+            _utils_js__WEBPACK_IMPORTED_MODULE_2__.drawInCtxRec(ctx, newP, size, bcolor, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(1, 0, animProgress));
+        }
+
+    }
+
+    draw(ctx, checkViewport) {
+        if (checkViewport && window.camera.checkObjectInCamera(this.position)) {
+            console.log("not in camera");
+            return;
+        }
+
+        let canDraw = this.handleAnimation();
+        if (!canDraw) {
+            return;
+        }
+
+        this.drawBorderBlock(ctx, "#420707", 10);
+        this.drawEmptyBlock(ctx, "#2d2926", "#4e463f", 7);
+        this.drawRegularBlock(ctx, "#2d2926", "#4e463f", 9);
+
+    }
+
+
+    static convertRectToBlock(rect, colorsWithId, listOfBlocks, myPlayer) {
+        const viewPortRadius = window.game.viewPortRadius;
+
+        if (myPlayer) {
+            rect.min.x = Math.max(rect.min.x, Math.round(myPlayer.position.x - viewPortRadius));
+            rect.min.y = Math.max(rect.min.y, Math.round(myPlayer.position.y - viewPortRadius));
+
+            rect.max.x = Math.min(rect.max.x, Math.round(myPlayer.position.x + viewPortRadius));
+            rect.max.y = Math.min(rect.max.y, Math.round(myPlayer.position.y + viewPortRadius));
+        }
+
+        for (let {x, y} of rect.for_each()) {
+            let block = Block.getBlockAt(new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), listOfBlocks);
+            block.colorsWithId = colorsWithId;
+            block.setBlockId(colorsWithId.id, Math.random() * 400);
+        }
+
+    }
+
+}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Block);
 
 /***/ }),
 
@@ -289,7 +2108,173 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ \"./src/ui/objects/point.js\");\n/* harmony import */ var _rectangle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./rectangle.js */ \"./src/ui/objects/rectangle.js\");\n/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/math.js */ \"./src/utils/math.js\");\n\n\n\n\n\nclass Camera {\n    constructor() {\n        this.zoom = 5;\n        this.camPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        this.camRotationOffset = 0;\n        this.camPositionOffset = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        this.camPrevPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n\n        this.camPosSet = false;\n\n        this.camShakeBuffer = [];\n    }\n\n\n    // TODO ADD VIEWPORT RADIUS\n    checkObjectInCamera(point) {\n        return (\n            point.x < this.camPosition.x - window.game.viewPortRadius ||\n            point.x > this.camPosition.x + window.game.viewPortRadius ||\n            point.y < this.camPosition.y - window.game.viewPortRadius ||\n            point.y > this.camPosition.y + window.game.viewPortRadius\n        )\n    }\n\n    shakeCamera(p, rotate = true) {\n        this.camShakeBuffer.push([\n            p, 0, !!rotate\n        ]);\n    }\n\n    shakeCameraDirection(dir, amount = 6, rotate = true) {\n        let x, y = 0;\n        switch (dir) {\n            case 0:\n                x = amount;\n                break;\n            case 1:\n                y = amount;\n                break;\n            case 2:\n                x = -amount;\n                break;\n            case 3:\n                y = -amount;\n                break;\n        }\n        this.shakeCamera(new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](x, y), rotate);\n    }\n\n    calCameraOffset() {\n        for (let i = this.camShakeBuffer.length - 1; i >= 0; i--) {\n            let shake = this.camShakeBuffer[i];\n            shake[1] = window.gameEngine.deltaTime * 0.003;\n            let shakeTime = shake[1];\n            let shakeTime2 = 0;\n            let shakeTime3 = 0;\n            if (shakeTime < 1) {\n                shakeTime2 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.out(shakeTime);\n                shakeTime3 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.inout(shakeTime);\n\n            } else if (shakeTime < 8) {\n                shakeTime2 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.inout(_utils_math_js__WEBPACK_IMPORTED_MODULE_3__.inverseLinearInterpolate(8, 1, shakeTime));\n                shakeTime3 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.in(_utils_math_js__WEBPACK_IMPORTED_MODULE_3__.inverseLinearInterpolate(8, 1, shakeTime));\n            } else {\n                this.camShakeBuffer.splice(i, 1);\n            }\n            this.camPositionOffset.x += shake[0].x * shakeTime2;\n            this.camPositionOffset.y += shake[0].y * shakeTime2;\n\n            this.camPositionOffset.x += shake[0] * Math.cos(shakeTime * 8) * 0.04 * shakeTime3;\n            this.camPositionOffset.y += shake[0] * Math.cos(shakeTime * 7) * 0.04 * shakeTime3;\n            if (shake[2]) {\n                this.camRotationOffset += Math.cos(shakeTime * 9) * 0.003 * shakeTime3;\n            }\n            console.log(this.camShakeBuffer.length);\n        }\n\n        let limit = 80;\n        let x = this.camPositionOffset.x;\n        let y = this.camPositionOffset.y;\n        x /= limit;\n        y /= limit;\n        x = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.smoothLimit(x);\n        y = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.smoothLimit(y);\n        x *= limit;\n        y *= limit;\n        this.camPositionOffset.x = x;\n        this.camPositionOffset.y = y;\n\n    }\n\n    calZoom(ctx) {\n        let maxPixelRatio = _utils_js__WEBPACK_IMPORTED_MODULE_2__.calculate_pixel_ratio();\n        let quality = 1;\n        const canvas = window.game.canvas;\n\n\n        if (ctx.canvas === canvas || true) {\n            const maxDimension = Math.max(canvas.width, canvas.height);\n            const zoomEdge = maxDimension / window.game.maxZoom;\n            const screenPixels = canvas.width * canvas.height;\n            const blockPixels = screenPixels / window.game.maxBlocksNumber;\n            const zoomBlocks = Math.sqrt(blockPixels) / 10;\n            this.zoom = Math.max(zoomEdge, zoomBlocks);\n            ctx.translate(window.game.canvas.width / 2, window.game.canvas.height / 2);\n\n            ctx.rotate(this.camRotationOffset);\n            ctx.scale(this.zoom, this.zoom);\n            ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);\n\n        } else {}\n    }\n\n\n    moveToPlayer(player) {\n        if (!player) return;\n        if (this.camPosSet) {\n            this.camPosition.x = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.linearInterpolate(this.camPosition.x, player.position.x, 0.03);\n            this.camPosition.y = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.linearInterpolate(this.camPosition.y, player.position.y, 0.03);\n\n        } else {\n            this.camPosition = player.position.clone();\n            this.camPosSet = true;\n        }\n    }\n\n\n    loop() {\n        this.camPrevPosition = this.camPosition;\n        this.calCameraOffset();\n    }\n\n\n    getViewPortRec(pos){\n        const viewPortRadius = window.game.viewPortRadius * 2;\n        const leftSide = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n            pos.x - viewPortRadius,\n            pos.y - viewPortRadius\n        )\n        const rightSide = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n            pos.x + viewPortRadius,\n            pos.y + viewPortRadius\n        )\n        return new _rectangle_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"](leftSide, rightSide);\n    }\n\n}\n\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Camera);\n\n//# sourceURL=webpack:///./src/ui/objects/camera.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ "./src/ui/objects/point.js");
+/* harmony import */ var _rectangle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./rectangle.js */ "./src/ui/objects/rectangle.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/math.js */ "./src/utils/math.js");
+
+
+
+
+
+class Camera {
+    constructor() {
+        this.zoom = 5;
+        this.camPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        this.camRotationOffset = 0;
+        this.camPositionOffset = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        this.camPrevPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+
+        this.camPosSet = false;
+
+        this.camShakeBuffer = [];
+    }
+
+
+    // TODO ADD VIEWPORT RADIUS
+    checkObjectInCamera(point) {
+        return (
+            point.x < this.camPosition.x - window.game.viewPortRadius ||
+            point.x > this.camPosition.x + window.game.viewPortRadius ||
+            point.y < this.camPosition.y - window.game.viewPortRadius ||
+            point.y > this.camPosition.y + window.game.viewPortRadius
+        )
+    }
+
+    shakeCamera(p, rotate = true) {
+        this.camShakeBuffer.push([
+            p, 0, !!rotate
+        ]);
+    }
+
+    shakeCameraDirection(dir, amount = 6, rotate = true) {
+        let x, y = 0;
+        switch (dir) {
+            case 0:
+                x = amount;
+                break;
+            case 1:
+                y = amount;
+                break;
+            case 2:
+                x = -amount;
+                break;
+            case 3:
+                y = -amount;
+                break;
+        }
+        this.shakeCamera(new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](x, y), rotate);
+    }
+
+    calCameraOffset() {
+        for (let i = this.camShakeBuffer.length - 1; i >= 0; i--) {
+            let shake = this.camShakeBuffer[i];
+            shake[1] = window.gameEngine.deltaTime * 0.003;
+            let shakeTime = shake[1];
+            let shakeTime2 = 0;
+            let shakeTime3 = 0;
+            if (shakeTime < 1) {
+                shakeTime2 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.out(shakeTime);
+                shakeTime3 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.inout(shakeTime);
+
+            } else if (shakeTime < 8) {
+                shakeTime2 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.inout(_utils_math_js__WEBPACK_IMPORTED_MODULE_3__.inverseLinearInterpolate(8, 1, shakeTime));
+                shakeTime3 = _utils_js__WEBPACK_IMPORTED_MODULE_2__.ease.in(_utils_math_js__WEBPACK_IMPORTED_MODULE_3__.inverseLinearInterpolate(8, 1, shakeTime));
+            } else {
+                this.camShakeBuffer.splice(i, 1);
+            }
+            this.camPositionOffset.x += shake[0].x * shakeTime2;
+            this.camPositionOffset.y += shake[0].y * shakeTime2;
+
+            this.camPositionOffset.x += shake[0] * Math.cos(shakeTime * 8) * 0.04 * shakeTime3;
+            this.camPositionOffset.y += shake[0] * Math.cos(shakeTime * 7) * 0.04 * shakeTime3;
+            if (shake[2]) {
+                this.camRotationOffset += Math.cos(shakeTime * 9) * 0.003 * shakeTime3;
+            }
+            console.log(this.camShakeBuffer.length);
+        }
+
+        let limit = 80;
+        let x = this.camPositionOffset.x;
+        let y = this.camPositionOffset.y;
+        x /= limit;
+        y /= limit;
+        x = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.smoothLimit(x);
+        y = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.smoothLimit(y);
+        x *= limit;
+        y *= limit;
+        this.camPositionOffset.x = x;
+        this.camPositionOffset.y = y;
+
+    }
+
+    calZoom(ctx) {
+        let maxPixelRatio = _utils_js__WEBPACK_IMPORTED_MODULE_2__.calculate_pixel_ratio();
+        let quality = 1;
+        const canvas = window.game.canvas;
+
+
+        if (ctx.canvas === canvas || true) {
+            const maxDimension = Math.max(canvas.width, canvas.height);
+            const zoomEdge = maxDimension / window.game.maxZoom;
+            const screenPixels = canvas.width * canvas.height;
+            const blockPixels = screenPixels / window.game.maxBlocksNumber;
+            const zoomBlocks = Math.sqrt(blockPixels) / 10;
+            this.zoom = Math.max(zoomEdge, zoomBlocks);
+            ctx.translate(window.game.canvas.width / 2, window.game.canvas.height / 2);
+
+            ctx.rotate(this.camRotationOffset);
+            ctx.scale(this.zoom, this.zoom);
+            ctx.translate(-this.camPrevPosition.x * 10 - this.camPositionOffset.x, -this.camPrevPosition.y * 10 - this.camPositionOffset.y);
+
+        } else {}
+    }
+
+
+    moveToPlayer(player) {
+        if (!player) return;
+        if (this.camPosSet) {
+            this.camPosition.x = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.linearInterpolate(this.camPosition.x, player.position.x, 0.03);
+            this.camPosition.y = _utils_math_js__WEBPACK_IMPORTED_MODULE_3__.linearInterpolate(this.camPosition.y, player.position.y, 0.03);
+
+        } else {
+            this.camPosition = player.position.clone();
+            this.camPosSet = true;
+        }
+    }
+
+    moveToAbsolutePosition(pos) {
+        this.camPosition = pos;
+    }
+
+
+    loop() {
+        this.camPrevPosition = this.camPosition;
+        this.calCameraOffset();
+    }
+
+
+    getViewPortRec(pos){
+        const viewPortRadius = window.game.viewPortRadius * 2;
+        const leftSide = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](
+            pos.x - viewPortRadius,
+            pos.y - viewPortRadius
+        )
+        const rightSide = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](
+            pos.x + viewPortRadius,
+            pos.y + viewPortRadius
+        )
+        return new _rectangle_js__WEBPACK_IMPORTED_MODULE_1__["default"](leftSide, rightSide);
+    }
+
+}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Camera);
 
 /***/ }),
 
@@ -300,7 +2285,800 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ \"./src/ui/objects/point.js\");\n/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/math.js */ \"./src/utils/math.js\");\n/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ \"./src/ui/utils.js\");\n/* harmony import */ var _network_packets_direction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../network/packets/direction */ \"./src/network/packets/direction.js\");\n/* harmony import */ var _network_packets_requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../network/packets/requestWaitingBlocks */ \"./src/network/packets/requestWaitingBlocks.js\");\n\n\n\n\n\n\n\nclass Player {\n\n    constructor(position = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](1, 1), id) {\n        this.id = id\n        this.drawPosSet = false;\n\n        this.isMyPlayer = false;\n        this.deathWasCertain = false;\n        this.didUncertainDeathLastTick = false;\n        this.isDeathTimer = 0;\n        this.uncertainDeathPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        this.deadAnimParts = [];\n        this.deadAnimPartsRandDist = [];\n        this.hitLines = [];\n\n        this.position = position\n        this.drawPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](-1, -1);\n        this.serverPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        this.lastChangedDirPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n\n\n        this.waitingBlocks = [];\n        this.name = \"\";\n\n\n        // Colors\n        this.colorBrighter = 0;\n        this.colorDarker = 0;\n        this.colorSlightlyBrighter = 0\n        this.colorPattern = 0\n        this.colorPatternEdge = 0\n\n\n        // Movements\n        this.hasReceivedPosition = false;\n        this.moveRelativeToServerPosNextFrame = false;\n        this.lastServerPosSentTime = 0;\n\n\n        this.isReady = false;\n        this.isDead = false;\n\n        ///\n        this.waitingBlocksDuringWaiting = [];\n        //\n        this.lastPosHasBeenConfirmed = false;\n        this.lastPosServerSentTime = 0;\n        this.myNextDir = '';\n        this.myLastSendDir = '';\n        this.lastDirServerSentTime = 0;\n        this.lastMyPostSetClientSendTime = 0;\n        this.lastConfirmedTimeForPos = 0;\n        this.dir = '';\n        this.sendDirQueue = [];\n        this.clientSideMoves = [];\n        this.changeDirAtCoord = null;\n        this.changeDirAtIsHorizontal = false;\n\n        this.serverPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        this.serverDir = '';\n\n\n        this.waitingForPing = false;\n        this.lastPingTime = 0;\n        this.severLastPing = 0;\n        this.serverAvgPing = 0;\n        this.serverDiffPing = 0;\n\n\n        this.isGettingWaitingBlocks = false;\n        this.skipGettingWaitingBlocksRespose = false;\n        this.waitingPushedDuringReceiving = [];\n\n    }\n\n\n    static getPlayerById(id, players) {\n        for (let p of players) {\n            if (p.id === id) return p;\n        }\n    }\n\n    static isMovingHorizontally(direction) {\n        return direction === 'left' || direction === 'right';\n    }\n\n    static movePlayer(pos, dir, offset) {\n        let workingPos = pos.clone();\n        if (dir === 'up') {\n            workingPos.y -= offset;\n        } else if (dir === 'down') {\n            workingPos.y += offset;\n        } else if (dir === 'left') {\n            workingPos.x -= offset;\n        } else if (dir === 'right') {\n            workingPos.x += offset;\n        }\n        return workingPos;\n\n    }\n\n    static mapControlsToDir(controls) {\n        if (controls === 1) return 'up'; else if (controls === 3) return 'down'; else if (controls === 4) return 'left'; else if (controls === 2) return 'right'; else return '';\n    }\n\n   /**\n     * Verifies if the client's predicted player movement is synchronized with the server's authoritative state.\n     * This function checks the alignment of the player's current or next direction and position against the server's updates.\n     * It is critical for maintaining gameplay integrity by ensuring that all movements rendered client-side are accurate and acknowledged by the server.\n     * This helps prevent discrepancies that can affect game dynamics, such as rubberbanding or desyncs.\n     *\n     * - The function compares the latest direction and position (factoring in calculated offsets for lag) received from the server.\n     * - Returns false if the client’s predictions are confirmed by the server (i.e., no update or correction needed),\n     *   which means the player's state on the client matches the server's data.\n     * - Returns true if discrepancies are found, signaling the need for the client to update its local state based on the latest server information.\n     *\n     * Use this function to ensure that the gameplay remains fluid and consistent, avoiding interruptions due to network latency or processing delays.\n     */\n    checkClientMovementSyncedWithServer(newDir, newPosOffset, newPos) {\n        // Check If dir and por are close to current\n        const distVector = this.position.distanceVector(newPosOffset);\n        if ((this.dir === newDir || this.myNextDir === newDir) &&\n            distVector.x < 1 && distVector.y < 1) {\n            return false\n        }\n\n        // check if last client side move is same as new\n        // if server faster than client\n        if (this.clientSideMoves.length > 0) {\n            const lastClientSideMove = this.clientSideMoves.shift()\n            if (lastClientSideMove.dir === newDir\n                && lastClientSideMove.pos.equals(newPos)) {\n                return false\n            } else {\n                this.clientSideMoves = [];\n            }\n        }\n\n        return true\n\n    }\n\n\n    equals(player) {\n        return this.id === player.id;\n    }\n\n\n    /**\n     * Calculate Move Offset Based On Ping And Game Speed\n     * If Player Is Not My Player Or Ping Is Less Than 50 Return 0\n     * 50 ms is the minimum ping to consider the player is synced with the server\n     * so if not my player no need to calculate offset but if my player and ping is bigger than 50\n     * ping [round trip] / 2 * gameSpeed = offset\n     * @returns {number}\n     */\n    calMoveOffset() {\n        let offset = 0;\n        if (!this.isMyPlayer || this.serverAvgPing <= 50) return offset;\n\n        const gameSpeed = window.game.gameSpeed;\n        offset = (this.serverAvgPing / 2) * gameSpeed;\n        return offset;\n    }\n\n\n    addWaitingBlocks(pos = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0)) {\n        if (this.waitingBlocks.length <= 0) return;\n        const lastBlock = this.waitingBlocks.getLast.blocks;\n        if (lastBlock.length <= 0) return;\n        if (!(lastBlock[0].x !== pos.x || lastBlock[0].y !== pos.y)) return;\n        lastBlock.push(pos.clone());\n\n        if (this.isMyPlayer && this.isGettingWaitingBlocks) {\n            this.waitingPushedDuringReceiving.push(pos);\n        }\n\n    }\n\n    /**\n     * This Function Is Called Every Frame\n     * It Moves The Draw Position To The Position\n     */\n    moveDrawPosToPos() {\n        let target = this.position;\n        this.drawPosition.x = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(this.drawPosition.x, target.x, 0.23);\n        this.drawPosition.y = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(this.drawPosition.y, target.y, 0.23);\n    }\n\n    /**\n     * Update Player Direction\n     * @param dir\n     */\n    updatePlayerDirection(dir) {\n        this.dir = dir;\n    }\n\n    /**\n     * Check If Player Is Moving Horizontally\n     * @param direction\n     * @returns {boolean}\n     */\n    isMovingHorizontally(direction = this.dir) {\n        return direction === 'left' || direction === 'right';\n    }\n\n    /**\n     * Update Player Position\n     * @param pos\n     */\n    updatePlayerPosition(pos) {\n        this.position = pos;\n    }\n\n    /**\n     * This Is Called In PlayerState Message\n     * To Remove Blocks Outside Camera\n     */\n    removeBlocksOutsideCamera() {\n        const camera = window.camera;\n        const playerRect = camera.getViewPortRec(this.position);\n        const blocks = window.gameEngine.gameObjects.blocks;\n        for (let i = 0; i < blocks.length; i++) {\n            const block = blocks[i];\n            if (!playerRect.pointInRect(block.position)) {\n                blocks.splice(i, 1);\n            }\n        }\n    }\n\n    /**\n     * This Function Is Called Every Frame\n     * It Checks If The Player Should Change Direction\n     * Based On Next Direction If It Should Change Direction\n     */\n    checkNextDirAndCamera() {\n\n        if (!this.isMyPlayer) return;\n\n        const camera = window.camera;\n        camera.moveToPlayer(this)\n\n\n        if (this.myNextDir === this.dir) return;\n\n        const isHorizontal = this.isMovingHorizontally(this.dir);\n        if (this.changeDirAtIsHorizontal === isHorizontal) return;\n        let changeDirNow = false;\n        const currentCoord = isHorizontal ? this.position.x : this.position.y;\n\n        // Check If Last Direction Complete passed .55 Of Current Block\n        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isMovingToPositiveDir(this.dir)) {\n            if (this.changeDirAtCoord < currentCoord) changeDirNow = true;\n        } else {\n            if (this.changeDirAtCoord > currentCoord) changeDirNow = true;\n        }\n\n\n        if (changeDirNow) {\n            const newPos = this.position.clone();\n            const tooFar = Math.abs(this.changeDirAtCoord - currentCoord);\n            if (isHorizontal)\n                newPos.x = this.changeDirAtCoord;\n            else\n                newPos.y = this.changeDirAtCoord;\n            this.changeCurrentDir(this.myNextDir, newPos);\n            let offsetPosition = Player.movePlayer(this.position, this.dir, tooFar);\n            this.updatePlayerPosition(offsetPosition);\n        }\n\n    }\n\n    /**\n     * Change Player Direction and Position\n     * Add Waiting Blocks\n     * Add Client Side Move To Check If Server Synced With Client in PlayerState Message\n     * @param dir\n     * @param pos\n     * @param addWaitingBlocks\n     * @param clientDecision\n     */\n    changeCurrentDir(dir, pos, addWaitingBlocks = true, clientDecision = true) {\n        this.updatePlayerDirection(dir);\n        this.myNextDir = dir;\n\n        this.updatePlayerPosition(pos.clone());\n        this.lastChangedDirPos = pos.clone();\n\n\n        if (addWaitingBlocks) {\n            this.addWaitingBlocks(pos);\n        }\n\n\n        // To Check If Player Movement is Synced With Server in\n        // PlayerState Message\n        if (clientDecision) {\n            this.clientSideMoves.push({\n                dir: dir, pos: pos.clone(), time: Date.now()\n            });\n        }\n\n    }\n\n\n    ////////////// DRAWING /////////////////\n    drawPlayerHeadWithEye(ctx) {\n        let newDrawPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](this.drawPosition.x * 10 + 4.5, this.drawPosition.y * 10 + 4.5);\n        const bigEye = \"#ffff\";\n        const smallEye = \"#000\";\n        let radius = 6;\n        let size = radius;\n        const animationSpeed = 0.005;\n        const eyeAnimation = Math.sin(Date.now() * animationSpeed) * 2;\n        let r = 0.5;\n\n        const gradient = ctx.createRadialGradient(newDrawPos.x - 3, newDrawPos.y - 3, 0, newDrawPos.x, newDrawPos.y, radius);\n        gradient.addColorStop(0, this.colorSlightlyBrighter);\n        gradient.addColorStop(1, this.colorBrighter);\n\n        const c = ctx;\n        c.translate(newDrawPos.x, newDrawPos.y);\n\n        if (this.dir === 'up') {\n            c.rotate(Math.PI * r);\n        } else if (this.dir === 'down') {\n            r += .5 * 2;\n            c.rotate(Math.PI * r);\n        } else if (this.dir === 'left') {\n            r += .5 * 3;\n            c.rotate(Math.PI * r);\n        } else {\n            r += .5;\n            c.rotate(Math.PI * r);\n        }\n\n        c.beginPath();\n        c.arc(0, 0, size, 0, Math.PI * 2, false);\n\n        c.fillStyle = gradient;\n        c.fill();\n\n        // Draw the left white eye\n        c.beginPath();\n        c.fillStyle = bigEye;\n        c.arc(-size / 2, -size / 2.5, size / 4, 0, Math.PI * 2, false);\n        c.fill();\n\n        // Draw the left black eye\n        c.beginPath();\n        c.fillStyle = smallEye;\n        c.arc(-size / 2, -size / 2.5 + eyeAnimation, size / 8, 0, Math.PI * 2, false);\n        c.fill();\n\n        // Draw the right white eye\n        c.beginPath();\n        c.fillStyle = bigEye;\n        c.arc(-size / 2, size / 2.5, size / 4, 0, Math.PI * 2, false);\n        c.fill();\n\n        // Draw the right black eye\n        c.beginPath();\n        c.fillStyle = smallEye;\n        c.arc(-size / 2, size / 2.5 + eyeAnimation, size / 8, 0, Math.PI * 2, false);\n        c.fill();\n\n        // Smile\n        c.beginPath();\n        c.arc(size / 4, 0, size / 2, -0.5 * Math.PI, 0.5 * Math.PI);\n        c.lineWidth = size / 10;\n        c.stroke();\n\n        c.restore();\n        window.gameEngine.camTransform(ctx);\n\n    }\n\n    drawWaitingBlocks(ctx) {\n        if (this.waitingBlocks.length <= 0) return;\n        const gameSpeed = window.game.gameSpeed;\n        const deltaTime = window.gameEngine.deltaTime;\n\n\n        for (let blockIndex = this.waitingBlocks.length - 1; blockIndex >= 0; blockIndex--) {\n            let block = this.waitingBlocks[blockIndex];\n            let isLastBlock = blockIndex === this.waitingBlocks.length - 1;\n\n            if (!isLastBlock || this.isDead) {\n                let speed = (this.isDead && isLastBlock) ? gameSpeed : 0.02;\n                block.vanishTimer += deltaTime * speed;\n                if (!isLastBlock && (block.vanishTimer > 10)) {\n                    this.waitingBlocks.splice(blockIndex, 1);\n                }\n            }\n\n            let helperCanvas = window.game.helperCtx.canvas;\n            let helperCtx = window.game.helperCtx;\n\n            if (block.blocks.length <= 0) continue;\n\n            const lastDrawPos = isLastBlock ? this.drawPosition : null;\n\n            if (block.vanishTimer > 0 && false) {} else if (block.vanishTimer < 10) {\n                this.drawWaitingBlockInCTX([\n                    {ctx: ctx, color: this.colorDarker, offset: 6},\n                    {ctx: ctx, color: this.colorBrighter, offset: 4},\n                ], block.blocks, lastDrawPos);\n            }\n\n\n        }\n\n\n    }\n\n    drawWaitingBlockInCTX(callback, blocks, lastPosition) {\n        if (blocks.length <= 0) return;\n\n\n        for (let ctxIndex = 0; ctxIndex < callback.length; ctxIndex++) {\n            let b = callback[ctxIndex];\n            let ctx = b.ctx;\n            let offset = b.offset;\n            ctx.lineCap = \"round\";\n            ctx.lineJoin = \"round\";\n            ctx.lineWidth = 6;\n            ctx.strokeStyle = b.color;\n            ctx.beginPath();\n            ctx.moveTo(blocks[0].x * 10 + offset, blocks[0].y * 10 + offset);\n            for (let i = 1; i < blocks.length; i++) {\n                ctx.lineTo(blocks[i].x * 10 + offset, blocks[i].y * 10 + offset);\n            }\n            if (lastPosition !== null) {\n                ctx.lineTo(lastPosition.x * 10 + offset, lastPosition.y * 10 + offset);\n            }\n            ctx.stroke();\n        }\n    }\n\n    draw(ctx) {\n        if (!this.isReady) return;\n        if (!this.hasReceivedPosition) return;\n        const gameSpeed = window.game.gameSpeed;\n        let offset = window.gameEngine.deltaTime * gameSpeed;\n\n        if (this.moveRelativeToServerPosNextFrame) {\n            // When Receiving Player State\n            // Next Frame Move Relative To Server Pos\n            offset = (Date.now() - this.lastServerPosSentTime) * gameSpeed;\n            this.moveRelativeToServerPosNextFrame = false;\n        }\n\n        if (this.isMyPlayer) {\n            this.serverPos = Player.movePlayer(this.serverPos, this.serverDir, offset);\n            if (this.serverDir === this.dir) {\n                let clientSideDist = 0;\n                if (Player.isMovingHorizontally(this.dir)) {\n                    if (this.position.y === this.serverPos.y) {\n                        if (this.dir === 'right') {\n                            clientSideDist = this.position.x - this.serverPos.x;\n                        } else {\n                            clientSideDist = this.serverPos.x - this.position.x;\n                        }\n                    }\n                } else {\n                    if (this.position.x === this.serverPos.x) {\n                        if (this.dir === 'down') {\n                            clientSideDist = this.position.y - this.serverPos.y;\n                        } else {\n                            clientSideDist = this.serverPos.y - this.position.y;\n                        }\n                    }\n                }\n                clientSideDist = Math.max(0, clientSideDist);\n                offset *= _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(.5, 1, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.inverseLinearInterpolate(5, 0, clientSideDist));\n            }\n        }\n        let offsetPosition = Player.movePlayer(this.position, this.dir, offset);\n        if (!this.positionInWalls(offsetPosition))\n            this.updatePlayerPosition(offsetPosition);\n\n\n        this.moveDrawPosToPos();\n        this.checkNextDirAndCamera();\n        this.drawWaitingBlocks(ctx);\n        this.drawPlayerHeadWithEye(ctx);\n        this.parseDirQueue();\n\n    }\n\n\n    checkIfPositionSentEarlier(pos) {\n        return false; // TODO: Fix This\n        // console.log(pos, this.lastChangedDirPos, \"E\");\n\n\n        if (this.dir === 'up' && pos.y >= this.lastChangedDirPos.y) return true;\n        else if (this.dir === 'down' && pos.y <= this.lastChangedDirPos.y) return true;\n        else if (this.dir === 'left' && pos.x >= this.lastChangedDirPos.x) return true;\n        else return this.dir === 'right' && pos.x <= this.lastChangedDirPos.x;\n    }\n\n\n    positionInWalls(pos) {\n        const mapSize = window.gameEngine.gameObjects.mapSize - 1;\n        const playerPositionFloored = pos.floorVector();\n        const playerPositionCelled = pos.ceilVector();\n        const minBoundary = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](0, 0);\n        const maxBoundary = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](mapSize, mapSize);\n\n        return (playerPositionFloored.x <= minBoundary.x ||\n            playerPositionCelled.x >= maxBoundary.x ||\n            playerPositionFloored.y <= minBoundary.y ||\n            playerPositionCelled.y >= maxBoundary.y)\n    }\n\n    requestChangeDir(value, skipQueue = false) {\n        const dir = Player.mapControlsToDir(value);\n        const gameSpeed = window.game.gameSpeed;\n        const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;\n        const minTimeToWaitToSendDir = 0.7 / gameSpeed;\n\n        if (true) {\n            //check Player Socket Connection\n        }\n\n\n        // Prevent Sending Same Dir\n        // Prevent Sending Dir Too Fast\n        if (dir === this.myLastSendDir && timePassedFromLastSend < minTimeToWaitToSendDir) {\n            console.log(\"dir === this.myLastSendDir || timePassedFromLastSend < minTimeToWaitToSendDir\")\n            return false;\n        }\n        this.myLastSendDir = dir;\n        this.lastDirServerSentTime = Date.now();\n\n        if (this.dir === dir) {\n            console.log(\"this.dir === dir\");\n            this.addDirToQueue(dir, skipQueue);\n            return false;\n        }\n\n        // Check If Dir Is Opposite Of Current Dir\n        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isOppositeDir(dir, this.dir)) {\n            console.log(\"GameUtils.isOppositeDir(dir, this.dir)\");\n            this.addDirToQueue(dir, skipQueue);\n            return false;\n        }\n\n        // Round Player Position To The Nearest Integer\n        const isHorizontal = !this.isMovingHorizontally(this.dir);\n        const valueToRound = isHorizontal ? this.position.y : this.position.x;\n        const roundedValue = Math.round(valueToRound);\n        const newPlayerPos = this.position.clone();\n        if (isHorizontal) newPlayerPos.y = roundedValue; else newPlayerPos.x = roundedValue;\n        // console.log(\"LastPos\", this.position, \"NewPos\", newPlayerPos);\n\n        // Check If Position Corrupted Since Last Send\n        if (this.checkIfPositionSentEarlier(newPlayerPos)) {\n            console.log(\"GameUtils.checkIfPositionSentEarlier(dir, this.dir)\");\n            this.addDirToQueue(dir, skipQueue);\n            return false;\n        }\n\n\n        console.log(\"Position Passed\")\n        // Check If Last Direction Complete passed .55 Of Current Block\n        let changeDirNow = false;\n\n        const blockProgress = valueToRound - Math.floor(valueToRound);\n        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isMovingToPositiveDir(dir)) {\n            if (blockProgress < .45) changeDirNow = true;\n        } else if (blockProgress > .55) changeDirNow = true;\n\n\n        // Check If Prediction Of Next Direction Will Touch Wall\n        // We Change It Now Not in Next Frame\n        // Because checkNextDirAndCamera function will not change the direction\n        // Because the player is not moving to the next block\n        // as it prevented from move in main update function\n        let predictionVector = this.position.clone();\n        predictionVector = Player.movePlayer(predictionVector, this.dir, 1);\n        if (this.positionInWalls(predictionVector))\n            changeDirNow = true;\n\n\n        if (changeDirNow) {\n            console.log(\"changeDirNow\");\n            this.changeCurrentDir(dir, newPlayerPos);\n        } else {\n            console.log(\"Change It Next Frame\");\n            this.myNextDir = dir;\n            this.changeDirAtCoord = roundedValue;\n            this.changeDirAtIsHorizontal = isHorizontal;\n            this.lastChangedDirPos = newPlayerPos.clone();\n        }\n\n\n        // Last Send Time\n        // Last Confirmed Time\n        this.lastMyPostSetClientSendTime = Date.now();\n        if (this.lastPosHasBeenConfirmed) {\n            this.lastConfirmedTimeForPos = Date.now();\n            this.lastPosHasBeenConfirmed = false;\n        }\n\n\n        // We Send The Position and Dir To Server\n        // To Make Server Sync With Client\n        const packet = new _network_packets_direction__WEBPACK_IMPORTED_MODULE_3__[\"default\"](dir, newPlayerPos);\n        window.client.send(packet);\n        return true;\n    }\n\n\n    parseDirQueue() {\n\n        if (this.sendDirQueue.length <= 0) return;\n        const firstDir = this.sendDirQueue.first;\n        const timePassed = Date.now() - firstDir.time;\n        const gameSpeed = window.game.gameSpeed;\n        const minTimeToWaitToSendDir = 1.2 / gameSpeed;\n        if (timePassed < minTimeToWaitToSendDir || this.requestChangeDir(firstDir.dir, true)) {\n            this.sendDirQueue.shift();\n        }\n    }\n\n    addDirToQueue(dir, skip = false) {\n        if (!skip && this.sendDirQueue.length < 3) {\n            this.sendDirQueue.push({\n                dir: dir, time: Date.now()\n            });\n        }\n    }\n\n    /**\n     * Request Waiting Blocks For Two Reasons\n     * 1- If server thinks player movement then some waiting blocks were missed so we request it\n     */\n    requestWaitingBlocks() {\n        this.isGettingWaitingBlocks = true;\n        this.waitingPushedDuringReceiving = [];\n        const packet = new _network_packets_requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_4__[\"default\"]();\n        window.client.send(packet);\n    }\n\n\n    drawPlayerHead(ctx) {\n        let newDrawPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](this.drawPosition.x * 10 + 4.5, this.drawPosition.y * 10 + 4.5);\n        let radius = 6;\n        let shadowOffset = .3;\n\n        const gradient = ctx.createRadialGradient(newDrawPos.x - 3, newDrawPos.y - 3, 0, newDrawPos.x, newDrawPos.y, radius);\n        gradient.addColorStop(0, this.colorSlightlyBrighter);\n        gradient.addColorStop(1, this.colorBrighter);\n        if (false) {} else {\n            ctx.fillStyle = this.colorDarker;\n            ctx.beginPath();\n            ctx.arc(newDrawPos.x + shadowOffset, newDrawPos.y + shadowOffset, radius, 0, Math.PI * 2, false);\n            ctx.fill();\n            ctx.fillStyle = gradient;\n            ctx.beginPath();\n            ctx.arc(newDrawPos.x - shadowOffset, newDrawPos.y - shadowOffset, radius, 0, Math.PI * 2, false);\n            ctx.fill();\n            if (this.isMyPlayer) {\n                ctx.fillStyle = \"#ffffff\";\n                ctx.beginPath();\n                ctx.arc(newDrawPos.x - shadowOffset, newDrawPos.y - shadowOffset, 1, 0, Math.PI * 2, false);\n                ctx.fill();\n            }\n        }\n    }\n}\n\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Player);\n\n//# sourceURL=webpack:///./src/ui/objects/player.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ "./src/ui/objects/point.js");
+/* harmony import */ var _utils_math_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/math.js */ "./src/utils/math.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _network_packets_direction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../network/packets/direction */ "./src/network/packets/direction.js");
+/* harmony import */ var _network_packets_requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../network/packets/requestWaitingBlocks */ "./src/network/packets/requestWaitingBlocks.js");
+
+
+
+
+
+
+
+
+class Player {
+
+    constructor(position = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](1, 1), id) {
+        this.id = id
+        this.drawPosSet = false; // from PlayerState Packet
+
+        this.isMyPlayer = false;
+        this.deathWasCertain = false;
+        this.didUncertainDeathLastTick = false;
+        this.isDeathTimer = 0;
+        this.uncertainDeathPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        this.deadAnimParts = [];
+        this.deadAnimPartsRandDist = [];
+        this.hitLines = [];
+
+        this.position = position
+        this.drawPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](-1, -1);
+        this.serverPosition = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        this.lastChangedDirPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+
+
+        this.name = "";
+
+
+        // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
+
+
+        // Movements
+        this.hasReceivedPosition = false; // from PlayerState Packet it set position
+        this.moveRelativeToServerPosNextFrame = false; // from PlayerState Packet
+        this.lastServerPosSentTime = 0;
+
+
+        this.isReady = false;
+        this.isDead = false;
+
+        ///
+        /**
+         * waitingBlocks can be updated vai two messaged only
+         * 1- WaitingBlocksPacket [if player requested waiting blocks]
+         * 2- StopDrawingWaitingBlocksPacket [if player received to stop drawing waiting blocks request is sent to server]
+         * @type {*[]}
+         */
+        this.waitingBlocks = [];
+        this.waitingBlocksDuringWaiting = [];
+        //
+        this.lastPosHasBeenConfirmed = false;
+        this.lastPosServerSentTime = 0;
+        this.myNextDir = '';
+        this.myLastSendDir = '';
+        this.lastDirServerSentTime = 0;
+        this.lastMyPostSetClientSendTime = 0;
+        this.lastConfirmedTimeForPos = 0;
+        this.dir = '';
+        this.sendDirQueue = [];
+        this.clientSideMoves = [];
+        this.changeDirAtCoord = null;
+        this.changeDirAtIsHorizontal = false;
+
+        this.serverPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        this.serverDir = '';
+
+
+        this.waitingForPing = false;
+        this.lastPingTime = 0;
+        this.severLastPing = 0;
+        this.serverAvgPing = 0;
+        this.serverDiffPing = 0;
+
+
+        this.isGettingWaitingBlocks = false;
+        this.skipGettingWaitingBlocksRespose = false;
+        this.waitingPushedDuringReceiving = [];
+
+
+        // animation and drawing
+        this.nameAlphaTimer = 0;
+        this.isDeadTimer = 0;
+
+    }
+
+
+    static getPlayerById(id, players) {
+        for (let p of players) {
+            if (p.id === id) return p;
+        }
+    }
+
+    static isMovingHorizontally(direction) {
+        return direction === 'left' || direction === 'right';
+    }
+
+    static movePlayer(pos, dir, offset) {
+        let workingPos = pos.clone();
+        if (dir === 'up') {
+            workingPos.y -= offset;
+        } else if (dir === 'down') {
+            workingPos.y += offset;
+        } else if (dir === 'left') {
+            workingPos.x -= offset;
+        } else if (dir === 'right') {
+            workingPos.x += offset;
+        }
+        return workingPos;
+
+    }
+
+    static mapControlsToDir(controls) {
+        if (controls === 1) return 'up'; else if (controls === 3) return 'down'; else if (controls === 4) return 'left'; else if (controls === 2) return 'right'; else return '';
+    }
+
+    /**
+     * Verifies if the client's predicted player movement is synchronized with the server's authoritative state.
+     * This function checks the alignment of the player's current or next direction and position against the server's updates.
+     * It is critical for maintaining gameplay integrity by ensuring that all movements rendered client-side are accurate and acknowledged by the server.
+     * This helps prevent discrepancies that can affect game dynamics, such as rubberbanding or desyncs.
+     *
+     * - The function compares the latest direction and position (factoring in calculated offsets for lag) received from the server.
+     * - Returns false if the client’s predictions are confirmed by the server (i.e., no update or correction needed),
+     *   which means the player's state on the client matches the server's data.
+     * - Returns true if discrepancies are found, signaling the need for the client to update its local state based on the latest server information.
+     *
+     * Use this function to ensure that the gameplay remains fluid and consistent, avoiding interruptions due to network latency or processing delays.
+     */
+    checkClientMovementSyncedWithServer(newDir, newPosOffset, newPos) {
+        // Check If dir and por are close to current
+        const distVector = this.position.distanceVector(newPosOffset);
+        if ((this.dir === newDir || this.myNextDir === newDir) &&
+            distVector.x < 1 && distVector.y < 1) {
+            return false
+        }
+
+        // check if last client side move is same as new
+        // if server faster than client
+        if (this.clientSideMoves.length > 0) {
+            const lastClientSideMove = this.clientSideMoves.shift()
+            if (lastClientSideMove.dir === newDir
+                && lastClientSideMove.pos.equals(newPos)) {
+                return false
+            } else {
+                this.clientSideMoves = [];
+            }
+        }
+
+        return true
+
+    }
+
+
+    equals(player) {
+        return this.id === player.id;
+    }
+
+
+    /**
+     * Calculate Move Offset Based On Ping And Game Speed
+     * If Player Is Not My Player Or Ping Is Less Than 50 Return 0
+     * 50 ms is the minimum ping to consider the player is synced with the server
+     * so if not my player no need to calculate offset but if my player and ping is bigger than 50
+     * ping [round trip] / 2 * gameSpeed = offset
+     * @returns {number}
+     */
+    calMoveOffset() {
+        let offset = 0;
+        if (!this.isMyPlayer || this.serverAvgPing <= 50) return offset;
+
+        const gameSpeed = window.game.gameSpeed;
+        offset = (this.serverAvgPing / 2) * gameSpeed;
+        return offset;
+    }
+
+
+    addWaitingBlocks(pos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0)) {
+        if (this.waitingBlocks.length <= 0) return;
+        const lastBlock = this.waitingBlocks.getLast.blocks;
+        if (lastBlock.length <= 0) return;
+        if (!(lastBlock[0].x !== pos.x || lastBlock[0].y !== pos.y)) return;
+        lastBlock.push(pos.clone());
+
+
+        // If Player Change his Direction During Receiving Waiting Blocks
+        if (this.isMyPlayer && this.isGettingWaitingBlocks) {
+            this.waitingPushedDuringReceiving.push(pos);
+        }
+
+    }
+
+    /**
+     * This Function Is Called Every Frame
+     * It Moves The Draw Position To The Position
+     */
+    moveDrawPosToPos() {
+        let target = this.position;
+        this.drawPosition.x = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(this.drawPosition.x, target.x, 0.23);
+        this.drawPosition.y = _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(this.drawPosition.y, target.y, 0.23);
+    }
+
+    /**
+     * Update Player Direction
+     * @param dir
+     */
+    updatePlayerDirection(dir) {
+        this.dir = dir;
+    }
+
+    /**
+     * Check If Player Is Moving Horizontally
+     * @param direction
+     * @returns {boolean}
+     */
+    isMovingHorizontally(direction = this.dir) {
+        return direction === 'left' || direction === 'right';
+    }
+
+    /**
+     * Update Player Position
+     * @param pos
+     */
+    updatePlayerPosition(pos) {
+        this.position = pos;
+    }
+
+    /**
+     * This Is Called In PlayerState Message
+     * To Remove Blocks Outside Camera
+     */
+    removeBlocksOutsideCamera() {
+        const camera = window.camera;
+        const playerRect = camera.getViewPortRec(this.position);
+        const blocks = window.gameEngine.gameObjects.blocks;
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (!playerRect.pointInRect(block.position)) {
+                blocks.splice(i, 1);
+            }
+        }
+    }
+
+    /**
+     * This Function Is Called Every Frame
+     * It Checks If The Player Should Change Direction
+     * Based On Next Direction If It Should Change Direction
+     */
+    checkNextDirAndCamera() {
+
+        if (!this.isMyPlayer) return;
+
+        const camera = window.camera;
+        camera.moveToPlayer(this)
+
+
+        if (this.myNextDir === this.dir) return;
+
+        const isHorizontal = this.isMovingHorizontally(this.dir);
+        if (this.changeDirAtIsHorizontal !== isHorizontal) return;
+
+
+        let changeDirectionCurrentFrame = false;
+        const currentCoord = isHorizontal ? this.position.x : this.position.y;
+
+        // Check If Last Direction passed the point that player requested to change direction
+        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isMovingToPositiveDir(this.dir)) {
+            if (this.changeDirAtCoord < currentCoord) changeDirectionCurrentFrame = true;
+        } else {
+            if (this.changeDirAtCoord > currentCoord) changeDirectionCurrentFrame = true;
+        }
+
+
+        if (changeDirectionCurrentFrame) {
+            const newPos = this.position.clone();
+            const distance = Math.abs(this.changeDirAtCoord - currentCoord);
+            if (isHorizontal)
+                newPos.x = this.changeDirAtCoord;
+            else
+                newPos.y = this.changeDirAtCoord;
+            this.changeCurrentDir(this.myNextDir, newPos);
+            let offsetPosition = Player.movePlayer(this.position, this.dir, distance);
+            this.updatePlayerPosition(offsetPosition);
+        }
+
+    }
+
+    /**
+     * Change Player Direction and Position
+     * Add Waiting Blocks
+     * Add Client Side Move To Check If Server Synced With Client in PlayerState Message
+     * @param dir
+     * @param pos
+     * @param addWaitingBlocks
+     * @param clientDecision
+     */
+    changeCurrentDir(dir, pos, addWaitingBlocks = true, clientDecision = true) {
+        this.updatePlayerDirection(dir);
+        this.myNextDir = dir;
+
+        this.updatePlayerPosition(pos.clone());
+        this.lastChangedDirPos = pos.clone();
+
+
+        if (addWaitingBlocks) {
+            this.addWaitingBlocks(pos);
+        }
+
+
+        // To Check If Player Movement is Synced With Server in
+        // PlayerState Message
+        if (clientDecision) {
+            this.clientSideMoves.push({
+                dir: dir, pos: pos.clone(), time: Date.now()
+            });
+        }
+
+    }
+
+
+    ////////////// DRAWING /////////////////
+    drawPlayerHeadWithEye(ctx) {
+        let newDrawPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.drawPosition.x * 10 + 4.5, this.drawPosition.y * 10 + 4.5);
+        const bigEye = "#ffff";
+        const smallEye = "#000";
+        let radius = 6;
+        let size = radius;
+        const animationSpeed = 0.005;
+        const eyeAnimation = Math.sin(Date.now() * animationSpeed) * 2;
+        let r = 0.5;
+
+        const gradient = ctx.createRadialGradient(newDrawPos.x - 3, newDrawPos.y - 3, 0, newDrawPos.x, newDrawPos.y, radius);
+        gradient.addColorStop(0, this.colorSlightlyBrighter);
+        gradient.addColorStop(1, this.colorBrighter);
+
+        const c = ctx;
+        c.translate(newDrawPos.x, newDrawPos.y);
+
+        if (this.dir === 'up') {
+            c.rotate(Math.PI * r);
+        } else if (this.dir === 'down') {
+            r += .5 * 2;
+            c.rotate(Math.PI * r);
+        } else if (this.dir === 'left') {
+            r += .5 * 3;
+            c.rotate(Math.PI * r);
+        } else {
+            r += .5;
+            c.rotate(Math.PI * r);
+        }
+
+        c.beginPath();
+        c.arc(0, 0, size, 0, Math.PI * 2, false);
+
+        c.fillStyle = gradient;
+        c.fill();
+
+        // Draw the left white eye
+        c.beginPath();
+        c.fillStyle = bigEye;
+        c.arc(-size / 2, -size / 2.5, size / 4, 0, Math.PI * 2, false);
+        c.fill();
+
+        // Draw the left black eye
+        c.beginPath();
+        c.fillStyle = smallEye;
+        c.arc(-size / 2, -size / 2.5 + eyeAnimation, size / 8, 0, Math.PI * 2, false);
+        c.fill();
+
+        // Draw the right white eye
+        c.beginPath();
+        c.fillStyle = bigEye;
+        c.arc(-size / 2, size / 2.5, size / 4, 0, Math.PI * 2, false);
+        c.fill();
+
+        // Draw the right black eye
+        c.beginPath();
+        c.fillStyle = smallEye;
+        c.arc(-size / 2, size / 2.5 + eyeAnimation, size / 8, 0, Math.PI * 2, false);
+        c.fill();
+
+        // Smile
+        c.beginPath();
+        c.arc(size / 4, 0, size / 2, -0.5 * Math.PI, 0.5 * Math.PI);
+        c.lineWidth = size / 10;
+        c.stroke();
+
+        c.restore();
+        window.gameEngine.camTransform(ctx);
+
+    }
+
+    drawWaitingBlocks(ctx) {
+        if (this.waitingBlocks.length <= 0) return;
+        const gameSpeed = window.game.gameSpeed;
+        const deltaTime = window.gameEngine.deltaTime;
+
+
+        for (let blockIndex = this.waitingBlocks.length - 1; blockIndex >= 0; blockIndex--) {
+            let block = this.waitingBlocks[blockIndex];
+            let isLastBlock = blockIndex === this.waitingBlocks.length - 1;
+
+
+            // remove Top Block From Waiting Blocks If It's Vanish Timer Is More Than 10
+            if (!isLastBlock || this.isDead) {
+                let speed = (this.isDead && isLastBlock) ? gameSpeed : 0.02;
+                block.vanishTimer += deltaTime * speed;
+                if (!isLastBlock && (block.vanishTimer > 10)) {
+                    this.waitingBlocks.splice(blockIndex, 1);
+                }
+            }
+
+            let helperCanvas = window.game.helperCtx.canvas;
+            let helperCtx = window.game.helperCtx;
+
+            if (block.blocks.length <= 0) continue;
+
+            const lastDrawPos = isLastBlock ? this.drawPosition : null;
+
+            if (block.vanishTimer > 0) {
+                window.gameEngine.camTransform(helperCtx, true);
+
+
+                this.drawWaitingBlockInCTX([
+                    {ctx: helperCtx, color: this.colorDarker, offset: 5},
+                    {ctx: helperCtx, color: this.colorBrighter, offset: 4},
+                ], block.blocks, lastDrawPos);
+
+
+                helperCtx.globalCompositeOperation = 'destination-out';
+
+                ctx.restore();
+                helperCtx.restore();
+
+                ctx.drawImage(helperCanvas, 0, 0);
+
+                helperCtx.fillStyle = '#c7c7c7';
+                helperCtx.globalCompositeOperation = "source-in";
+                helperCtx.fillRect(0, 0, helperCanvas.width, helperCanvas.height);
+                window.gameEngine.camTransform(ctx);
+
+            } else if (block.vanishTimer < 10) {
+                this.drawWaitingBlockInCTX([
+                    {ctx: ctx, color: this.colorDarker, offset: 6},
+                    {ctx: ctx, color: this.colorBrighter, offset: 4},
+                ], block.blocks, lastDrawPos);
+            }
+
+
+        }
+
+
+    }
+
+    drawWaitingBlockInCTX(contexts, blocks, lastPosition) {
+        if (blocks.length <= 0) return;
+
+
+        for (let ctxIndex = 0; ctxIndex < contexts.length; ctxIndex++) {
+            let b = contexts[ctxIndex];
+            let ctx = b.ctx;
+            let offset = b.offset;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = b.color;
+            ctx.beginPath();
+            ctx.moveTo(blocks[0].x * 10 + offset, blocks[0].y * 10 + offset);
+            for (let i = 1; i < blocks.length; i++) {
+                ctx.lineTo(blocks[i].x * 10 + offset, blocks[i].y * 10 + offset);
+            }
+            if (lastPosition !== null) {
+                ctx.lineTo(lastPosition.x * 10 + offset, lastPosition.y * 10 + offset);
+            }
+            ctx.stroke();
+        }
+    }
+
+    draw(ctx) {
+        if (!this.isReady) return; // from Ready Packet
+        if (!this.hasReceivedPosition) return; // from PlayerState Packet
+        const gameSpeed = window.game.gameSpeed;
+        let offset = window.gameEngine.deltaTime * gameSpeed;
+
+
+        // When Receiving Player State Next Frame Move Relative To Server Pos
+        if (this.moveRelativeToServerPosNextFrame) {
+            // When Receiving Player State
+            // Next Frame Move Relative To Server Pos
+            offset = (Date.now() - this.lastServerPosSentTime) * gameSpeed;
+            this.moveRelativeToServerPosNextFrame = false;
+        }
+
+        if (this.isMyPlayer) {
+            this.serverPos = Player.movePlayer(this.serverPos, this.serverDir, offset);
+
+            // Check If Client Movement As Same As Server Direction Received From Server in PlayerState Message
+            if (this.serverDir === this.dir) {
+                let clientSideDist = 0;
+                if (Player.isMovingHorizontally(this.dir)) {
+                    if (this.position.y === this.serverPos.y) {
+                        if (this.dir === 'right') {
+                            clientSideDist = this.position.x - this.serverPos.x;
+                        } else {
+                            clientSideDist = this.serverPos.x - this.position.x;
+                        }
+                    }
+                } else {
+                    if (this.position.x === this.serverPos.x) {
+                        if (this.dir === 'down') {
+                            clientSideDist = this.position.y - this.serverPos.y;
+                        } else {
+                            clientSideDist = this.serverPos.y - this.position.y;
+                        }
+                    }
+                }
+                clientSideDist = Math.max(0, clientSideDist);
+                offset *= _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.linearInterpolate(.5, 1, _utils_math_js__WEBPACK_IMPORTED_MODULE_1__.inverseLinearInterpolate(5, 0, clientSideDist));
+            }
+        }
+
+
+        let offsetPosition = Player.movePlayer(this.position, this.dir, offset);
+        if (!this.positionInWalls(offsetPosition))
+            this.updatePlayerPosition(offsetPosition);
+
+
+        this.moveDrawPosToPos();
+        this.checkNextDirAndCamera();
+        this.drawWaitingBlocks(ctx);
+        this.drawPlayerHeadWithEye(ctx);
+        this.drawPlayerName(ctx)
+        this.parseDirQueue();
+
+    }
+
+
+    drawPlayerName(ctx) {
+        this.nameAlphaTimer += window.gameEngine.deltaTime * 0.001;
+        const userNameSize = 6;
+        ctx.font = `${userNameSize}px Arial, Helvetica, sans-serif`;
+        let myAlpha = 1;
+        let deadAlpha = 1;
+        if (this.isMyPlayer) {
+            myAlpha = 9 - this.nameAlphaTimer;
+        }
+        if (this.isDead) {
+            deadAlpha = 1 - this.isDeadTimer;
+        }
+        let alpha = Math.min(myAlpha, deadAlpha);
+        // if (alpha <= 0) return;
+
+        ctx.save();
+        // ctx.globalAlpha = GameMath.clamp(alpha, 0, 1);
+        let realNameWidth = ctx.measureText(this.name).width;
+        let nameWidth = Math.max(100, realNameWidth);
+
+        const maxNamePos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"]((this.drawPosition.x * 10) + 5 - (nameWidth / 2), this.drawPosition.y * 10 - 5);
+        // center the width i we have a space
+
+
+        const namePos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](maxNamePos.x, maxNamePos.y);
+        const distanceToMax = this.drawPosition.multiply(10).distanceVector(maxNamePos).abs();
+        namePos.x = Math.abs(distanceToMax.x - realNameWidth)/2 + maxNamePos.x;
+
+
+        ctx.rect(namePos.x - 4, namePos.y - userNameSize * 1.2, nameWidth + 8, userNameSize * 2);
+        ctx.clip();
+
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = ctx.shadowOffsetY = 2;
+        ctx.fillStyle = this.colorBrighter;
+        ctx.fillText(this.name, namePos.x, namePos.y);
+
+        ctx.shadowColor = this.colorDarker;
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = ctx.shadowOffsetY = 0.8;
+        ctx.fillText(this.name, namePos.x, namePos.y);
+
+        ctx.restore();
+
+
+    }
+
+    ///////////////////////////////////
+
+    checkIfPositionSentEarlier(pos) {
+        return false; // TODO: Fix This
+        // console.log(pos, this.lastChangedDirPos, "E");
+
+
+        if (this.dir === 'up' && pos.y >= this.lastChangedDirPos.y) return true;
+        else if (this.dir === 'down' && pos.y <= this.lastChangedDirPos.y) return true;
+        else if (this.dir === 'left' && pos.x >= this.lastChangedDirPos.x) return true;
+        else return this.dir === 'right' && pos.x <= this.lastChangedDirPos.x;
+    }
+
+
+    positionInWalls(pos) {
+        const mapSize = window.gameEngine.gameObjects.mapSize - 1;
+        const playerPositionFloored = pos.floorVector();
+        const playerPositionCelled = pos.ceilVector();
+        const minBoundary = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](0, 0);
+        const maxBoundary = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](mapSize, mapSize);
+
+        return (playerPositionFloored.x <= minBoundary.x ||
+            playerPositionCelled.x >= maxBoundary.x ||
+            playerPositionFloored.y <= minBoundary.y ||
+            playerPositionCelled.y >= maxBoundary.y)
+    }
+
+    requestChangeDir(direction, skipQueue = false) {
+        const dir = direction;
+        const gameSpeed = window.game.gameSpeed;
+        const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;
+        const minTimeToWaitToSendDir = 0.7 / gameSpeed;
+
+
+        // Prevent Sending Same Dir
+        // Prevent Sending Dir Too Fast
+        if (dir === this.myLastSendDir && timePassedFromLastSend < minTimeToWaitToSendDir) {
+            return false;
+        }
+        this.myLastSendDir = dir;
+        this.lastDirServerSentTime = Date.now();
+
+
+        // Check If Dir Is Same As Current Dir
+        if (this.dir === dir) {
+            return false;
+        }
+
+        // Check If Dir Is Opposite Of Current Dir
+        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isOppositeDir(dir, this.dir)) {
+            return false;
+        }
+
+        // Round Player Position To The Nearest Integer
+        const isHorizontal = this.isMovingHorizontally(this.dir);
+
+        const valueToRound = isHorizontal ? this.position.x : this.position.y;
+        const roundedValue = Math.round(valueToRound);
+        const newPlayerPos = this.position.clone();
+        if (isHorizontal) newPlayerPos.x = roundedValue;
+        else newPlayerPos.y = roundedValue;
+
+        // Check If Position Corrupted Since Last Send
+        if (this.checkIfPositionSentEarlier(newPlayerPos)) {
+            console.log("GameUtils.checkIfPositionSentEarlier(dir, this.dir)");
+            this.addDirToQueue(dir, skipQueue);
+            return false;
+        }
+
+
+        console.log("Position Passed")
+        // Check If Last Direction Complete passed .55 Of Current Block
+        let changeDirectionCurrentFrame = false;
+
+        const blockProgress = valueToRound - Math.floor(valueToRound);
+        if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isMovingToPositiveDir(dir)) {
+            if (blockProgress < .45)
+                changeDirectionCurrentFrame = true;
+        } else if (blockProgress > .55)
+            changeDirectionCurrentFrame = true;
+
+
+        // Check If Prediction Of Next Direction Will Touch Wall
+        // We Change It Now Not in Next Frame
+        // Because checkNextDirAndCamera function will not change the direction
+        // Because the player is not moving to the next block
+        // as it prevented from move in main update function
+        let predictionVector = this.position.clone();
+        predictionVector = Player.movePlayer(predictionVector, this.dir, 1);
+
+        if (this.positionInWalls(predictionVector))
+            changeDirectionCurrentFrame = true;
+
+
+        if (changeDirectionCurrentFrame) {
+            this.changeCurrentDir(dir, newPlayerPos);
+        } else {
+            // change direction in next frame
+            // this movement will be done in next frame not now
+            this.myNextDir = dir;
+            this.changeDirAtCoord = roundedValue;
+            this.changeDirAtIsHorizontal = isHorizontal;
+            this.lastChangedDirPos = newPlayerPos.clone();
+        }
+
+
+        // Last Send Time
+        // Last Confirmed Time
+        this.lastMyPostSetClientSendTime = Date.now();
+        if (this.lastPosHasBeenConfirmed) {
+            this.lastConfirmedTimeForPos = Date.now();
+            this.lastPosHasBeenConfirmed = false;
+        }
+
+
+        // We Send The Position and Dir To Server
+        // To Make Server Sync With Client
+        const packet = new _network_packets_direction__WEBPACK_IMPORTED_MODULE_3__["default"](dir, newPlayerPos);
+        window.client.send(packet);
+        return true;
+    }
+
+
+    parseDirQueue() {
+
+        if (this.sendDirQueue.length <= 0) return;
+        const firstDir = this.sendDirQueue.first;
+        const timePassed = (Date.now() - firstDir.time);
+        const gameSpeed = window.game.gameSpeed;
+        const minTimeToWaitToSendDir = 1.2 / gameSpeed;
+
+        /// Check If Time Passed From Last Send Is Less Than minTimeToWaitToSendDir
+        if (timePassed < minTimeToWaitToSendDir || this.requestChangeDir(firstDir.dir, true)) {
+            this.sendDirQueue.shift();
+        }
+    }
+
+    addDirToQueue(dir, skip = false) {
+        if (!skip && this.sendDirQueue.length < 3) {
+            this.sendDirQueue.push({
+                dir: dir, time: Date.now()
+            });
+        }
+    }
+
+    /**
+     * Request Waiting Blocks For Two Reasons
+     * 1- If server thinks during player movement then some waiting blocks were missed so we request it
+
+     the RequestWaitingBlocks could happen if we found server and client blocks are not synced
+     in Player State Packet
+
+
+
+     */
+    requestWaitingBlocks() {
+        this.isGettingWaitingBlocks = true;
+        this.waitingPushedDuringReceiving = [];
+        const packet = new _network_packets_requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_4__["default"]();
+        window.client.send(packet);
+    }
+
+
+    drawPlayerHead(ctx) {
+        let newDrawPos = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.drawPosition.x * 10 + 4.5, this.drawPosition.y * 10 + 4.5);
+        let radius = 6;
+        let shadowOffset = .3;
+
+        const gradient = ctx.createRadialGradient(newDrawPos.x - 3, newDrawPos.y - 3, 0, newDrawPos.x, newDrawPos.y, radius);
+        gradient.addColorStop(0, this.colorSlightlyBrighter);
+        gradient.addColorStop(1, this.colorBrighter);
+        if (false) {} else {
+            ctx.fillStyle = this.colorDarker;
+            ctx.beginPath();
+            ctx.arc(newDrawPos.x + shadowOffset, newDrawPos.y + shadowOffset, radius, 0, Math.PI * 2, false);
+            ctx.fill();
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(newDrawPos.x - shadowOffset, newDrawPos.y - shadowOffset, radius, 0, Math.PI * 2, false);
+            ctx.fill();
+            if (this.isMyPlayer) {
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(newDrawPos.x - shadowOffset, newDrawPos.y - shadowOffset, 1, 0, Math.PI * 2, false);
+                ctx.fill();
+            }
+        }
+    }
+}
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Player);
 
 /***/ }),
 
@@ -311,7 +3089,53 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\nclass Point {\n    constructor(x, y) {\n        this.x = x;\n        this.y = y;\n    }\n\n    equals(otherPoint) {\n        return this.x === otherPoint.x && this.y === otherPoint.y;\n    }\n\n    distanceVector(otherPoint) {\n        return new Point(Math.abs(this.x - otherPoint.x), Math.abs(this.y - otherPoint.y));\n    }\n\n    clone() {\n        return new Point(this.x, this.y);\n    }\n\n\n    floorVector()\n    {\n        return new Point(Math.floor(this.x),Math.floor(this.y));\n    }\n\n    ceilVector()\n    {\n        return new Point(Math.ceil(this.x),Math.ceil(this.y));\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Point);\n\n//# sourceURL=webpack:///./src/ui/objects/point.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    equals(otherPoint) {
+        return this.x === otherPoint.x && this.y === otherPoint.y;
+    }
+
+    distanceVector(otherPoint) {
+        return new Point(Math.abs(this.x - otherPoint.x), Math.abs(this.y - otherPoint.y));
+    }
+
+
+    multiply(scalar) {
+        return new Point(this.x * scalar, this.y * scalar);
+    }
+
+
+    clone() {
+        return new Point(this.x, this.y);
+    }
+
+
+    floorVector()
+    {
+        return new Point(Math.floor(this.x),Math.floor(this.y));
+    }
+
+    ceilVector()
+    {
+        return new Point(Math.ceil(this.x),Math.ceil(this.y));
+    }
+
+    abs(){
+        return new Point(Math.abs(this.x),Math.abs(this.y));
+    }
+
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Point);
 
 /***/ }),
 
@@ -322,7 +3146,74 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ \"./src/ui/objects/point.js\");\n\nclass Rectangle {\n    constructor(minVec, maxVec) {\n        this.min = minVec;\n        this.max = maxVec;\n    }\n\n    toString() {\n        return `<Rectangle min=${this.min} max=${this.max}>`;\n    }\n\n    clamp(rect) {\n        const minVec = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n            Math.max(this.min.x, rect.min.x),\n            Math.max(this.min.y, rect.min.y)\n        );\n\n        const maxVec = new _point_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\n            Math.min(this.max.x, rect.max.x),\n            Math.min(this.max.y, rect.max.y)\n        );\n\n        return new Rectangle(minVec, maxVec);\n    }\n\n    *for_each() {\n        for (let x = this.min.x; x < this.max.x; x++) {\n            for (let y = this.min.y; y < this.max.y; y++) {\n                yield { x, y };\n            }\n        }\n    }\n\n    isRectOverlap(rect) {\n        return (\n            this.min.x < rect.max.x &&\n            this.max.x > rect.min.x &&\n            this.min.y < rect.max.y &&\n            this.max.y > rect.min.y\n        );\n    }\n\n    isNotRectOverlap(rect) {\n        return (\n            this.max.x < rect.min.x ||\n            this.min.x > rect.max.x ||\n            this.max.y < rect.min.y ||\n            this.min.y > rect.max.y\n        );\n    }\n\n\n    pointInRect(point) {\n        return (\n            point.x >= this.min.x &&\n            point.x <= this.max.x &&\n            point.y >= this.min.y &&\n            point.y <= this.max.y\n        );\n    }\n}\n\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Rectangle);\n\n//# sourceURL=webpack:///./src/ui/objects/rectangle.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./point.js */ "./src/ui/objects/point.js");
+
+class Rectangle {
+    constructor(minVec, maxVec) {
+        this.min = minVec;
+        this.max = maxVec;
+    }
+
+    toString() {
+        return `<Rectangle min=${this.min} max=${this.max}>`;
+    }
+
+    clamp(rect) {
+        const minVec = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](
+            Math.max(this.min.x, rect.min.x),
+            Math.max(this.min.y, rect.min.y)
+        );
+
+        const maxVec = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](
+            Math.min(this.max.x, rect.max.x),
+            Math.min(this.max.y, rect.max.y)
+        );
+
+        return new Rectangle(minVec, maxVec);
+    }
+
+    *for_each() {
+        for (let x = this.min.x; x < this.max.x; x++) {
+            for (let y = this.min.y; y < this.max.y; y++) {
+                yield { x, y };
+            }
+        }
+    }
+
+    isRectOverlap(rect) {
+        return (
+            this.min.x < rect.max.x &&
+            this.max.x > rect.min.x &&
+            this.min.y < rect.max.y &&
+            this.max.y > rect.min.y
+        );
+    }
+
+    isNotRectOverlap(rect) {
+        return (
+            this.max.x < rect.min.x ||
+            this.min.x > rect.max.x ||
+            this.max.y < rect.min.y ||
+            this.min.y > rect.max.y
+        );
+    }
+
+
+    pointInRect(point) {
+        return (
+            point.x >= this.min.x &&
+            point.x <= this.max.x &&
+            point.y >= this.min.y &&
+            point.y <= this.max.y
+        );
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Rectangle);
 
 /***/ }),
 
@@ -333,7 +3224,73 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   calculate_pixel_ratio: () => (/* binding */ calculate_pixel_ratio),\n/* harmony export */   convertIntColorToHex: () => (/* binding */ convertIntColorToHex),\n/* harmony export */   drawInCtxRec: () => (/* binding */ drawInCtxRec),\n/* harmony export */   ease: () => (/* binding */ ease),\n/* harmony export */   getHeight: () => (/* binding */ getHeight),\n/* harmony export */   getWidth: () => (/* binding */ getWidth),\n/* harmony export */   isMovingToPositiveDir: () => (/* binding */ isMovingToPositiveDir),\n/* harmony export */   isOppositeDir: () => (/* binding */ isOppositeDir),\n/* harmony export */   isVerticalDir: () => (/* binding */ isVerticalDir)\n/* harmony export */ });\nconst getHeight = () => window.innerHeight;\nconst getWidth = () => window.innerWidth;\n\nconst calculate_pixel_ratio = () => {\n    let context = document.createElement(\"canvas\").getContext(\"2d\");\n    let dpr = window.devicePixelRatio || 1;\n    let bsr = context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio || context.msBackingStorePixelRatio || context.oBackingStorePixelRatio || context.backingStorePixelRatio || 1;\n    return dpr / bsr;\n}\n\nconst ease = {\n    in: function (t) {\n        return t * t * t * t;\n    },\n    out: function (t) {\n        return 1 - Math.pow(1 - t, 4);\n    },\n    inout: function (t) {\n        return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;\n    },\n};\n\n\nconst drawInCtxRec = (ctx, point, size, color, spacing = 0) => {\n    ctx.fillStyle = color;\n    ctx.fillRect(point.x + spacing, point.y + spacing, size, size);\n}\n\n\nconst convertIntColorToHex = (color) => {\n    return \"#\" + (\"000000\" + color.toString(16)).slice(-6);\n}\n\n\nconst isOppositeDir = (newDir, OldDir) => {\n    if (newDir === 'up' && OldDir === 'down')\n        return true;\n    else if (newDir === 'down' && OldDir === 'up')\n        return true;\n    else if (newDir === 'left' && OldDir === 'right')\n        return true;\n    else return newDir === 'right' && OldDir === 'left';\n\n}\n\nconst isVerticalDir = (dir) => {\n    return dir === 'up' || dir === 'down';\n}\n\nconst isMovingToPositiveDir = (dir) => {\n    return dir === 'down' || dir === 'right';\n\n}\n\n\n\n//# sourceURL=webpack:///./src/ui/utils.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   calculate_pixel_ratio: () => (/* binding */ calculate_pixel_ratio),
+/* harmony export */   convertIntColorToHex: () => (/* binding */ convertIntColorToHex),
+/* harmony export */   drawInCtxRec: () => (/* binding */ drawInCtxRec),
+/* harmony export */   ease: () => (/* binding */ ease),
+/* harmony export */   getHeight: () => (/* binding */ getHeight),
+/* harmony export */   getWidth: () => (/* binding */ getWidth),
+/* harmony export */   isMovingToPositiveDir: () => (/* binding */ isMovingToPositiveDir),
+/* harmony export */   isOppositeDir: () => (/* binding */ isOppositeDir),
+/* harmony export */   isVerticalDir: () => (/* binding */ isVerticalDir)
+/* harmony export */ });
+const getHeight = () => window.innerHeight;
+const getWidth = () => window.innerWidth;
+
+const calculate_pixel_ratio = () => {
+    let context = document.createElement("canvas").getContext("2d");
+    let dpr = window.devicePixelRatio || 1;
+    let bsr = context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio || context.msBackingStorePixelRatio || context.oBackingStorePixelRatio || context.backingStorePixelRatio || 1;
+    return dpr / bsr;
+}
+
+const ease = {
+    in: function (t) {
+        return t * t * t * t;
+    },
+    out: function (t) {
+        return 1 - Math.pow(1 - t, 4);
+    },
+    inout: function (t) {
+        return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+    },
+};
+
+
+const drawInCtxRec = (ctx, point, size, color, spacing = 0) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(point.x + spacing, point.y + spacing, size, size);
+}
+
+
+const convertIntColorToHex = (color) => {
+    return "#" + ("000000" + color.toString(16)).slice(-6);
+}
+
+
+const isOppositeDir = (newDir, OldDir) => {
+    if (newDir === 'up' && OldDir === 'down')
+        return true;
+    else if (newDir === 'down' && OldDir === 'up')
+        return true;
+    else if (newDir === 'left' && OldDir === 'right')
+        return true;
+    else return newDir === 'right' && OldDir === 'left';
+
+}
+
+const isVerticalDir = (dir) => {
+    return dir === 'up' || dir === 'down';
+}
+
+const isMovingToPositiveDir = (dir) => {
+    return dir === 'down' || dir === 'right';
+
+}
+
+
 
 /***/ }),
 
@@ -344,7 +3301,54 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   adaptedConLinearInterpolate: () => (/* binding */ adaptedConLinearInterpolate),\n/* harmony export */   adaptedLinearInterpolate: () => (/* binding */ adaptedLinearInterpolate),\n/* harmony export */   calPercentage: () => (/* binding */ calPercentage),\n/* harmony export */   clamp: () => (/* binding */ clamp),\n/* harmony export */   inverseLinearInterpolate: () => (/* binding */ inverseLinearInterpolate),\n/* harmony export */   linearInterpolate: () => (/* binding */ linearInterpolate),\n/* harmony export */   smoothLimit: () => (/* binding */ smoothLimit)\n/* harmony export */ });\nconst linearInterpolate = (a, b, v) => {\n    return a + (b - a) * v;\n}\n\n\nconst inverseLinearInterpolate = (a, b, v) => {\n    return (v - a) / (b - a);\n}\n\nconst adaptedLinearInterpolate = (a, b, val1, val2) => {\n    let x = 1 - Math.pow((1 - val1), val2);\n    return linearInterpolate(a, b, x);\n};\n\nconst adaptedConLinearInterpolate = (val2) => (a, b, val1) => {\n    return adaptedLinearInterpolate(a, b, val1, val2);\n}\n\nconst smoothLimit = (v) => {\n    let negative = v < 0;\n    if (negative) {\n        v *= -1;\n    }\n    v = 1 - Math.pow(2, -v);\n    if (negative) {\n        v *= -1;\n    }\n    return v;\n}\n\nconst clamp = (val, min, max) => {\n    return Math.max(min, Math.min(max, val));\n}\n\n\nconst calPercentage = (a, percentage) => a * percentage;\n\n\n\n//# sourceURL=webpack:///./src/utils/math.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   adaptedConLinearInterpolate: () => (/* binding */ adaptedConLinearInterpolate),
+/* harmony export */   adaptedLinearInterpolate: () => (/* binding */ adaptedLinearInterpolate),
+/* harmony export */   calPercentage: () => (/* binding */ calPercentage),
+/* harmony export */   clamp: () => (/* binding */ clamp),
+/* harmony export */   inverseLinearInterpolate: () => (/* binding */ inverseLinearInterpolate),
+/* harmony export */   linearInterpolate: () => (/* binding */ linearInterpolate),
+/* harmony export */   smoothLimit: () => (/* binding */ smoothLimit)
+/* harmony export */ });
+const linearInterpolate = (a, b, v) => {
+    return a + (b - a) * v;
+}
+
+
+const inverseLinearInterpolate = (a, b, v) => {
+    return (v - a) / (b - a);
+}
+
+const adaptedLinearInterpolate = (a, b, val1, val2) => {
+    let x = 1 - Math.pow((1 - val1), val2);
+    return linearInterpolate(a, b, x);
+};
+
+const adaptedConLinearInterpolate = (val2) => (a, b, val1) => {
+    return adaptedLinearInterpolate(a, b, val1, val2);
+}
+
+const smoothLimit = (v) => {
+    let negative = v < 0;
+    if (negative) {
+        v *= -1;
+    }
+    v = 1 - Math.pow(2, -v);
+    if (negative) {
+        v *= -1;
+    }
+    return v;
+}
+
+const clamp = (val, min, max) => {
+    return Math.max(min, Math.min(max, val));
+}
+
+
+const calPercentage = (a, percentage) => a * percentage;
+
+
 
 /***/ })
 
@@ -416,11 +3420,85 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/app.js");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+/*!********************!*\
+  !*** ./src/app.js ***!
+  \********************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ui_objects_camera_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ui/objects/camera.js */ "./src/ui/objects/camera.js");
+/* harmony import */ var _gameEngine__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./gameEngine */ "./src/gameEngine.js");
+/* harmony import */ var _network_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./network/client */ "./src/network/client.js");
+/* harmony import */ var _globals_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./globals.js */ "./src/globals.js");
+/* harmony import */ var _controls_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./controls.js */ "./src/controls.js");
+/* harmony import */ var _extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./extensions/arraysExtensions.js */ "./src/extensions/arraysExtensions.js");
+/* harmony import */ var _extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_extensions_arraysExtensions_js__WEBPACK_IMPORTED_MODULE_5__);
+
+
+
+
+
+
+
+
+const camera = new _ui_objects_camera_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+const gameEngine = new _gameEngine__WEBPACK_IMPORTED_MODULE_1__["default"](60);
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+let blocks = gameEngine.gameObjects.blocks;
+let players = gameEngine.gameObjects.players;
+
+let helperCanvas = document.createElement("canvas");
+let helperCtx = helperCanvas.getContext("2d");
+
+window.game.helperCtx = helperCtx;
+window.gameEngine = gameEngine;
+window.camera = camera;
+window.game.canvas = canvas;
+
+let client = null;
+let myPlayer = null;
+
+const draw = () => {
+    if (client && client.player) myPlayer = client.player;
+
+    gameEngine.scaleCanvas(ctx);
+    ctx.fillStyle = "#3a3428";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    camera.loop()
+    gameEngine.camTransform(ctx);
+
+
+    // console.log("Blocks: " + blocks.length);
+    for (let b of blocks) {
+        b.draw(ctx, false);
+    }
+
+    for (let p in players) {
+        players[p].draw(ctx);
+    }
+
+    if (client && client.player) myPlayer.removeBlocksOutsideCamera();
+
+}
+
+
+gameEngine.setDrawFunction(draw);
+
+
+window.requestAnimationFrame(gameEngine.loop.bind(gameEngine));
+
+client = new _network_client__WEBPACK_IMPORTED_MODULE_2__.Client('ws://127.0.0.1:5000/game', (client) => {
+    client.setPlayerName("Test");
+});
+
+
+
+})();
+
 /******/ })()
 ;
+//# sourceMappingURL=bundle.js.map

@@ -47,6 +47,7 @@ class Rectangle:
         self.min = min_vec
         self.max = max_vec
 
+
     def expand_to_rect(self, other_rectangle):
         min_vec = Vector(
             min(self.min.x, other_rectangle.min.x),
@@ -68,3 +69,13 @@ class Rectangle:
 
     def same_as(self, other):
         return self.min == other.min and self.max == other.max
+
+
+    def all_points_in_border(self):
+        for x in range(self.min.x, self.max.x+1):
+            yield x, self.min.y
+            yield x, self.max.y
+        # exclude the corners
+        for y in range(self.min.y+1, self.max.y):
+            yield self.min.x, y
+            yield self.max.x, y

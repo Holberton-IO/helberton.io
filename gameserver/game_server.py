@@ -1,7 +1,5 @@
 import math
 import random
-from gameserver.game.player import Player
-from gameserver.game.map import Map
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
@@ -10,7 +8,7 @@ from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket, P
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game.map import Map
+    pass
 
 
 class GameServer:
@@ -22,6 +20,10 @@ class GameServer:
 
     min_tiles_viewport_rect_size = 20
     viewport_edge_chunk_size = 5
+
+
+
+
     updates_viewport_rect_size = min_tiles_viewport_rect_size + viewport_edge_chunk_size
 
     max_undo_event_time = 600
@@ -43,6 +45,8 @@ class GameServer:
 
     def __new__(cls, *args, **kwargs):
         if GameServer.__instance is None:
+            from gameserver.game.map import Map
+
             map_size = kwargs.get("map_size", 0)
             GameServer.__instance = object.__new__(cls)
             GameServer.__instance.map: Map = Map(map_size, GameServer.__instance)
@@ -53,6 +57,13 @@ class GameServer:
         self.clients = []
         self.players = []
         self.player_count = 0
+
+
+    def get_player_by_id(self, player_id):
+        for player in self.players:
+            if player.player_id == player_id:
+                return player
+        return None
 
     def add_new_player(self, player):
         self.players.append(player)
@@ -161,6 +172,11 @@ class GameServer:
             print("Player State Packet Sent To: ", p.name)
             p.client.send(player_state_packet)
 
+
+
+    """
+        Broadcast The Waiting Blocks To All Nearby Players Of The Player in [other_players] this includes the player itself
+    """
     def broadcast_player_waiting_blocks(self, player):
         packet = WaitingBlocksPacket(player)
         for nearby_player in player.players_see_this_player():
@@ -184,3 +200,6 @@ class GameServer:
                 callback_if_myself(nearby_player)
             else:
                 callback_if_not_myself(nearby_player)
+
+
+

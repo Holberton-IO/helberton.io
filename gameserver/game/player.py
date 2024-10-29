@@ -1,6 +1,5 @@
 from gameserver.network.packets.stop_draw_waiting_blocks import StopDrawWaitingBlocksPacket
 from gameserver.utils.colors import Colors
-from gameserver.utils.game_math import *
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets.player_state import PlayerStatePacket
@@ -42,7 +41,7 @@ class Player:
 
         ## Capture Area
         self.capture_blocks = []
-        self.waiting_bounds = Rectangle(Vector(0, 0), Vector(0, 0))
+        self.waiting_bounds: Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
         self.current_waiting_blocks_ex_pos = 0
         self.max_waiting_blocks = 0
 
@@ -56,6 +55,17 @@ class Player:
         self.start_position = None
         self.next_tile_progress = 0
 
+
+        self.is_moving = False
+        self.is_alive = True
+
+
+    def stop_movement(self):
+        self.is_moving = True
+
+    def start_movement(self):
+        self.is_moving = False
+
     @property
     def is_capturing(self):
         return len(self.capture_blocks) > 0
@@ -68,7 +78,7 @@ class Player:
 
     @property
     def is_dead(self):
-        return False
+        return not self.is_alive
 
     def generate_player_colors(self):
         self.choose_random_color()
@@ -99,23 +109,25 @@ class Player:
     def loop(self, tick, dt, game_server):
         if not self.is_send_ready_packet:
             return
+
         if self.is_dead:
             return
         player_speed = self.game.player_travel_speed
         self.next_tile_progress += dt * player_speed
+
+        if self.is_moving:
+            return
+
         if self.next_tile_progress > 1:
             self.next_tile_progress -= 1
             last_position = self.position.clone()
             self.position = self.position.get_vector_from_direction(self.direction)
-            if self.position.is_vector_hast_negative() or self.game.map.check_vector_in_walls(self.position):
+            if self.position.is_vector_has_negative() or self.game.map.check_vector_in_walls(self.position):
                 self.position = last_position.clone()
 
             self.update_current_block(last_position)
             self.on_change_position()
             self.pares_movement_queue()
-
-        # TODO Handle Player Movement
-        # TODO Handle Player Capture Area
 
     def update_waiting_blocks_length_ex_pos(self):
         length = 0
@@ -133,22 +145,21 @@ class Player:
             # Prevent Diagonal
             if last_block_vec.x != position.x and last_block_vec.y != position.y:
                 raise Exception("Diagonal Capture Not Allowed")
+
             last_block_2 = None if len(self.capture_blocks) < 2 else self.capture_blocks[-2]
             if last_block_2:
                 # Check if last block is in same line
                 # Prevent adding block in between two blocks
-                if last_block_vec.x == last_block_2.x \
-                        and last_block_vec.x == position.x:
+                if last_block_vec.x == last_block_2.x and last_block_vec.x == position.x:
                     if last_block_vec.y <= position.y <= last_block_2.y:
                         return
-                        raise Exception("Block In Between Two Blocks")
+                        # raise Exception("Block In Between Two Blocks")
                     last_block_vec.set_y(position)
                     return
-                if last_block_vec.y == last_block_2.y \
-                        and last_block_vec.y == position.y:
+                if last_block_vec.y == last_block_2.y and last_block_vec.y == position.y:
                     if last_block_vec.x <= position.x <= last_block_2.x:
                         return
-                        raise Exception("Block In Between Two Blocks")
+                        # raise Exception("Block In Between Two Blocks")
                     last_block_vec.set_x(position)
                     return
 
@@ -183,20 +194,21 @@ class Player:
 
     def update_current_block(self, last_position: Vector):
         data = self.game.map.get_valid_blocks(self.position)
-        if type(data) == Player and data == self and self.is_capturing:
+        if type(data) == Player and self.is_capturing:
             # We Come Back To Our Blocks
-            self.add_waiting_block(last_position)
-            self.game.map.fill_waiting_blocks(self)
-            self.send_capture_blocks()
-            self.notify_empty_waiting_blocks()
-            self.clear_waiting_blocks()
+            if data == self:
+                # Player Make Cycle Move To Capture Blocks
+                self.add_waiting_block(last_position)
+                self.game.map.fill_waiting_blocks(self)
+                self.send_capture_blocks()
+                self.notify_empty_waiting_blocks()
+                self.clear_waiting_blocks()
 
         """
         if not player.is_capturing: start capturing
         """
-        if isinstance(data, int) and data == 1 or data != self:
+        if (isinstance(data, int) and data == 1) or data != self:
             if not self.is_capturing:
-                # print("[add_waiting_block] Player Exit For Occupied Area")
                 self.add_waiting_block(self.position)
                 self.game.broadcast_player_waiting_blocks(self)
                 return
@@ -245,6 +257,32 @@ class Player:
         
         """
 
+
+        """
+           0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 
+         0 X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  
+         1 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
+         2 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
+         3 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
+         4 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
+         5 X  3  3  3  3  3  2  2  2  O  O  O  O  O  O  O  O  O  O  X  
+         6 X  O  O  3  O  O  O  O  2  O  O  O  O  O  O  O  O  O  O  X  
+         7 X  O  O  3  O  O  O  O  2  O  O  O  O  O  O  O  O  O  O  X  
+         8 X  O  O  3  O  O  O  O  2  O  O  O  2  2  2  2  2  O  O  X  
+         9 X  3  3  3  3  3  3  3  3  O  O  O  2  2  2  2  2  O  O  X  
+        10 X  O  O  2  2  2  2  2  2  2  2  2  2  2  2  2  2  O  O  X  
+        11 X  O  O  3  O  O  O  O  3  O  O  O  2  2  2  2  2  O  O  X  
+        12 X  O  O  3  O  O  O  O  3  O  O  O  2  2  2  2  2  O  O  X  
+        13 X  O  O  3  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
+        14 X  O  O  3  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
+        15 X  2  2  2  2  2  2  2  3  O  O  O  O  O  O  O  O  O  O  X  
+        16 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
+        17 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
+        18 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
+        19 X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  
+        """
+
+        # Current Player View Port with [Waiting Blocks] of Other Players
         for player in self.game.get_overlapping_waiting_blocks_players_rec(self.get_viewport()):
             left_players.discard(player)
             self.add_player_to_viewport(player)
@@ -252,7 +290,10 @@ class Player:
         for player in left_players:
             self.remove_player_from_viewport(player)
 
+
+
         left_players = set(self.other_players_in_viewport)
+        # Other Players View Port with [Waiting Blocks] of Current Player
         for player in self.game.get_overlapping_viewport_with_rec(self.waiting_bounds):
             left_players.discard(player)
             player.add_player_to_viewport(self)
@@ -282,8 +323,8 @@ class Player:
 
         # Check if player touches waiting blocks of other players
         for other_player in self.game.get_overlapping_waiting_blocks_players_pos(self.position):
-            is_my_self = other_player != self
-            if not other_player.check_point_in_capture_area(self.position, is_my_self):
+            is_my_player = other_player != self
+            if not other_player.check_point_in_capture_area(self.position, is_my_player):
                 continue
 
             killed_my_self = other_player == self
@@ -293,6 +334,7 @@ class Player:
             if other_player.is_capturing:
                 # Send Kill Packet
                 # other_player Killed by Myself or self
+                self.kill_player(other_player)
                 pass
 
             # When Two Heads Touch Each Other
@@ -305,6 +347,37 @@ class Player:
                 pass
         # TODO DELAY IN SENDING EDGES
         self.send_required_edge_blocks()
+
+
+
+    def kill_player(self,killed_player):
+        if killed_player.is_dead:
+            return
+
+        is_my_player = killed_player == self
+        killed_player.is_alive = False
+
+        if not is_my_player:
+            print(f"Player {killed_player.name} Killed By {self.name}")
+            self.game.map.replace_player_blocks(self,killed_player)
+            print(self.game.map)
+            self.send_capture_blocks()
+        else:
+            print(f"Player {killed_player.name} Killed Himself")
+
+
+    def reset_player(self):
+        self.movement_queue = []
+        self.lashCertainClientPos = None
+        self.position = None
+        self.last_edge_check_position = None
+        self.direction = 0
+        self.waiting_bounds = Rectangle(Vector(0, 0), Vector(0, 0))
+        self.max_waiting_blocks = 0
+        self.players_in_viewport = set()
+        self.other_players_in_viewport = set()
+        self.is_moving = False
+        self.clear_waiting_blocks()
 
     def check_point_in_capture_area(self, point, include_last_block=True):
         if not self.is_capturing:
@@ -425,6 +498,10 @@ class Player:
         return PlayerStatePacket(self)
 
     def players_see_this_player(self):
+        """
+        This Player is in Viewport of Other Players Viewport [ The Current Player is Considered as Other Player]
+        :return:
+        """
         for player in self.other_players_in_viewport:
             yield player
 
@@ -452,8 +529,8 @@ class Player:
         :param new_pos:
         :return:
         """
-        if new_pos == self.position:
-            return False
+        # if new_pos == self.position:
+        #     return False
         if self.direction == "up" and new_pos.y < self.position.y:
             return True
         if self.direction == "down" and new_pos.y > self.position.y:
@@ -466,13 +543,14 @@ class Player:
             return True
         return False
 
+    def invalid_movement_detected(self):
+        print("Invalid Movement")
+        player_state_packet = PlayerStatePacket(self)
+        self.client.send(player_state_packet)
+
     def pares_movement_queue(self):
-        last_move_was_invalid = False
 
         while len(self.movement_queue) > 0:
-
-            print("Movement Queue Length: ", len(self.movement_queue))
-            print("Movement Queue: ", self.movement_queue[0])
             move = self.movement_queue[0]
             new_direction = move[0]
             new_pos = move[1]
@@ -480,16 +558,15 @@ class Player:
 
             if self.game.map.check_vector_in_walls(new_pos):
                 self.movement_queue.pop(0)
-                last_move_was_invalid = True
+                self.invalid_movement_detected()
                 continue
 
             is_valid = self.check_move_is_valid(new_direction, new_pos)
             if not is_valid:
                 self.movement_queue.pop(0)
-                last_move_was_invalid = True
+                self.invalid_movement_detected()
                 continue
 
-            last_move_was_invalid = False
             if self.is_future_position(new_pos):
                 return
 
@@ -500,7 +577,6 @@ class Player:
             self.position = new_pos.clone()
             self.lashCertainClientPos = new_pos.clone()
             if self.is_capturing:
-                # print("[add_waiting_block] Player Changed Position In Waiting Mode")
                 self.add_waiting_block(self.position)
 
             self.direction = new_direction
@@ -508,11 +584,23 @@ class Player:
             self.update_current_block(self.position)
             self.on_change_position()
 
-        if last_move_was_invalid:
-            print("Invalid Movement")
-            player_state_packet = PlayerStatePacket(self)
-            self.client.send(player_state_packet)
-
     def get_waiting_blocks_vectors(self):
         for vector in self.capture_blocks:
             yield vector.clone()
+
+
+    def get_random_direction_but_not_opposite(self):
+        directions = ["up", "down", "left", "right"]
+        opposite = {
+            "up": "down",
+            "down": "up",
+            "left": "right",
+            "right": "left"
+        }
+
+
+        if self.direction:
+            directions.remove(self.direction)
+            directions.remove(opposite[self.direction])
+        import random
+        return random.choice(directions)

@@ -25,17 +25,15 @@ class Line:
         max_x = max(self.start.x, self.end.x)
         min_y = min(self.start.y, self.end.y)
         max_y = max(self.start.y, self.end.y)
-        start = Vector(min_x, min_y)
-        end = Vector(max_x, max_y)
 
-        if start.is_in_same_horizontal_line_with(end):
-            if  start.x <= point.x <= end.x:
+        if self.start.is_in_same_horizontal_line_with(self.end):
+            # Check y-coordinates match and x-coordinate lies in range
+            if point.y == self.start.y and min_x <= point.x <= max_x:
                 return True
 
-        elif start.is_in_same_vertical_line_with(end):
-            if start.y <= point.y <= end.y:
+        elif self.start.is_in_same_vertical_line_with(self.end):
+            # Check x-coordinates match and y-coordinate lies in range
+            if point.x == self.start.x and min_y <= point.y <= max_y:
                 return True
 
         return False
-
-        # check if

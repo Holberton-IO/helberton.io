@@ -211,6 +211,7 @@ class Block {
         this.drawBorderBlock(ctx, "#420707", 10);
         this.drawEmptyBlock(ctx, "#2d2926", "#4e463f", 7);
         this.drawRegularBlock(ctx, "#2d2926", "#4e463f", 9);
+
     }
 
 

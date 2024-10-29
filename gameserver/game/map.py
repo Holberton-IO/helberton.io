@@ -40,6 +40,8 @@ class Map:
             raise Exception("Vector is not in map")
         return self.blocks[vector.x][vector.y]
 
+
+
     def fill_blocks(self, rect, player: 'Player'):
         rect = rect.clamp(Rectangle(
             Vector(0, 0),
@@ -50,6 +52,12 @@ class Map:
 
         self.notify_blocks_filled(rect, player)
 
+    """
+         Will Search For all Players That Overlap With The Given Rectangle
+            And Notify Them That The Blocks Inside The Rectangle Are Filled
+            
+            Send --> [FillAreaPacket]
+     """
     def notify_blocks_filled(self, rect, player):
         area_packet = FillAreaPacket(rect, player)
         for p in self.game.get_overlapping_players_with_rec(rect):
@@ -114,8 +122,7 @@ class Map:
         return block_compression
 
     def check_vector_in_walls(self, vector):
-        if vector.x <= 0 or \
-                vector.x >= self.map_size - 1 or \
+        if vector.x <= 0 or vector.x >= self.map_size - 1 or \
                 vector.y <= 0 or \
                 vector.y >= self.map_size - 1:
             return True
@@ -123,11 +130,15 @@ class Map:
 
     def fill_waiting_blocks(self, player):
         blocks = player.capture_blocks
+        # this means that player is moving Horizontally or Vertically without
+        # any 90 degree turns
         if len(blocks) == 1:
             vector = blocks[0]
             rect = Rectangle(vector, vector.add_scalar(1))
             self.fill_blocks(rect, player)
 
+        # this means that player is moving Horizontally or Vertically with
+        # 90 degree turns
         for vec in range(len(blocks) - 1):
             vector = blocks[vec]
             next_vector = blocks[vec + 1]
@@ -139,7 +150,7 @@ class Map:
             min_vec = Vector(min(vector.x, next_vector.x), min(vector.y, next_vector.y))
             max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
             rec = Rectangle(min_vec, max_vec)
-            print(rec, "Will Filled")
+
 
             self.fill_blocks(rec, player)
 
@@ -235,3 +246,170 @@ class Map:
 
         compressed_blocks = self.compress_blocks_in(player_capture_blocks, call_back)
         return compressed_blocks, new_player_capture_blocks
+
+    def draw_map_as_text(self):
+        print("  ", end="")
+        for col in range(self.map_size):
+            print(f"{col:>2} ", end="")
+        print()
+
+        n= self.map_size
+        for x in range(self.map_size):
+            print(f"{x:>2} ", end="")
+            for y in range(self.map_size):
+                data = self.blocks[x][y]
+                if isinstance(data, int):
+                    if data == 0:
+                        print(f"\033[1;31mX\033[0m ", end=" ")
+                    elif data == 1:
+                        print("O ", end=" ")
+                else:
+                    player = data
+                    print(f"\033[1;3{player.player_id}m{player.player_id}\033[0m ", end=" ")
+            print()
+
+
+
+    def replace_player_blocks(self, killer, killed):
+        # Replace Player Blocks
+
+
+        for x, y in self.for_each():
+            if self.blocks[x][y] == killed:
+                self.blocks[x][y] = killer
+
+
+
+    def draw_map_as_text_with_players_positions(self):
+        print("  ", end="")
+        for col in range(self.map_size):
+            print(f"{col:>2} ", end="")
+        print()
+
+        players_positions = {}
+        for player in self.game.players:
+            players_positions[Vector(player.position.x, player.position.y)] = player
+
+
+        players_viewport = {}
+        for player in self.game.players:
+            for x, y in player.get_viewport().all_points_in_border():
+                players_viewport[Vector(x, y)] = player
+
+        players_waiting = {}
+        for p in self.game.players:
+            yy = Rectangle(p.waiting_bounds.min, p.waiting_bounds.max)
+            yy.expand_to(Vector(yy.max.x + 1, yy.max.y + 1))
+            for x, y in yy.for_each():
+                players_waiting[Vector(x, y)] = p
+
+
+        for x in range(self.map_size):
+            print(f"{x:>2} ", end="")
+            for y in range(self.map_size):
+                data = self.blocks[y][x]
+                position = Vector(y, x)
+
+
+                # Draw Players Positions
+                if position in players_positions:
+                    player = players_positions[position]
+                    print(f"\033[1;35m{player.player_id}\033[0m ", end=" ")
+                    continue
+
+
+
+
+                # Draw Waiting Players
+                if Vector(y, x) in players_waiting:
+                    player = players_waiting[Vector(y, x)]
+                    print(f"\033[1;34m{player.player_id}\033[0m ", end=" ")
+                    continue
+
+                if isinstance(data, int):
+                    if data == 0:
+                        print(f"\033[1;31mX\033[0m ", end=" ")
+
+                    elif position in players_viewport:
+                        player = players_viewport[position]
+                        print(f"\033[1;40m{player.player_id}\033[0m ", end=" ")
+                        continue
+                    elif data == 1:
+                        print("O ", end=" ")
+
+
+
+                else:
+                    player = data
+                    print(f"\033[1;3{player.player_id}m{player.player_id}\033[0m ", end=" ")
+                    continue
+
+
+
+            print()
+
+
+    def __str__(self):
+        from io import StringIO
+        output = StringIO()
+
+        # Print column headers
+        output.write("  ")
+        for col in range(self.map_size):
+            output.write(f"{col:>2} ")
+        output.write("\n")
+
+        players_positions = {}
+        for player in self.game.players:
+            players_positions[Vector(player.position.x, player.position.y)] = player
+
+        players_viewport = {}
+        for player in self.game.players:
+            for x, y in player.get_viewport().all_points_in_border():
+                players_viewport[Vector(x, y)] = player
+
+        players_waiting = {}
+        for p in self.game.players:
+            yy = Rectangle(p.waiting_bounds.min, p.waiting_bounds.max)
+            yy.expand_to(Vector(yy.max.x + 1, yy.max.y + 1))
+            for x, y in yy.for_each():
+                players_waiting[Vector(x, y)] = p
+
+        for x in range(self.map_size):
+            output.write(f"{x:>2} ")
+            for y in range(self.map_size):
+                data = self.blocks[y][x]
+                position = Vector(y, x)
+
+                # Draw Players Positions
+                if position in players_positions:
+                    player = players_positions[position]
+                    output.write(f"\033[1;35m{player.player_id}\033[0m ")
+                    continue
+
+                # Draw Waiting Players
+                if Vector(y, x) in players_waiting:
+                    player = players_waiting[Vector(y, x)]
+                    output.write(f"\033[1;34m{player.player_id}\033[0m ")
+                    continue
+
+                if isinstance(data, int):
+                    if data == 0:
+                        output.write(f"\033[1;31mX\033[0m ")
+
+                    elif position in players_viewport:
+                        player = players_viewport[position]
+                        output.write(f"\033[1;40m{player.player_id}\033[0m ")
+                        continue
+                    elif data == 1:
+                        output.write("O ")
+
+                else:
+                    player = data
+                    output.write(f"\033[1;3{player.player_id}m{player.player_id}\033[0m ")
+                    continue
+
+            output.write("\n")
+
+        # Return the accumulated string
+        return output.getvalue()

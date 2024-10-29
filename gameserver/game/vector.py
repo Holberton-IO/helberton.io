@@ -27,7 +27,7 @@ class Vector:
     def add(self, vector):
         return Vector(self.x + vector.x, self.y + vector.y)
 
-    def is_vector_hast_negative(self):
+    def is_vector_has_negative(self):
         return self.x < 0 or self.y < 0
 
     def __add__(self, other):
@@ -71,3 +71,7 @@ class Vector:
 
     def is_horizontal_or_vertical_with(self, other):
         return self.is_in_same_horizontal_line_with(other) or self.is_in_same_vertical_line_with(other)
+
+
+    def __hash__(self):
+        return hash((self.x, self.y))

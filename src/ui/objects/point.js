@@ -12,6 +12,12 @@ class Point {
         return new Point(Math.abs(this.x - otherPoint.x), Math.abs(this.y - otherPoint.y));
     }
 
+
+    multiply(scalar) {
+        return new Point(this.x * scalar, this.y * scalar);
+    }
+
+
     clone() {
         return new Point(this.x, this.y);
     }
@@ -26,6 +32,12 @@ class Point {
     {
         return new Point(Math.ceil(this.x),Math.ceil(this.y));
     }
+
+    abs(){
+        return new Point(Math.abs(this.x),Math.abs(this.y));
+    }
+
+
 }
 
 export default Point;

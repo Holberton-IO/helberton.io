@@ -36,6 +36,7 @@ module.exports = (env, argv) => {
   const buildTime = new Date().toLocaleString();
 
   return {
+    devtool: 'source-map',
     entry: './src/app.js',
     output: {
       filename: 'bundle.js',

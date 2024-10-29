@@ -40,6 +40,8 @@ class StopDrawingWaitingBlocksPacket extends Packet {
             throw new Error("Player Not Found We Need To Send Player Colors");
         }
 
+
+
         if (player.waitingBlocks.length > 0) {
             const playerWaitingBlocks = player.waitingBlocks.getLast.blocks;
             if (playerWaitingBlocks.length > 0) {
@@ -47,6 +49,9 @@ class StopDrawingWaitingBlocksPacket extends Packet {
             }
         }
 
+
+        // if player received to stop drawing waiting blocks request is sent to server
+        // we need to skip the response
         if (player.isMyPlayer && player.isGettingWaitingBlocks) {
             player.skipGettingWaitingBlocksRespose = true;
         }

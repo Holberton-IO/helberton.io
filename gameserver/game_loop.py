@@ -18,10 +18,12 @@ class GameLoop:
         self.lastTick = time.time()
         self.dt = time.time()
         self.game_server = game_server
+        game_server.game_loop = self
         self.is_running = True
         self.thread = Thread(target=self.loop)
         self.thread.daemon = True
-        self.start()
+        self.frames_rendered_from_game_start = 0
+        self.stop_render_based_on_function = None
 
     def start(self):
         self.is_running = True
@@ -32,6 +34,8 @@ class GameLoop:
 
     def loop(self):
         while self.is_running:
+            self.frames_rendered_from_game_start += 1
+
             tick = time.time()
             self.dt = tick - self.lastTick
             self.lastTick = tick
@@ -39,3 +43,7 @@ class GameLoop:
             self.dt *= 1000
             self.game_server.loop(tick, self.dt)
             time.sleep(GameLoop.sleep_time)
+
+
+            if self.stop_render_based_on_function is not None and self.stop_render_based_on_function():
+                self.stop()
