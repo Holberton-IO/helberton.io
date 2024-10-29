@@ -9,7 +9,7 @@ class Player {
 
     constructor(position = new Point(1, 1), id) {
         this.id = id
-        this.drawPosSet = false;
+        this.drawPosSet = false; // from PlayerState Packet
 
         this.isMyPlayer = false;
         this.deathWasCertain = false;
@@ -39,8 +39,8 @@ class Player {
 
 
         // Movements
-        this.hasReceivedPosition = false;
-        this.moveRelativeToServerPosNextFrame = false;
+        this.hasReceivedPosition = false; // from PlayerState Packet it set position
+        this.moveRelativeToServerPosNextFrame = false; // from PlayerState Packet
         this.lastServerPosSentTime = 0;
 
 
@@ -248,30 +248,33 @@ class Player {
         camera.moveToPlayer(this)
 
 
+
         if (this.myNextDir === this.dir) return;
 
         const isHorizontal = this.isMovingHorizontally(this.dir);
-        if (this.changeDirAtIsHorizontal === isHorizontal) return;
-        let changeDirNow = false;
+        if (this.changeDirAtIsHorizontal !== isHorizontal) return;
+
+
+        let changeDirectionCurrentFrame = false;
         const currentCoord = isHorizontal ? this.position.x : this.position.y;
 
-        // Check If Last Direction Complete passed .55 Of Current Block
+        // Check If Last Direction passed the point that player requested to change direction
         if (GameUtils.isMovingToPositiveDir(this.dir)) {
-            if (this.changeDirAtCoord < currentCoord) changeDirNow = true;
+            if (this.changeDirAtCoord < currentCoord) changeDirectionCurrentFrame = true;
         } else {
-            if (this.changeDirAtCoord > currentCoord) changeDirNow = true;
+            if (this.changeDirAtCoord > currentCoord) changeDirectionCurrentFrame = true;
         }
 
 
-        if (changeDirNow) {
+        if (changeDirectionCurrentFrame) {
             const newPos = this.position.clone();
-            const tooFar = Math.abs(this.changeDirAtCoord - currentCoord);
+            const distance = Math.abs(this.changeDirAtCoord - currentCoord);
             if (isHorizontal)
                 newPos.x = this.changeDirAtCoord;
             else
                 newPos.y = this.changeDirAtCoord;
             this.changeCurrentDir(this.myNextDir, newPos);
-            let offsetPosition = Player.movePlayer(this.position, this.dir, tooFar);
+            let offsetPosition = Player.movePlayer(this.position, this.dir, distance);
             this.updatePlayerPosition(offsetPosition);
         }
 
@@ -469,11 +472,13 @@ class Player {
     }
 
     draw(ctx) {
-        if (!this.isReady) return;
-        if (!this.hasReceivedPosition) return;
+        if (!this.isReady) return; // from Ready Packet
+        if (!this.hasReceivedPosition) return; // from PlayerState Packet
         const gameSpeed = window.game.gameSpeed;
         let offset = window.gameEngine.deltaTime * gameSpeed;
 
+
+        // When Receiving Player State Next Frame Move Relative To Server Pos
         if (this.moveRelativeToServerPosNextFrame) {
             // When Receiving Player State
             // Next Frame Move Relative To Server Pos
@@ -483,6 +488,8 @@ class Player {
 
         if (this.isMyPlayer) {
             this.serverPos = Player.movePlayer(this.serverPos, this.serverDir, offset);
+
+            // Check If Client Movement As Same As Server Direction Received From Server in PlayerState Message
             if (this.serverDir === this.dir) {
                 let clientSideDist = 0;
                 if (Player.isMovingHorizontally(this.dir)) {
@@ -506,6 +513,9 @@ class Player {
                 offset *= GameMath.linearInterpolate(.5, 1, GameMath.inverseLinearInterpolate(5, 0, clientSideDist));
             }
         }
+
+
+
         let offsetPosition = Player.movePlayer(this.position, this.dir, offset);
         if (!this.positionInWalls(offsetPosition))
             this.updatePlayerPosition(offsetPosition);
@@ -545,8 +555,8 @@ class Player {
             playerPositionCelled.y >= maxBoundary.y)
     }
 
-    requestChangeDir(value, skipQueue = false) {
-        const dir = Player.mapControlsToDir(value);
+    requestChangeDir(direction, skipQueue = false) {
+        const dir = direction;
         const gameSpeed = window.game.gameSpeed;
         const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;
         const minTimeToWaitToSendDir = 0.7 / gameSpeed;
@@ -559,32 +569,30 @@ class Player {
         // Prevent Sending Same Dir
         // Prevent Sending Dir Too Fast
         if (dir === this.myLastSendDir && timePassedFromLastSend < minTimeToWaitToSendDir) {
-            console.log("dir === this.myLastSendDir || timePassedFromLastSend < minTimeToWaitToSendDir")
             return false;
         }
         this.myLastSendDir = dir;
         this.lastDirServerSentTime = Date.now();
 
+
+        // Check If Dir Is Same As Current Dir
         if (this.dir === dir) {
-            console.log("this.dir === dir");
-            this.addDirToQueue(dir, skipQueue);
             return false;
         }
 
         // Check If Dir Is Opposite Of Current Dir
         if (GameUtils.isOppositeDir(dir, this.dir)) {
-            console.log("GameUtils.isOppositeDir(dir, this.dir)");
-            this.addDirToQueue(dir, skipQueue);
             return false;
         }
 
         // Round Player Position To The Nearest Integer
-        const isHorizontal = !this.isMovingHorizontally(this.dir);
-        const valueToRound = isHorizontal ? this.position.y : this.position.x;
+        const isHorizontal = this.isMovingHorizontally(this.dir);
+
+        const valueToRound = isHorizontal ? this.position.x : this.position.y;
         const roundedValue = Math.round(valueToRound);
         const newPlayerPos = this.position.clone();
-        if (isHorizontal) newPlayerPos.y = roundedValue; else newPlayerPos.x = roundedValue;
-        // console.log("LastPos", this.position, "NewPos", newPlayerPos);
+        if (isHorizontal) newPlayerPos.x = roundedValue;
+        else newPlayerPos.y = roundedValue;
 
         // Check If Position Corrupted Since Last Send
         if (this.checkIfPositionSentEarlier(newPlayerPos)) {
@@ -596,12 +604,15 @@ class Player {
 
         console.log("Position Passed")
         // Check If Last Direction Complete passed .55 Of Current Block
-        let changeDirNow = false;
+        let changeDirectionCurrentFrame = false;
 
         const blockProgress = valueToRound - Math.floor(valueToRound);
         if (GameUtils.isMovingToPositiveDir(dir)) {
-            if (blockProgress < .45) changeDirNow = true;
-        } else if (blockProgress > .55) changeDirNow = true;
+            if (blockProgress < .45)
+                changeDirectionCurrentFrame = true;
+        }
+        else if (blockProgress > .55)
+            changeDirectionCurrentFrame = true;
 
 
         // Check If Prediction Of Next Direction Will Touch Wall
@@ -611,15 +622,16 @@ class Player {
         // as it prevented from move in main update function
         let predictionVector = this.position.clone();
         predictionVector = Player.movePlayer(predictionVector, this.dir, 1);
+
         if (this.positionInWalls(predictionVector))
-            changeDirNow = true;
+            changeDirectionCurrentFrame = true;
 
 
-        if (changeDirNow) {
-            console.log("changeDirNow");
+        if (changeDirectionCurrentFrame) {
             this.changeCurrentDir(dir, newPlayerPos);
         } else {
-            console.log("Change It Next Frame");
+            // change direction in next frame
+            // this movement will be done in next frame not now
             this.myNextDir = dir;
             this.changeDirAtCoord = roundedValue;
             this.changeDirAtIsHorizontal = isHorizontal;
@@ -648,9 +660,11 @@ class Player {
 
         if (this.sendDirQueue.length <= 0) return;
         const firstDir = this.sendDirQueue.first;
-        const timePassed = Date.now() - firstDir.time;
+        const timePassed = (Date.now() - firstDir.time);
         const gameSpeed = window.game.gameSpeed;
         const minTimeToWaitToSendDir = 1.2 / gameSpeed;
+
+        /// Check If Time Passed From Last Send Is Less Than minTimeToWaitToSendDir
         if (timePassed < minTimeToWaitToSendDir || this.requestChangeDir(firstDir.dir, true)) {
             this.sendDirQueue.shift();
         }

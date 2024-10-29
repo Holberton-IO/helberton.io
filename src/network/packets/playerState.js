@@ -61,12 +61,15 @@ class PlayerStatePacket extends Packet {
         player.colorPatternEdge = this.colorPatternEdge;
 
 
-        player.hasReceivedPosition = true;
+
 
         // When Receiving Player State
         // Next Frame Move Relative To Server Pos
+        player.hasReceivedPosition = true;
         player.moveRelativeToServerPosNextFrame = true;
         player.lastServerPosSentTime = Date.now();
+
+        // current player consider that his last position has been confirmed
         myPlayer.lastPosHasBeenConfirmed = true;
 
 
@@ -76,7 +79,7 @@ class PlayerStatePacket extends Packet {
         let newDir = this.direction;
 
         newPosOffset = Player.movePlayer(newPosOffset, newDir, offset);
-        let serverSyncedWithClient = true;
+        let clientServerNeedsSync = true;
 
 
         if (player.isMyPlayer) {
@@ -86,10 +89,10 @@ class PlayerStatePacket extends Packet {
             // To Draw This Movement or Ignore It
             // if server predict the same movement
             // or the movement is to close to server
-            serverSyncedWithClient = player.checkClientMovementSyncedWithServer(newDir
+            clientServerNeedsSync = player.checkClientMovementSyncedWithServer(newDir
                 , newPosOffset, newPos);
 
-            if (serverSyncedWithClient) {
+            if (clientServerNeedsSync) {
                 /***
                  Here We Found That Server and Client not Synced
                  So We Need To Sync Them
@@ -111,13 +114,14 @@ class PlayerStatePacket extends Packet {
             player.updatePlayerDirection(newDir);
         }
 
-        if (serverSyncedWithClient) {
+        if (clientServerNeedsSync) {
             player.position = newPosOffset.clone();
             player.addWaitingBlocks(newPos);
         }
 
         //Start To Handel Draw Position
         if (!player.drawPosSet) {
+            // if we don't draw this player before set draw position
             player.drawPosSet = true;
             player.drawPosition = player.position.clone();
         }

@@ -67,12 +67,8 @@ class Ready extends Packet {
         player.colorSlightlyBrighter = this.colorSlightlyBrighter;
         player.colorPattern = this.colorPattern;
         player.colorPatternEdge = this.colorPatternEdge;
-        // player.position = new Point(packet.playerX, packet.playerY);
-        // player.dir = packet.direction;
-        console.log("READY", player);
         window.gameEngine.gameObjects.mapSize = this.mapSize;
         player.isReady = true;
-        console.log(window.gameEngine.gameObjects);
 
 
     }

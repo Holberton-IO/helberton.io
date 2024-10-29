@@ -35,8 +35,6 @@ class NamePacket extends Packet {
 
 
     handleReceivedPacket(client) {
-        console.log("Received Name Packet");
-
 
         if (this.isVerified) {
 

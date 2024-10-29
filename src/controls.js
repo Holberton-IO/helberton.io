@@ -1,3 +1,5 @@
+import Player from "./ui/objects/player";
+
 const keyMapper = { //In Circle Way
     ArrowUp: 1,
     ArrowDown: 3,
@@ -9,6 +11,7 @@ window.onkeyup = (e) => {
     //console.log(keyMapper[e.key]);
     const keyVal = keyMapper[e.key];
     if(keyVal && window.client && window.client.player){
-        window.client.player.requestChangeDir(keyVal);
+        const dir = Player.mapControlsToDir(keyVal);
+        window.client.player.requestChangeDir(dir);
     }
 };
