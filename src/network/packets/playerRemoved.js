@@ -17,7 +17,7 @@ class PlayerRemovedPacket extends Packet {
 
 
     // Handel Server Response
-    static parsePacket() {
+    parsePacket() {
         this.userId = this.reader.readInt4();
     }
 

@@ -18,7 +18,7 @@ class PingPacket(Packet):
 
     def handle_packet(self, client):
         """On Received Ready Packet"""
-        print("Ping Packet Received")
+        #print("Ping Packet Received")
         client.last_ping_time = time.time()
         pong_packet = PongPacket()
         client.send(pong_packet)

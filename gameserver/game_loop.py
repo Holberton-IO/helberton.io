@@ -24,6 +24,7 @@ class GameLoop:
         self.thread.daemon = True
         self.frames_rendered_from_game_start = 0
         self.stop_render_based_on_function = None
+        self.on_render_frame = None
 
     def start(self):
         self.is_running = True
@@ -44,6 +45,7 @@ class GameLoop:
             self.game_server.loop(tick, self.dt)
             time.sleep(GameLoop.sleep_time)
 
-
+            if not self.on_render_frame is None:
+                self.on_render_frame(self.frames_rendered_from_game_start)
             if self.stop_render_based_on_function is not None and self.stop_render_based_on_function():
                 self.stop()

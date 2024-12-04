@@ -3,8 +3,20 @@ from gameserver.game.vector import Vector
 
 class Line:
     def __init__(self, start: 'Vector', end:'Vector'):
+        # rearrange the points so that start is always the leftmost Top point
         self.start = start
         self.end = end
+
+        min_x = min(self.start.x, self.end.x)
+        max_x = max(self.start.x, self.end.x)
+        min_y = min(self.start.y, self.end.y)
+        max_y = max(self.start.y, self.end.y)
+        self.start = Vector(min_x, min_y)
+        self.end = Vector(max_x, max_y)
+
+
+
+
         if not self.start.is_horizontal_or_vertical_with(self.end):
             raise Exception("Line must be horizontal or vertical not diagonal")
 
@@ -37,3 +49,12 @@ class Line:
                 return True
 
         return False
+
+
+    def __str__(self):
+        return f"Line: {self.start} -> {self.end}"
+
+    def for_each(self):
+        for x in range(self.start.x, self.end.x + 1):
+            for y in range(self.start.y, self.end.y + 1):
+                yield x,y

@@ -21,6 +21,12 @@ class Rectangle:
         return Rectangle(min_vec, max_vec)
 
     def for_each(self):
+        """
+         min Vector is inclusive and max Vector is exclusive
+         for example if min = (0,0) and max = (2,2)
+         the for_each will yield (0,0), (0,1), (1,0), (1,1)
+        :return:
+        """
         for x in range(self.min.x, self.max.x):
             for y in range(self.min.y, self.max.y):
                 yield x, y
@@ -47,7 +53,6 @@ class Rectangle:
         self.min = min_vec
         self.max = max_vec
 
-
     def expand_to_rect(self, other_rectangle):
         min_vec = Vector(
             min(self.min.x, other_rectangle.min.x),
@@ -66,16 +71,34 @@ class Rectangle:
     def clone(self):
         return Rectangle(self.min.clone(), self.max.clone())
 
-
     def same_as(self, other):
         return self.min == other.min and self.max == other.max
 
-
     def all_points_in_border(self):
-        for x in range(self.min.x, self.max.x+1):
+        for x in range(self.min.x, self.max.x + 1):
             yield x, self.min.y
             yield x, self.max.y
         # exclude the corners
-        for y in range(self.min.y+1, self.max.y):
+        for y in range(self.min.y + 1, self.max.y):
             yield self.min.x, y
             yield self.max.x, y
+
+
+class RectangleBuilder:
+    def __init__(self, v1, v2):
+        # self.min = min_vec
+        # self.max = Vector(max_vec.x + 1, max_vec.y + 1)
+        pass
+        # we need to ensure that top left is min and bottom right is max
+        self.min = Vector(
+            min(v1.x, v2.x),
+            min(v1.y, v2.y)
+        )
+        self.max = Vector(
+            max(v1.x, v2.x) + 1,
+            max(v1.y, v2.y) + 1
+        )
+
+
+    def build(self):
+        return Rectangle(self.min, self.max)

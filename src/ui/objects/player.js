@@ -491,6 +491,8 @@ class Player {
         const gameSpeed = window.game.gameSpeed;
         let offset = window.gameEngine.deltaTime * gameSpeed;
 
+        if (!window.gameEngine.gameObjects.isPlayerExist(this)) return;
+
 
         // When Receiving Player State Next Frame Move Relative To Server Pos
         if (this.moveRelativeToServerPosNextFrame) {

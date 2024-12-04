@@ -309,6 +309,10 @@ class GameObjects {
             delete this.players[player.id];
     }
 
+    isPlayerExist(player) {
+        return player.id in this.players;
+    }
+
     addBlock(block) {
         return _ui_objects_block_js__WEBPACK_IMPORTED_MODULE_0__["default"].getBlockAt(block.position, this.blocks);
     }
@@ -905,7 +909,7 @@ class PlayerRemovedPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["defau
 
 
     // Handel Server Response
-    static parsePacket() {
+    parsePacket() {
         this.userId = this.reader.readInt4();
     }
 
@@ -2785,6 +2789,8 @@ class Player {
         if (!this.hasReceivedPosition) return; // from PlayerState Packet
         const gameSpeed = window.game.gameSpeed;
         let offset = window.gameEngine.deltaTime * gameSpeed;
+
+        if (!window.gameEngine.gameObjects.isPlayerExist(this)) return;
 
 
         // When Receiving Player State Next Frame Move Relative To Server Pos

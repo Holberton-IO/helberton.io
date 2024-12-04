@@ -359,9 +359,8 @@ class Player:
 
         if not is_my_player:
             print(f"Player {killed_player.name} Killed By {self.name}")
-            self.game.map.replace_player_blocks(self,killed_player)
-            print(self.game.map)
-            self.send_capture_blocks()
+            self.game.map.take_player_blocks(self,killed_player)
+            #self.send_capture_blocks()
         else:
             print(f"Player {killed_player.name} Killed Himself")
 

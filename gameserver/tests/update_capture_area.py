@@ -137,8 +137,8 @@ def mocking():
 
     player = add_player_with_client("Mock Player",direction=Direction.LEFT,position=Vector(14,10))
     start_position = player.position.clone()
-    # player.stop_movement()
-    player2 = add_player_with_client("King",Vector(3,3),Direction.DOWN)
+
+    # player2 = add_player_with_client("King",Vector(4,3),Direction.DOWN)
 
     game_map = gameserver.map
     def on_frame_render(frame):
@@ -154,6 +154,14 @@ def mocking():
             direction_packet.dir = "right"
             direction_packet.position = player.position.clone()
             direction_packet.handle_packet(player.client)
+        elif frame == 53:
+            # Move To Down
+            return
+            direction_packet = DirectionPacket()
+            direction_packet.dir = 'right'
+            direction_packet.position = player2.position.clone()
+            direction_packet.handle_packet(player2.client)
+
 
     start_game_loop_with_on_frame_render(max_frames_to_stop= 73,on_render_frame=on_frame_render)
 
@@ -161,21 +169,14 @@ def mocking():
     print(f"Time Taken: {end_time - start_time}")
 
     print(f"Player Position: {player.position}, Start Position: {start_position}, {player.next_tile_progress} , Direction {player.direction}")
-    # game_map.draw_map_as_text_with_players_positions()
-    # for i in gameserver.get_overlapping_players_with_rec(player.waiting_bounds):
-    #     print(i.name)
+    player.loop(100, 50, gameserver)
+    player.loop(100, 50, gameserver)
 
     game_map.draw_map_as_text_with_players_positions()
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.on_change_position()
-    print(player.position,"aa")
+    print(f"Player Position: {player.position}")
 
-    #
+
+
 
 
 def add_player_with_client(name,position=Vector(10,10),direction=Direction.RIGHT):
@@ -206,9 +207,6 @@ def start_game_loop(max_frames_to_stop=35,wait=True):
     game_loop.start()
     if wait:
         wait_till_game_loop_finish()
-
-
-
 
 @logTime
 def start_game_loop_with_on_frame_render(max_frames_to_stop=35,on_render_frame=None,wait=True):

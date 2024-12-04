@@ -33,6 +33,10 @@ class GameObjects {
             delete this.players[player.id];
     }
 
+    isPlayerExist(player) {
+        return player.id in this.players;
+    }
+
     addBlock(block) {
         return Block.getBlockAt(block.position, this.blocks);
     }

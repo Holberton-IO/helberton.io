@@ -73,5 +73,13 @@ class Vector:
         return self.is_in_same_horizontal_line_with(other) or self.is_in_same_vertical_line_with(other)
 
 
+    def expand_in_all_directions(self, scalar):
+        return [
+            self.clone().add(Vector(0, scalar)),
+            self.clone().add(Vector(0, -scalar)),
+            self.clone().add(Vector(scalar, 0)),
+            self.clone().add(Vector(-scalar, 0)),
+        ]
+
     def __hash__(self):
         return hash((self.x, self.y))

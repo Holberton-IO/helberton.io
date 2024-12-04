@@ -135,27 +135,33 @@ def mocking():
     start_time = time.time()
 
 
-    player = add_player_with_client("Mock Player",direction=Direction.LEFT,position=Vector(14,10))
+    player = add_player_with_client("Mock Player",direction=Direction.DOWN,position=Vector(14,4))
     start_position = player.position.clone()
-    # player.stop_movement()
-    player2 = add_player_with_client("King",Vector(3,3),Direction.DOWN)
+    player2 = add_player_with_client("King",Vector(7,10),Direction.RIGHT)
 
     game_map = gameserver.map
     def on_frame_render(frame):
-        if frame == 38:
-            # Move To Up
+        player_2_position = player2.position
+        if player_2_position == Vector(15,10):
             direction_packet = DirectionPacket()
             direction_packet.dir = "up"
-            direction_packet.position = player.position.clone()
-            direction_packet.handle_packet(player.client)
-        elif frame == 45:
-            # Move To Right
-            direction_packet = DirectionPacket()
-            direction_packet.dir = "right"
-            direction_packet.position = player.position.clone()
-            direction_packet.handle_packet(player.client)
+            direction_packet.position = player2.position.clone()
+            direction_packet.handle_packet(player2.client)
 
-    start_game_loop_with_on_frame_render(max_frames_to_stop= 73,on_render_frame=on_frame_render)
+        elif player_2_position == Vector(15,4):
+            direction_packet = DirectionPacket()
+            direction_packet.dir = "left"
+            direction_packet.position = player2.position.clone()
+            direction_packet.handle_packet(player2.client)
+
+
+        elif player_2_position == Vector(7,4):
+            direction_packet = DirectionPacket()
+            direction_packet.dir = "down"
+            direction_packet.position = player2.position.clone()
+            direction_packet.handle_packet(player2.client)
+
+    start_game_loop_with_on_frame_render(max_frames_to_stop= 100,on_render_frame=on_frame_render)
 
     end_time = time.time()
     print(f"Time Taken: {end_time - start_time}")
@@ -166,13 +172,6 @@ def mocking():
     #     print(i.name)
 
     game_map.draw_map_as_text_with_players_positions()
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.loop(100,50,gameserver)
-    player.on_change_position()
     print(player.position,"aa")
 
     #
