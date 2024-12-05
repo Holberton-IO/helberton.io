@@ -9,6 +9,12 @@ class Rectangle:
     def __repr__(self):
         return f"<Rectangle min={self.min} max={self.max}>"
 
+    def clamp_to_min_max(self, min_val, max_val):
+        return self.clamp(Rectangle(
+            Vector(min_val, min_val),
+            Vector(max_val, max_val)
+        ))
+
     def clamp(self, rect):
         min_vec = Vector(
             max(self.min.x, rect.min.x),
@@ -30,6 +36,15 @@ class Rectangle:
         for x in range(self.min.x, self.max.x):
             for y in range(self.min.y, self.max.y):
                 yield x, y
+
+    def __iter__(self):
+        """
+         min Vector is inclusive and max Vector is exclusive
+         for example if min = (0,0) and max = (2,2)
+         the for_each will yield (0,0), (0,1), (1,0), (1,1)
+        :return:
+        """
+        yield from self.for_each()
 
     def is_rect_overlap(self, rect):
         if self.min.x > rect.max.x or self.max.x < rect.min.x:
@@ -83,6 +98,10 @@ class Rectangle:
             yield self.min.x, y
             yield self.max.x, y
 
+    def is_vector_outside(self, vector):
+        return (vector.x < self.min.x or vector.x >= self.max.x
+                or vector.y < self.min.y or vector.y >= self.max.y)
+
 
 class RectangleBuilder:
     def __init__(self, v1, v2):
@@ -98,7 +117,6 @@ class RectangleBuilder:
             max(v1.x, v2.x) + 1,
             max(v1.y, v2.y) + 1
         )
-
 
     def build(self):
         return Rectangle(self.min, self.max)

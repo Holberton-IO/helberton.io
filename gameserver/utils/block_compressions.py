@@ -63,7 +63,7 @@ class BlockCompression:
 
     def compress_inside_rectangle(self, rectangle):
         recs = []
-        prev_column = []
+        prev_column:list[Column] = []
         columns_with_same_data = 0
 
         """
@@ -82,10 +82,7 @@ class BlockCompression:
                         Vector(x - columns_with_same_data - 1, section.start),
                         Vector(x, section.end)
                     )
-                    recs.append({
-                        "rect": rec,
-                        "data": section.data
-                    })
+                    recs.append((rec, section.data))
                 columns_with_same_data = 0
                 prev_column = sections
         return recs
