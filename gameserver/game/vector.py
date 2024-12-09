@@ -62,6 +62,9 @@ class Vector:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
+    def __sub__(self, other):
+        return Vector(self.x - other.x, self.y - other.y)
+
 
     def is_in_same_horizontal_line_with(self, other):
         return self.y == other.y

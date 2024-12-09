@@ -11,7 +11,7 @@ class Packet(ABC):
 
     def __init__(self):
         self.data = bytearray()
-        self.packet_id = 0
+        self.packet_id = self.PACKET_ID
         self.packet_size = 0
         self.reader: Optional[Reader] = None
 

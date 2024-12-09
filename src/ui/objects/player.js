@@ -2,17 +2,17 @@ import Point from "./point.js";
 import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
 import DirectionPacket from "../../network/packets/direction";
-import {log} from "three/nodes";
 import RequestWaitingBlockPacket from "../../network/packets/requestWaitingBlocks";
+import IObject from "./i_object";
 
 
-class Player {
+class Player extends IObject {
 
     constructor(position = new Point(1, 1), id) {
-        this.id = id
+        super(position, id, "");
+
         this.drawPosSet = false; // from PlayerState Packet
 
-        this.isMyPlayer = false;
         this.deathWasCertain = false;
         this.didUncertainDeathLastTick = false;
         this.isDeathTimer = 0;
@@ -21,13 +21,10 @@ class Player {
         this.deadAnimPartsRandDist = [];
         this.hitLines = [];
 
-        this.position = position
         this.drawPosition = new Point(-1, -1);
-        this.serverPosition = new Point(0, 0);
         this.lastChangedDirPos = new Point(0, 0);
 
 
-        this.name = "";
 
 
         // Colors
@@ -44,8 +41,6 @@ class Player {
         this.lastServerPosSentTime = 0;
 
 
-        this.isReady = false;
-        this.isDead = false;
 
         ///
         /**
@@ -69,10 +64,6 @@ class Player {
         this.clientSideMoves = [];
         this.changeDirAtCoord = null;
         this.changeDirAtIsHorizontal = false;
-
-        this.serverPos = new Point(0, 0);
-        this.serverDir = '';
-
 
         this.waitingForPing = false;
         this.lastPingTime = 0;
@@ -233,21 +224,7 @@ class Player {
         this.position = pos;
     }
 
-    /**
-     * This Is Called In PlayerState Message
-     * To Remove Blocks Outside Camera
-     */
-    removeBlocksOutsideCamera() {
-        const camera = window.camera;
-        const playerRect = camera.getViewPortRec(this.position);
-        const blocks = window.gameEngine.gameObjects.blocks;
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
-            if (!playerRect.pointInRect(block.position)) {
-                blocks.splice(i, 1);
-            }
-        }
-    }
+
 
     /**
      * This Function Is Called Every Frame

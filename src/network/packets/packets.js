@@ -9,6 +9,7 @@ import PongPacket from "./pong";
 import RequestWaitingBlockPacket from "./requestWaitingBlocks";
 import PlayerRemovedPacket from "./playerRemoved";
 import StopDrawingWaitingBlocksPacket from "./stopDrawingWaitingBlocks";
+import ConnectAsViewerPacket from "./connectAsViewerPacket";
 
 const PacketsDictionary = {
     1001: NamePacket,
@@ -22,6 +23,7 @@ const PacketsDictionary = {
     1009: RequestWaitingBlockPacket,
     1010: PlayerRemovedPacket,
     1011: StopDrawingWaitingBlocksPacket,
+    1012: ConnectAsViewerPacket,
 }
 
 

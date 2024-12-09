@@ -2,6 +2,7 @@ import time
 from enum import Enum
 from time import sleep
 
+from gameserver.game.line import Line
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 from gameserver.network.packets import DirectionPacket
@@ -161,7 +162,7 @@ def mocking():
             direction_packet.position = player2.position.clone()
             direction_packet.handle_packet(player2.client)
 
-    start_game_loop_with_on_frame_render(max_frames_to_stop= 88,on_render_frame=on_frame_render)
+    start_game_loop_with_on_frame_render(max_frames_to_stop= 44,on_render_frame=on_frame_render)
 
     end_time = time.time()
     print(f"Time Taken: {end_time - start_time}")
@@ -174,8 +175,6 @@ def mocking():
     game_map.draw_map_as_text_with_players_positions()
     print(f"Player Killer Total Blocks: {player2.total_physical_blocks}")
     print(f"Player Killer Total Blocks: {player.total_physical_blocks}")
-    print(f"Player Killer Total Blocks: {player2.occupied_percentage}")
-    print(f"Player Killer Total Blocks: {player.occupied_percentage}")
     #
 
 
@@ -227,3 +226,4 @@ def start_game_loop_with_on_frame_render(max_frames_to_stop=35,on_render_frame=N
 
 
 mocking()
+

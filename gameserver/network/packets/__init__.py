@@ -1,3 +1,4 @@
+from gameserver.network.packets.connect_as_viewer import ViewerConnectPacket
 from gameserver.network.packets.direction import DirectionPacket
 from gameserver.network.packets.name import NamePacket
 from gameserver.network.packets.ping import PingPacket
@@ -20,4 +21,5 @@ dic = {
     RequestWaitingBlocks.PACKET_ID: RequestWaitingBlocks,
     PlayerRemovedPacket.PACKET_ID: PlayerRemovedPacket,
     1011: None,  # Stop Drawing Packet
+    ViewerConnectPacket.PACKET_ID: ViewerConnectPacket,
 }

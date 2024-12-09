@@ -81,7 +81,9 @@ class WaitingBlocksPacket extends Packet {
                 // possible that player received stop drawing blocks
                 // possible that initial waiting blocks are empty game just started
 
-                if (player.waitingBlocks.length > 0) {
+
+                // TODO Think Of This player.waitingBlocks For Reviewer Type
+                if (player.waitingBlocks && player.waitingBlocks.length > 0) {
                     const lastBlock = player.waitingBlocks.getLast;
                     if (lastBlock.blocks.length <= 0 && this.blocks.length > 0) {
                         // this call will cause to replace the waiting blocks with the new blocks coming from server
@@ -94,7 +96,9 @@ class WaitingBlocksPacket extends Packet {
 
 
         if (replaceWaitingBlocks) {
-            if (player.waitingBlocks.length > 0) {
+
+            // TODO Think Of This player.waitingBlocks For Reviewer Type
+            if (player.waitingBlocks &&player.waitingBlocks.length > 0) {
                 const lastBlock = player.waitingBlocks.getLast;
                 lastBlock.blocks = [...this.blocks];
                 lastBlock.vanishTimer = 0;
@@ -103,14 +107,14 @@ class WaitingBlocksPacket extends Packet {
             }
         }
 
-        if (!replaceWaitingBlocks) {
+        // TODO Think Of This player.waitingBlocks For Reviewer Type
+        if (!replaceWaitingBlocks && player.waitingBlocks) {
             player.waitingBlocks.push({
                 vanishTimer: 0,
                 blocks: [...this.blocks]
             });
         }
 
-        console.log("Waiting Blocks", [...player.waitingBlocks]);
 
     }
 }

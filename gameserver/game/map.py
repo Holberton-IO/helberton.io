@@ -3,16 +3,20 @@ from typing import TYPE_CHECKING
 
 from gameserver.game.ds.graph import Graph
 from gameserver.game.line import Line
+from gameserver.game.objects.h_object import HObject
 from gameserver.game.system.player_captured_blocks import PlayersCapturedBlocks
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets import PlayerRemovedPacket
 from gameserver.network.packets.fill_area import FillAreaPacket
 from gameserver.utils.block_compressions import BlockCompression
-
+from gameserver.game.player import Player
 if TYPE_CHECKING:
     from gameserver.game.player import Player
 
+
+
+#TODO We Need To Handle Occupied Blocks In The Map When Player Disconnects
 
 class Map:
     def __init__(self, map_size=0, game_server=None):
@@ -23,6 +27,8 @@ class Map:
         self.map_structure = Graph(self.map_size)
         self.map_structure.init_graph()
 
+
+        self.total_blocks =  abs((self.map_size - 2) * (self.map_size - 2))
     def __iter__(self):
         yield from self.for_each()
 
@@ -39,13 +45,21 @@ class Map:
         if len(blocks) == 1:
             vector = blocks[0]
             rect = Rectangle(vector, vector.add_scalar(1))
+            player.on_occupied_blocks(rect)
             self.fill_blocks(rect, player)
+
 
         # this means that player is moving Horizontally or Vertically with
         # 90 degree turns
+        include_last_block = False
         for vec in range(len(blocks) - 1):
+            # the next vector is exclusive
+
             vector = blocks[vec]
             next_vector = blocks[vec + 1]
+
+
+
             # Prevent Diagonal
             if vector.x != next_vector.x and vector.y != next_vector.y:
                 raise Exception("Invalid Vector")
@@ -55,11 +69,29 @@ class Map:
             max_vec = Vector(max(vector.x, next_vector.x) + 1, max(vector.y, next_vector.y) + 1)
             rec = Rectangle(min_vec, max_vec)
 
+            line_of_blocks = Line(vector, next_vector)
+            if next_vector == blocks[-1]:
+                include_last_block = True
+
+            # TODO Think How To Optimize This
+            player.on_occupied_blocks(line_of_blocks,include_last_block)
             self.fill_blocks(rec, player)
 
         # Update Player Captured Blocks In Map Memory
         for b in blocks:
             self.players_captured_blocks.expand_player_blocks_vec(player, b)
+
+
+    def on_remove_blocks_from_player(self,ob,player):
+        # TODO Think How To Optimize This
+        for x, y in ob:
+            current_player = self.map_structure.graph[x][y]
+            if  isinstance(current_player, Player):
+                if current_player != player:
+                    # line = Line(Vector(x, y), Vector(x, y))
+                    current_player.on_take_area_from_player()
+
+
 
     def fill_inner_blocks_of_player_rectangle(self, player: 'Player'):
         array_of_other_players = list(self.game.get_non_fillable_blocks(ignore_player=player))
@@ -74,8 +106,11 @@ class Map:
                 """
                 update map blocks
                 """
+                player.on_occupied_blocks(Line(Vector(x, y), Vector(x, y)),True)
                 self.game.map.map_structure.graph[x][y] = cmp_block[1]
+            # player.on_occupied_blocks(cmp_block[0])
             self.game.map.notify_blocks_filled(cmp_block[0], cmp_block[1])
+
 
 
     def fill_new_player_blocks(self, player: 'Player'):
@@ -86,7 +121,10 @@ class Map:
         min_vec = player.position.add_scalar(-blocks_num)
         max_vec = player.position.add_scalar(blocks_num + 1)
         rect = Rectangle(min_vec, max_vec)
+
+        player.on_occupied_blocks(rect)
         self.fill_blocks(rect, player)
+
         return rect
 
     def fill_killed_player_blocks(self, killer, killed):
@@ -95,6 +133,7 @@ class Map:
         blocks = self.map_structure.get_all_player_blocks(self,killed)
 
         for rec,data in blocks:
+            killer.on_occupied_blocks(rec)
             self.fill_blocks(rec, killer)
 
         self.players_captured_blocks.remove_player(killed)
@@ -138,7 +177,7 @@ class Map:
 
         self.map_structure.reset_vertex(reset_func)
 
-    def is_valid_viewport_around(self, player):
+    def is_valid_viewport_around(self, player:'HObject'):
         blocks_num = self.game.updates_viewport_rect_size
         rect = Rectangle(
             player.position.add_scalar(-blocks_num),

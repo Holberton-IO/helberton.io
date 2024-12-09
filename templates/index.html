@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helberton.IO</title>
+    <script>
+        const isViewing = {{ 'true' if isViewing else 'false' }};
+        window.serverArgs = {
+        isViewing: isViewing
+    };
+    </script>
     <script type="module" src="{{ url_for('static', filename='bundle.js') }}"></script>
     <style>
         html, body {

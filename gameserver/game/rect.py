@@ -102,6 +102,8 @@ class Rectangle:
         return (vector.x < self.min.x or vector.x >= self.max.x
                 or vector.y < self.min.y or vector.y >= self.max.y)
 
+    def area(self):
+        return (self.max.x - self.min.x) * (self.max.y - self.min.y)
 
 class RectangleBuilder:
     def __init__(self, v1, v2):

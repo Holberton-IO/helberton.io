@@ -41,8 +41,8 @@ class StopDrawingWaitingBlocksPacket extends Packet {
         }
 
 
-
-        if (player.waitingBlocks.length > 0) {
+        // TODO Think Of This player.waitingBlocks For Reviewer Type
+        if (player.waitingBlocks && player.waitingBlocks.length > 0) {
             const playerWaitingBlocks = player.waitingBlocks.getLast.blocks;
             if (playerWaitingBlocks.length > 0) {
                 playerWaitingBlocks.push(this.lastBlock);
@@ -56,6 +56,10 @@ class StopDrawingWaitingBlocksPacket extends Packet {
             player.skipGettingWaitingBlocksRespose = true;
         }
 
+
+
+        // TODO Think Of This player.waitingBlocks For Reviewer Type
+        if(player.waitingBlocks)
         player.waitingBlocks.push({
             vanishTimer: 0,
             blocks: []

@@ -20,6 +20,13 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/view')
+def view():
+    return render_template('index.html', isViewing=True)
+
+
+
+
 @sock.route('/game')
 def game_server(ws):
     s = Socket(ws, gameserver)

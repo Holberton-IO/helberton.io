@@ -3,6 +3,7 @@ import random
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
+from gameserver.game.viewer import Viewer
 from gameserver.network.packets import PlayerStatePacket, WaitingBlocksPacket, PlayerRemovedPacket
 
 from typing import TYPE_CHECKING
@@ -65,20 +66,9 @@ class GameServer:
         self.players.append(player)
         return player
     def remove_player(self, player):
-        self.players.remove(player)
+        player.on_removed()
 
-        # Notify Player Closed
-        self.map.reset_blocks(player)
 
-        # Remove Player From Captured Blocks History
-        self.map.players_captured_blocks.remove_player(player)
-
-        # Send New Port For All Players
-        # TODO HEAVY WORK NEED TO BE OPTIMIZED
-        removed_player_packet = PlayerRemovedPacket(player)
-        for p in self.players:
-            p.send_player_viewport()
-            p.client.send(removed_player_packet)
 
     def generate_random_id(self):
         # TODO We Need To Handle if ID Exceed 4 bytes (2**31 - 1)
@@ -101,9 +91,13 @@ class GameServer:
 
         start_direction = self.map.get_closet_wall_direction(vec)["direction"]
         return vec, start_direction
+
+    def get_spawn_point_center(self):
+        return Vector(self.map.map_size // 2, self.map.map_size // 2)
+
     def get_non_fillable_blocks(self, ignore_player=None):
         for player in self.players:
-            if player == ignore_player:
+            if player == ignore_player or isinstance(player, Viewer):
                 continue
             yield player.position
             if player.is_capturing:
@@ -142,6 +136,8 @@ class GameServer:
                 yield p
     def get_overlapping_waiting_blocks_players_rec(self, rec):
         for p in self.players:
+            if isinstance(p, Viewer):
+                continue
             player_waiting_blocks = p.waiting_bounds
             if rec.is_rect_overlap(player_waiting_blocks):
                 yield p
@@ -150,10 +146,17 @@ class GameServer:
         yield from self.get_overlapping_waiting_blocks_players_rec(rec)
 
     ########################## Broadcast Functions ##########################
+    def broadcast_player_removed(self, player):
+        removed_player_packet = PlayerRemovedPacket(player)
+        for p in self.players:
+            # Send New Port For All Players Because This Player Is Removed and we have edit the viewport
+            p.send_player_viewport()
+            p.client.send(removed_player_packet)
+
+
     def broadcast_player_state(self, player):
         player_state_packet = PlayerStatePacket(player)
         for p in self.get_overlapping_players_with_rec(player.waiting_bounds):
-            print("Player State Packet Sent To: ", p.name)
             p.client.send(player_state_packet)
 
     def broadcast_player_waiting_blocks(self, player):

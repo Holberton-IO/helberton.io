@@ -4,6 +4,11 @@ import {Client} from "./network/client";
 import "./globals.js";
 import "./controls.js";
 import "./extensions/arraysExtensions.js";
+import ConnectAsViewerPacket from "./network/packets/connectAsViewerPacket";
+import Point from "./ui/objects/point";
+
+
+const isViewing = window.serverArgs.isViewing;
 
 
 const camera = new Camera();
@@ -35,7 +40,6 @@ const draw = () => {
     gameEngine.camTransform(ctx);
 
 
-    // console.log("Blocks: " + blocks.length);
     for (let b of blocks) {
         b.draw(ctx, false);
     }
@@ -48,14 +52,21 @@ const draw = () => {
 
 }
 
-
 gameEngine.setDrawFunction(draw);
-
-
 window.requestAnimationFrame(gameEngine.loop.bind(gameEngine));
 
-client = new Client('ws://127.0.0.1:5000/game', (client) => {
-    client.setPlayerName("Test");
-});
+if (isViewing) {
+    client = new Client('ws://127.0.0.1:5000/game', (c) => {
+        let p = new ConnectAsViewerPacket();
+        c.send(p);
+    });
+
+} else {
+
+    client = new Client('ws://127.0.0.1:5000/game', (c) => {
+        c.setPlayerName("Test");
+    });
+
+}
 
 

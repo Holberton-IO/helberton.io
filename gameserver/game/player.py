@@ -1,9 +1,9 @@
+from gameserver.game.objects.h_object import HObject
 from gameserver.network.packets.stop_draw_waiting_blocks import StopDrawWaitingBlocksPacket
 from gameserver.utils.colors import Colors
 from gameserver.game.vector import Vector
 from gameserver.game.rect import Rectangle
 from gameserver.network.packets.player_state import PlayerStatePacket
-from gameserver.network.packets.waiting_blocks import WaitingBlocksPacket
 from gameserver.game.line import Line
 import gameserver.utils.game as game_utils
 
@@ -13,18 +13,18 @@ if TYPE_CHECKING:
     from gameserver.game.vector import Vector
 
 
-class Player:
+class Player(HObject):
     def __init__(self, game_server, client, name="", player_id=""):
-        self.game = game_server
-        self.client = client
+        super().__init__(game_server, client, player_id, name)
         self.is_send_ready_packet = False
+        self.player_id = player_id
+
 
         # Movement
         self.movement_queue = []
         self.lashCertainClientPos = None
 
-        self.name = name
-        self.player_id = player_id
+
         self.position: Optional['Vector'] = None
         self.last_edge_check_position = None
 
@@ -44,10 +44,9 @@ class Player:
         self.waiting_bounds: Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
         self.current_waiting_blocks_ex_pos = 0
         self.max_waiting_blocks = 0
+        self.total_physical_blocks = 0
 
-        # Players
-        self.players_in_viewport = set()
-        self.other_players_in_viewport = set()
+
 
         # TODO Hanlde Removing From Game
         self.is_removed_from_game = False
@@ -90,6 +89,7 @@ class Player:
         self.color_slightlyBrighter = colors["slightlyBrighter"]
         self.color_pattern = colors["pattern"]
         self.color_patternEdge = colors["patternEdge"]
+
     def loop(self, tick, dt, game_server):
         if not self.is_send_ready_packet:
             return
@@ -187,106 +187,7 @@ class Player:
 
 
 
-    ################## View Port ########################33
-    def add_player_to_viewport(self, player):
-        if player in self.players_in_viewport:
-            return
 
-        if player.is_dead:
-            return
-
-        """
-         Add This Player To Current Player Viewport 
-         this means that player will receive updates from this player
-         and this player will receive updates from this player 
-
-        """
-        self.players_in_viewport.add(player)
-        player.other_players_in_viewport.add(self)
-        self.client.send(player.generate_state_packet())
-
-        if player.is_dead:
-            # TODO Send Kill Packet
-            pass
-
-        # TODO Send Waiting Blocks Of Added Player
-        waiting_blocks_packet = WaitingBlocksPacket(player)
-        self.client.send(waiting_blocks_packet)
-
-    def remove_player_from_viewport(self, player):
-        if self.is_removed_from_game:
-            return
-        if player not in self.players_in_viewport:
-            return
-        self.players_in_viewport.discard(player)
-        player.other_players_in_viewport.discard(self)
-        # TODO SEND REMOVED FROM VIEWPORT PACKET (IMPORTANT)
-
-    def update_player_viewport(self):
-        # Consider All Players In Viewport As Left Players
-        left_players = set(self.players_in_viewport)
-
-        """ 
-          If Current Player Viewport Overlaps With Other Players Waiting Blocks
-          Mark This Player As In Viewport Of Current Player
-
-        """
-
-        """
-           0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 
-         0 X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  
-         1 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
-         2 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
-         3 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
-         4 X  3  3  3  3  3  O  O  O  O  O  O  O  O  O  O  O  O  O  X  
-         5 X  3  3  3  3  3  2  2  2  O  O  O  O  O  O  O  O  O  O  X  
-         6 X  O  O  3  O  O  O  O  2  O  O  O  O  O  O  O  O  O  O  X  
-         7 X  O  O  3  O  O  O  O  2  O  O  O  O  O  O  O  O  O  O  X  
-         8 X  O  O  3  O  O  O  O  2  O  O  O  2  2  2  2  2  O  O  X  
-         9 X  3  3  3  3  3  3  3  3  O  O  O  2  2  2  2  2  O  O  X  
-        10 X  O  O  2  2  2  2  2  2  2  2  2  2  2  2  2  2  O  O  X  
-        11 X  O  O  3  O  O  O  O  3  O  O  O  2  2  2  2  2  O  O  X  
-        12 X  O  O  3  O  O  O  O  3  O  O  O  2  2  2  2  2  O  O  X  
-        13 X  O  O  3  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
-        14 X  O  O  3  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
-        15 X  2  2  2  2  2  2  2  3  O  O  O  O  O  O  O  O  O  O  X  
-        16 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
-        17 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
-        18 X  O  O  O  O  O  O  O  3  O  O  O  O  O  O  O  O  O  O  X  
-        19 X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  X  
-        """
-
-        # Current Player View Port with [Waiting Blocks] of Other Players
-        for player in self.game.get_overlapping_waiting_blocks_players_rec(self.get_viewport()):
-            left_players.discard(player)
-            self.add_player_to_viewport(player)
-
-        for player in left_players:
-            self.remove_player_from_viewport(player)
-
-        left_players = set(self.other_players_in_viewport)
-        # Other Players View Port with [Waiting Blocks] of Current Player
-        for player in self.game.get_overlapping_players_with_rec(self.waiting_bounds):
-            left_players.discard(player)
-            player.add_player_to_viewport(self)
-
-        for player in left_players:
-            player.remove_player_from_viewport(self)
-
-    def get_viewport(self):
-        min_vec = self.position.add_scalar(-self.game.updates_viewport_rect_size)
-        max_vec = self.position.add_scalar(self.game.updates_viewport_rect_size)
-        return Rectangle(min_vec, max_vec)
-
-    def send_player_viewport(self):
-        """
-        Sends Compressed ViewPort To Player
-        :return:
-        """
-        if not self.game.map.is_valid_viewport_around(self):
-            return
-        for cmp_block in self.game.map.get_compressed_blocks_in(self.get_viewport()):
-            self.game.map.notify_blocks_filled(cmp_block[0], cmp_block[1])
 
     ############## Syncing ###############3
     def is_future_position(self, new_pos):
@@ -358,7 +259,7 @@ class Player:
                 # Send Kill Packet
                 # other_player Killed by self
                 pass
-        # TODO DELAY IN SENDING EDGES
+
         self.send_required_edge_blocks()
 
     def update_waiting_blocks_length_ex_pos(self):
@@ -413,7 +314,6 @@ class Player:
                 Vector(chunk_size, (viewport_size + chunk_size) * 2)
             )
             self.last_edge_check_position.x = self.position.x
-
         if self.position.x <= self.last_edge_check_position.x - chunk_size:
             chunk = Rectangle(
                 Vector(self.position.x - viewport_size - chunk_size,
@@ -421,7 +321,6 @@ class Player:
                 Vector(chunk_size, (viewport_size + chunk_size) * 2)
             )
             self.last_edge_check_position.x = self.position.x
-
         if self.position.y >= self.last_edge_check_position.y + chunk_size:
             chunk = Rectangle(
                 Vector(self.last_edge_check_position.x - viewport_size - chunk_size,
@@ -429,7 +328,6 @@ class Player:
                 Vector((viewport_size + chunk_size) * 2, chunk_size)
             )
             self.last_edge_check_position.y = self.position.y
-
         if self.position.y <= self.last_edge_check_position.y - chunk_size:
             chunk = Rectangle(
                 Vector(self.last_edge_check_position.x - viewport_size - chunk_size,
@@ -560,3 +458,32 @@ class Player:
         """
         return PlayerStatePacket(self)
 
+
+
+
+
+    def on_removed(self):
+        self.game.players.remove(self)
+        # Notify Player Closed
+        self.game.map.reset_blocks(self)
+        # Remove Player From Captured Blocks History
+        self.game.map.players_captured_blocks.remove_player(self)
+        self.game.broadcast_player_removed(self)
+
+
+
+    def on_occupied_blocks(self,ob,include_last_block=False):
+        area = ob.area()
+        if include_last_block:
+            area += 1
+        self.total_physical_blocks += area
+        self.game.map.on_remove_blocks_from_player(ob, self)
+
+
+    def on_take_area_from_player(self):
+        # TODO Think How To Optimize This
+        self.total_physical_blocks -= 1
+
+    @property
+    def occupied_percentage(self):
+        return (self.total_physical_blocks / self.game.map.total_blocks) * 100

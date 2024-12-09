@@ -2,7 +2,7 @@ import time
 from enum import Enum
 from time import sleep
 
-from gameserver.game.rect import Rectangle
+from gameserver.game.rect import Rectangle, RectangleBuilder
 from gameserver.game.vector import Vector
 from gameserver.network.packets import DirectionPacket
 
@@ -135,38 +135,28 @@ def mocking():
     start_time = time.time()
 
 
-    player = add_player_with_client("Mock Player",direction=Direction.DOWN,position=Vector(14,4))
-    start_position = player.position.clone()
-    player2 = add_player_with_client("King",Vector(7,10),Direction.RIGHT)
+    player2 = add_player_with_client("King",Vector(3,8),Direction.RIGHT)
 
     game_map = gameserver.map
     def on_frame_render(frame):
         player_2_position = player2.position
-        if player_2_position == Vector(15,10):
-            direction_packet = DirectionPacket()
-            direction_packet.dir = "up"
-            direction_packet.position = player2.position.clone()
-            direction_packet.handle_packet(player2.client)
-
-        elif player_2_position == Vector(15,4):
-            direction_packet = DirectionPacket()
-            direction_packet.dir = "left"
-            direction_packet.position = player2.position.clone()
-            direction_packet.handle_packet(player2.client)
+        # if player_2_position == Vector(8,8):
+        #     direction_packet = DirectionPacket()
+        #     direction_packet.dir = 'up'
+        #     direction_packet.position = player2.position.clone()
+        #     direction_packet.handle_packet(player2.client)
 
 
-        elif player_2_position == Vector(7,4):
-            direction_packet = DirectionPacket()
-            direction_packet.dir = "down"
-            direction_packet.position = player2.position.clone()
-            direction_packet.handle_packet(player2.client)
+    game_map.fill_blocks(
+        RectangleBuilder(Vector(9,8),Vector(9,8)).build(),
+        player2
+    )
 
-    start_game_loop_with_on_frame_render(max_frames_to_stop= 88,on_render_frame=on_frame_render)
+    start_game_loop_with_on_frame_render(max_frames_to_stop= 38,on_render_frame=on_frame_render)
 
     end_time = time.time()
     print(f"Time Taken: {end_time - start_time}")
 
-    print(f"Player Position: {player.position}, Start Position: {start_position}, {player.next_tile_progress} , Direction {player.direction}")
     # game_map.draw_map_as_text_with_players_positions()
     # for i in gameserver.get_overlapping_players_with_rec(player.waiting_bounds):
     #     print(i.name)
@@ -174,8 +164,6 @@ def mocking():
     game_map.draw_map_as_text_with_players_positions()
     print(f"Player Killer Total Blocks: {player2.total_physical_blocks}")
     print(f"Player Killer Total Blocks: {player.total_physical_blocks}")
-    print(f"Player Killer Total Blocks: {player2.occupied_percentage}")
-    print(f"Player Killer Total Blocks: {player.occupied_percentage}")
     #
 
 
