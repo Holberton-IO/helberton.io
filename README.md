@@ -88,7 +88,7 @@ The client-side code is responsible for rendering the game interface, handling u
 
 - **app.js:** Main application logic for the client.
 - **controls.js:** Manages user controls, enabling smooth gameplay.
-- **gameEngine.js:** Implements the game engine, handling rendering and game mechanics.
+- **game-engine.js:** Implements the game engine, handling rendering and game mechanics.
 - **network:**
   - **client.js:** Manages the game client on the client side.
   - **packet.js:** Defines the structure of network packets on the client side.
@@ -96,7 +96,7 @@ The client-side code is responsible for rendering the game interface, handling u
     - Various packet types used on the client side, such as age, direction, fill_area, namePacket, ping, playerState, pong, ready, and waitingBlocks.
   - **socket.js:** Manages WebSocket communication for real-time updates on the client side.
   - **utils:**
-    - **bytesUtils.js:** Provides utilities for handling bytes efficiently.
+    - **bytes-utils.js:** Provides utilities for handling bytes efficiently.
     - **reader.js:** Provides utilities for reading data from the network.
     - **writer.js:** Provides utilities for writing data to the network.
 

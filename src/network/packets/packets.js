@@ -10,6 +10,7 @@ import RequestWaitingBlockPacket from "./requestWaitingBlocks";
 import PlayerRemovedPacket from "./playerRemoved";
 import StopDrawingWaitingBlocksPacket from "./stopDrawingWaitingBlocks";
 import ConnectAsViewerPacket from "./connectAsViewerPacket";
+import UpdateLeaderBoardPacket from "./updateLeaderBoard";
 
 const PacketsDictionary = {
     1001: NamePacket,
@@ -24,6 +25,7 @@ const PacketsDictionary = {
     1010: PlayerRemovedPacket,
     1011: StopDrawingWaitingBlocksPacket,
     1012: ConnectAsViewerPacket,
+    1013: UpdateLeaderBoardPacket,
 }
 
 

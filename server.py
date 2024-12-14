@@ -11,13 +11,17 @@ app = Flask(__name__)
 sock = Sock()
 CORS(app)
 sock.init_app(app)
-gameserver = GameServer(map_size=25)
+gameserver = GameServer(map_size=35)
 game_loop = GameLoop(gameserver)
 game_loop.start()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # get query params
+    params = request.args
+    name = params.get('name','')
+    print(params,name)
+    return render_template('index.html', playerName=name)
 
 
 @app.route('/view')

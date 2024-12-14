@@ -1,7 +1,7 @@
 import * as GameMath from './utils/math.js';
 import * as GameUtils from './ui/utils.js';
 import {calculate_pixel_ratio} from "./ui/utils.js";
-import GameObjects from "./gameObjects.js"
+import GameObjects from "./game-objects";
 import PingPacket from "./network/packets/ping";
 
 

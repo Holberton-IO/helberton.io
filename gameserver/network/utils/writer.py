@@ -1,3 +1,6 @@
+import struct
+
+
 class Writer:
     def __init__(self, packet_id):
         self.buffer = bytearray(20)
@@ -27,6 +30,19 @@ class Writer:
         self.ensure_buffer_size(bytes_number)
         self.write_byte_array(b)
         self.update_packet_size()
+
+    def write_float_in_bytes(self, number, bytes_number=4):
+        if bytes_number == 4:
+            b = struct.pack('<f', number)  # '<f' is little-endian, 32-bit float
+        elif bytes_number == 8:
+            b = struct.pack('<d', number)  # '<d' is little-endian, 64-bit double
+        else:
+            raise ValueError("Only 4 (float) or 8 (double) bytes are supported for floats.")
+
+        self.ensure_buffer_size(bytes_number)
+        self.write_byte_array(b)
+        self.update_packet_size()
+
 
     def write_string(self, s: str):
         self.write_int_in_bytes(len(s), 2)

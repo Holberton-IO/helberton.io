@@ -18,7 +18,7 @@ class Player(HObject):
         super().__init__(game_server, client, player_id, name)
         self.is_send_ready_packet = False
         self.player_id = player_id
-
+        self.numberOfKills = 0
 
         # Movement
         self.movement_queue = []
@@ -151,9 +151,12 @@ class Player(HObject):
         if not is_my_player:
             print(f"Player {killed_player.name} Killed By {self.name}")
             self.game.map.fill_killed_player_blocks(self, killed_player)
+            self.numberOfKills += 1
             # self.send_capture_blocks()
         else:
             print(f"Player {killed_player.name} Killed Himself")
+
+
     def reset_player(self):
         self.movement_queue = []
         self.lashCertainClientPos = None
@@ -166,7 +169,7 @@ class Player(HObject):
         self.other_players_in_viewport = set()
         self.is_moving = False
         self.clear_waiting_blocks()
-
+        self.numberOfKills = 0
 
 
 

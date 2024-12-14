@@ -1,4 +1,4 @@
-import {intToBytes, bytesToInt, toHexString} from './bytesUtils.js';
+import {intToBytes, bytesToInt, toHexString} from './bytes-utils.js';
 
 
 class Reader {
@@ -17,6 +17,21 @@ class Reader {
         const bytes = this.data.slice(this.position, this.position + stringLength);
         this.position += stringLength;
         return new TextDecoder().decode(bytes);
+    }
+
+    readFloatFromBytes(bytesNumber = 4) {
+        const bytes = this.data.slice(this.position, this.position + bytesNumber);
+        this.position += bytesNumber;
+        const buffer = new ArrayBuffer(bytesNumber);
+        new Uint8Array(buffer).set(bytes);
+        const view = new DataView(buffer);
+        if (bytesNumber === 4) {
+            return view.getFloat32(0, true);
+        }
+        if (bytesNumber === 8) {
+            return view.getFloat64(0, true);
+        }
+        throw new Error('Unsupported number of bytes for float');
     }
 
     readString() {

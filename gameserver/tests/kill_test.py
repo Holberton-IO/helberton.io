@@ -161,7 +161,7 @@ def mocking():
             direction_packet.position = player2.position.clone()
             direction_packet.handle_packet(player2.client)
 
-    start_game_loop_with_on_frame_render(max_frames_to_stop= 88,on_render_frame=on_frame_render)
+    start_game_loop_with_on_frame_render(max_frames_to_stop= 25,on_render_frame=on_frame_render)
 
     end_time = time.time()
     print(f"Time Taken: {end_time - start_time}")
@@ -176,6 +176,7 @@ def mocking():
     print(f"Player Killer Total Blocks: {player.total_physical_blocks}")
     print(f"Player Killer Total Blocks: {player2.occupied_percentage}")
     print(f"Player Killer Total Blocks: {player.occupied_percentage}")
+    print(gameserver.sort_players_by_blocks())
     #
 
 

@@ -17,6 +17,10 @@ class Point {
         return new Point(this.x * scalar, this.y * scalar);
     }
 
+    divide(scalar) {
+        return new Point(Math.floor(this.x / scalar), Math.floor(this.y / scalar));
+    }
+
 
     clone() {
         return new Point(this.x, this.y);

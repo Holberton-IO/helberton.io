@@ -1,4 +1,4 @@
-import IObject from "./i_object";
+import IObject from "./i-object";
 
 class Viewer extends IObject{
     constructor(position,id) {

@@ -12,7 +12,6 @@ class Block {
         this.colorsWithId = null;
         this.lastSetTime = Date.now()
         this.animation = new Animation(0, 1, 0.003);
-
     }
 
 
@@ -71,6 +70,10 @@ class Block {
         return block;
 
     }
+    static BorderBlockWidth = 10;
+    static EmptyBlockWidth = 9;
+    static RegularBlockWidth = 9;
+
 
     handleAnimation() {
         this.animation.update(window.gameEngine.deltaTime);
@@ -99,7 +102,6 @@ class Block {
     drawEmptyBlock(ctx, darkColor, brightColor, size) {
         if (this.currentBlock !== 1) return;
 
-
         const sizeFactor = 10 / size;
         const newS = size * sizeFactor; // 10
         let animProgress = 0;
@@ -109,29 +111,32 @@ class Block {
         const spacingTen = GameMath.calPercentage(newS, 0.1); // 1
         const spacingNinty = GameMath.calPercentage(newS, 0.9);
 
+        // Snow-like background with subtle texture
+        ctx.fillStyle = brightColor;
+        ctx.fillRect(newP.x, newP.y, size, size);
+
+        // Generate random snowflake-like patterns
+        this.drawSnowflakeTexture(ctx, newP, size);
 
         /////////////////////// SHADOW ////////////////////////
         if (this.animation.progress > .8) {
             GameUtils.drawInCtxRec(ctx, newP, size, darkColor, spacingTwenty);
         }
 
-        ctx.fillStyle = brightColor;
-        if (this.animation.progress === 1) {
-            GameUtils.drawInCtxRec(ctx, newP, size, brightColor, spacingTen);
-        } else if (this.animation.progress < .4) {
+        if (this.animation.progress < .4) {
             animProgress = this.animation.progress * 2.5;
             ctx.beginPath();
-            ctx.moveTo(newP.x + spacingTwenty, newP.y + GameMath.linearInterpolate(spacingNinty, spacingTwenty, animProgress));
+            ctx.moveTo(newP.x + spacingTwenty, newP.y + spacingTwenty);
             ctx.lineTo(newP.x + spacingTwenty, newP.y + spacingNinty);
             ctx.lineTo(newP.x + GameMath.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingNinty);
+            ctx.lineTo(newP.x + GameMath.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingTwenty);
             ctx.fill();
         } else if (this.animation.progress < 0.8) {
             animProgress = this.animation.progress * 2.5 - 1;
             ctx.beginPath();
             ctx.moveTo(newP.x + spacingTwenty, newP.y + spacingTwenty);
-            ctx.lineTo(newP.x + spacingTwenty, newP.y + 9);
-            ctx.lineTo(newP.x + spacingNinty, newP.y + spacingNinty);
-            ctx.lineTo(newP.x + spacingNinty, newP.y + GameMath.linearInterpolate(spacingNinty, spacingTwenty, animProgress));
+            ctx.lineTo(newP.x + spacingNinty, newP.y + spacingTwenty);
+            ctx.lineTo(newP.x + spacingNinty, newP.y + GameMath.linearInterpolate(spacingTwenty, spacingNinty, animProgress));
             ctx.lineTo(newP.x + GameMath.linearInterpolate(spacingTwenty, spacingNinty, animProgress), newP.y + spacingTwenty);
             ctx.fill();
         } else {
@@ -139,6 +144,73 @@ class Block {
             animProgress = this.animation.progress * 5 - 4;
             GameUtils.drawInCtxRec(ctx, newP, size, brightColor, GameMath.linearInterpolate(2, 1, animProgress));
         }
+    }
+
+    seededRandom(seed) {
+        const x = Math.sin(seed) * 10000;
+        return x - Math.floor(x);
+    }
+
+    generateBlockSeed() {
+        // Use block's grid coordinates to create a unique, consistent seed
+        const gridX = Math.floor(this.position.x / 10);
+        const gridY = Math.floor(this.position.y / 10);
+        
+        // Create a unique seed based on grid coordinates
+        return gridX * 1000 + gridY;
+    }
+
+    drawSnowflakeTexture(ctx, position, size) {
+        ctx.save();
+        ctx.globalAlpha = 0.3; // Subtle effect
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 1;
+
+        // Generate a consistent seed for this block
+        const blockSeed = this.generateBlockSeed();
+        
+        // Number of snowflakes based on block size
+        const snowflakeCount = Math.floor(size / 5);
+
+        for (let i = 0; i < snowflakeCount; i++) {
+            // Use seeded random to ensure consistent randomness
+            const seedOffset = blockSeed + i * 137; // Prime number to reduce pattern repetition
+            const pseudoRandom = this.seededRandom(seedOffset);
+            
+            const x = position.x + pseudoRandom * size;
+            const y = position.y + this.seededRandom(seedOffset + 1000) * size;
+            const snowflakeSize = this.seededRandom(seedOffset + 2000) * 3;
+            
+            this.drawSingleSnowflake(ctx, x, y, snowflakeSize);
+        }
+
+        ctx.restore();
+    }
+
+    drawSingleSnowflake(ctx, x, y, size) {
+        ctx.beginPath();
+        
+        // Create a simple star-like snowflake
+        const arms = 6;
+        for (let i = 0; i < arms; i++) {
+            const angle = (i / arms) * Math.PI * 2;
+            const armLength = size;
+            
+            const startX = x;
+            const startY = y;
+            
+            const endX = x + Math.cos(angle) * armLength;
+            const endY = y + Math.sin(angle) * armLength;
+            
+            // Slight curve to make it more organic
+            const controlX = x + Math.cos(angle + Math.PI/4) * (armLength/2);
+            const controlY = y + Math.sin(angle + Math.PI/4) * (armLength/2);
+            
+            ctx.moveTo(startX, startY);
+            ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+        }
+        
+        ctx.stroke();
     }
 
     drawRegularBlock(ctx, darkColor, brightColor, size) {
@@ -197,22 +269,122 @@ class Block {
 
     }
 
-    draw(ctx, checkViewport) {
-        if (checkViewport && window.camera.checkObjectInCamera(this.position)) {
-            console.log("not in camera");
+    drawSnowBlock(ctx, baseColor, size) {
+        // Debug logging to understand block state
+        console.log('Snow Block Drawing:', {
+            currentBlock: this.currentBlock,
+            position: this.position,
+            size: size
+        });
+
+        // Modify condition to draw snow blocks more flexibly
+        if (this.currentBlock < 3 || this.currentBlock > 3) {
             return;
+        }
+
+        const newP = this.calBlockGap(this.position, size);
+        
+        // Vibrant snow block background with gradient
+        const gradient = ctx.createLinearGradient(
+            newP.x, newP.y, 
+            newP.x, newP.y + size
+        );
+        gradient.addColorStop(0, '#f0f8ff');     // Light blue-white
+        gradient.addColorStop(0.5, '#ffffff');   // Pure white
+        gradient.addColorStop(1, '#f0f8ff');     // Light blue-white
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(newP.x, newP.y, size, size);
+
+        // More prominent snow texture
+        this.drawSnowTexture(ctx, newP, size);
+
+        // Add depth and shadow
+        ctx.shadowColor = 'rgba(200, 200, 220, 0.3)';
+        ctx.shadowBlur = 3;
+        ctx.strokeStyle = 'rgba(200, 200, 220, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(newP.x, newP.y, size, size);
+        ctx.shadowBlur = 0;
+    }
+
+    drawSnowTexture(ctx, position, size) {
+        ctx.save();
+        ctx.globalAlpha = 0.6;  // Increased visibility
+        ctx.strokeStyle = 'rgba(220, 230, 255, 0.8)';
+        ctx.lineWidth = 1.5;
+
+        const blockSeed = this.generateBlockSeed();
+        const snowflakeCount = Math.floor(size / 3);  // More snowflakes
+
+        for (let i = 0; i < snowflakeCount; i++) {
+            const seedOffset = blockSeed + i * 137;
+            const pseudoRandom = this.seededRandom(seedOffset);
+            
+            const x = position.x + pseudoRandom * size;
+            const y = position.y + this.seededRandom(seedOffset + 1000) * size;
+            const snowflakeSize = this.seededRandom(seedOffset + 2000) * 3;
+            
+            this.drawDetailedSnowflake(ctx, x, y, snowflakeSize);
+        }
+
+        ctx.restore();
+    }
+
+    drawDetailedSnowflake(ctx, x, y, size) {
+        ctx.beginPath();
+        
+        // More pronounced snowflake pattern
+        const arms = 6;
+        for (let i = 0; i < arms; i++) {
+            const angle = (i / arms) * Math.PI * 2;
+            
+            // Main arm with more detail
+            const mainArmLength = size;
+            const mainEndX = x + Math.cos(angle) * mainArmLength;
+            const mainEndY = y + Math.sin(angle) * mainArmLength;
+            
+            ctx.moveTo(x, y);
+            ctx.lineTo(mainEndX, mainEndY);
+            
+            // Longer side branches
+            const branchAngle = Math.PI / 4; // 45-degree branches
+            const branchLength = size * 0.7;
+            
+            // Left branch
+            const leftBranchEndX = mainEndX + Math.cos(angle - branchAngle) * branchLength;
+            const leftBranchEndY = mainEndY + Math.sin(angle - branchAngle) * branchLength;
+            ctx.moveTo(mainEndX, mainEndY);
+            ctx.lineTo(leftBranchEndX, leftBranchEndY);
+            
+            // Right branch
+            const rightBranchEndX = mainEndX + Math.cos(angle + branchAngle) * branchLength;
+            const rightBranchEndY = mainEndY + Math.sin(angle + branchAngle) * branchLength;
+            ctx.moveTo(mainEndX, mainEndY);
+            ctx.lineTo(rightBranchEndX, rightBranchEndY);
+        }
+        
+        ctx.stroke();
+    }
+
+    draw(ctx, checkViewport) {
+        // Viewport check
+        if (checkViewport && !window.camera.checkObjectInCamera(this.position)) {
+            return false;
         }
 
         let canDraw = this.handleAnimation();
         if (!canDraw) {
-            return;
+            return true;
         }
 
-        this.drawBorderBlock(ctx, "#420707", 10);
-        this.drawEmptyBlock(ctx, "#2d2926", "#4e463f", 7);
-        this.drawRegularBlock(ctx, "#2d2926", "#4e463f", 9);
-
+        // Draw different block types
+        this.drawBorderBlock(ctx, "#420707", Block.BorderBlockWidth);
+        this.drawEmptyBlock(ctx, "#2d2926", "#e6f3ff", Block.EmptyBlockWidth);
+        this.drawRegularBlock(ctx, "#2d2926", "#e6f3ff", Block.RegularBlockWidth);
+        return true;
     }
+
 
 
     static convertRectToBlock(rect, colorsWithId, listOfBlocks, myPlayer) {

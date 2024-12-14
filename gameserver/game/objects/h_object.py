@@ -1,6 +1,6 @@
 from typing import Optional, TYPE_CHECKING
 from gameserver.game.rect import Rectangle
-import gameserver.network.packets as packets
+
 
 if TYPE_CHECKING:
     from gameserver.game.vector import Vector
@@ -46,6 +46,7 @@ class HObject:
         return not self.is_alive
 
     def add_player_to_viewport(self, player):
+        import gameserver.network.packets as packets
         if player in self.players_in_viewport:
             return
 

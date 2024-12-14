@@ -18,13 +18,21 @@ class GameObjects {
     addPlayer(player) {
         if (player.id in this.players)
             return this.players[player.id];
-        if (player.isMyPlayer)
+        if (player.isMyPlayer) {
+            window.myPlayer = player;
             this.myPlayer = player;
+        }
         else
             player.isReady = true;
 
         this.players[player.id] = player;
         return player;
+    }
+
+
+
+    getPlayerById(id) {
+        return this.players[id];
     }
 
 
@@ -35,6 +43,10 @@ class GameObjects {
 
     isPlayerExist(player) {
         return player.id in this.players;
+    }
+
+    isPlayerIdExist(id) {
+        return id in this.players;
     }
 
     addBlock(block) {

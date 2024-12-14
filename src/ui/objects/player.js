@@ -3,7 +3,7 @@ import * as GameMath from "../../utils/math.js";
 import * as GameUtils from "../utils.js";
 import DirectionPacket from "../../network/packets/direction";
 import RequestWaitingBlockPacket from "../../network/packets/requestWaitingBlocks";
-import IObject from "./i_object";
+import IObject from "./i-object";
 
 
 class Player extends IObject {

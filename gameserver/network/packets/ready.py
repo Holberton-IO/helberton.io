@@ -51,7 +51,10 @@ class ReadyPacket(Packet):
         self.player_x = client.player.position.x
         self.player_y = client.player.position.y
         self.player_direction = client.player.direction
-        print("On Ready Packet", self.player_x, self.player_y, self.player_direction)
+        print("On Ready Packet", self.player_x, self.player_y, self.player_direction
+              ,f"Id {self.user_id}"
+
+              )
 
         """
         Set Player Colors

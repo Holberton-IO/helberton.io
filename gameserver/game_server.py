@@ -1,5 +1,8 @@
 import math
 import random
+
+from gameserver.game.leader_board import LeaderBoard
+from gameserver.game.minmap import MinMap
 from gameserver.game.rect import Rectangle
 from gameserver.game.vector import Vector
 import gameserver.utils.game_math as game_math
@@ -52,9 +55,17 @@ class GameServer:
         self.clients = []
         self.players = []
         self.player_count = 0
+        self.leader_board = LeaderBoard(self, 5)
+        self.minimap = MinMap(self)
+
+
     def loop(self, tick, dt):
         for player in self.players:
             player.loop(tick, dt, self)
+
+        self.leader_board.loop(dt, tick)
+        self.minimap.loop(dt, tick)
+
 
     ########################## Player Helper Functions ##########################
     def get_player_by_id(self, player_id):
@@ -176,3 +187,10 @@ class GameServer:
 
         for cmp_block in self.map.get_compressed_blocks_in(player.get_viewport()):
             self.map.notify_blocks_filled(cmp_block[0], cmp_block[1])
+
+    ################### Players Statistics #################
+    def sort_players_by_blocks(self):
+        res = self.players[:]
+        res = [p for p in res if not isinstance(p, Viewer)]
+        res.sort(key=lambda x: x.total_physical_blocks, reverse=True)
+        return res

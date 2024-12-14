@@ -14,18 +14,38 @@ class Camera {
         this.camPosSet = false;
 
         this.camShakeBuffer = [];
+
+
     }
 
 
-    // TODO ADD VIEWPORT RADIUS
     checkObjectInCamera(point) {
-        return (
-            point.x < this.camPosition.x - window.game.viewPortRadius ||
-            point.x > this.camPosition.x + window.game.viewPortRadius ||
-            point.y < this.camPosition.y - window.game.viewPortRadius ||
-            point.y > this.camPosition.y + window.game.viewPortRadius
-        )
+         const bounds = {
+            minX: this.camPosition.x - (window.game.viewPortRadius*.9),
+            maxX: this.camPosition.x + (window.game.viewPortRadius*.9),
+            minY: this.camPosition.y - (window.game.viewPortRadius*.9),
+            maxY: this.camPosition.y + (window.game.viewPortRadius*.9),
+        }
+       return point.x > bounds.minX &&
+               point.x < bounds.maxX &&
+              point.y > bounds.minY &&
+            point.y < bounds.maxY;
     }
+
+    checkNotScaledObjectInCamera(t,scale) {
+        const point = t.divide(scale);
+        const bounds = {
+            minX: this.camPosition.x - window.game.viewPortRadius,
+            maxX: this.camPosition.x + window.game.viewPortRadius,
+            minY: this.camPosition.y - window.game.viewPortRadius,
+            maxY: this.camPosition.y + window.game.viewPortRadius
+        }
+       return point.x > bounds.minX &&
+               point.x < bounds.maxX &&
+              point.y > bounds.minY &&
+            point.y < bounds.maxY;
+    }
+
 
     shakeCamera(p, rotate = true) {
         this.camShakeBuffer.push([

@@ -1,4 +1,4 @@
-import {intToBytes, bytesToInt, toHexString} from './bytesUtils.js';
+import {intToBytes, bytesToInt, toHexString} from './bytes-utils.js';
 
 class Writer {
     // Infinity

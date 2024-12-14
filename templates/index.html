@@ -6,8 +6,10 @@
     <title>Helberton.IO</title>
     <script>
         const isViewing = {{ 'true' if isViewing else 'false' }};
+        const playerSubmitName = "{{ playerName }}"
         window.serverArgs = {
-        isViewing: isViewing
+        isViewing: isViewing,
+        playerSubmitName: playerSubmitName
     };
     </script>
     <script type="module" src="{{ url_for('static', filename='bundle.js') }}"></script>
