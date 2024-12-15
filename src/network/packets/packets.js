@@ -11,6 +11,8 @@ import PlayerRemovedPacket from "./playerRemoved";
 import StopDrawingWaitingBlocksPacket from "./stopDrawingWaitingBlocks";
 import ConnectAsViewerPacket from "./connectAsViewerPacket";
 import UpdateLeaderBoardPacket from "./updateLeaderBoard";
+import KilledPlayerPacket from "./killedPlayer";
+import RespawnPacket from "./respawn";
 
 const PacketsDictionary = {
     1001: NamePacket,
@@ -26,6 +28,8 @@ const PacketsDictionary = {
     1011: StopDrawingWaitingBlocksPacket,
     1012: ConnectAsViewerPacket,
     1013: UpdateLeaderBoardPacket,
+    1014: KilledPlayerPacket,
+    1015: RespawnPacket, // We Be Receive As Ready Packet
 }
 
 

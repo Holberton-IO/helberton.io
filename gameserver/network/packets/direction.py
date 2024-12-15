@@ -26,9 +26,9 @@ class DirectionPacket(Packet):
 
     def handle_packet(self, client):
         """On Received Ready Packet"""
-        print(client.player.name, "is Changing Direction")
-        print("Direction: ", self.dir)
-        print("Position: ", self.position)
+        # print(client.player.name, "is Changing Direction")
+        # print("Direction: ", self.dir)
+        # print("Position: ", self.position)
         client.player.client_update_pos(self.dir, self.position)
 
 

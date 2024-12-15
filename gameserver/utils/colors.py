@@ -84,6 +84,62 @@ class Colors:
             'patternEdge': "#BD6B0E",
             'slightlyBrighter': "#FBDF78",
             'bevelBright': "#F9D485",
+        },
+        'teal': {
+            'brighter': "#20B2AA",
+            'darker': "#008080",
+            'pattern': "#1E9896",
+            'patternEdge': "#167A77",
+            'slightlyBrighter': "#2AC4C4"
+        },
+        'coral': {
+            'brighter': "#FF7F50",
+            'darker': "#FF5733",
+            'pattern': "#FF6B4A",
+            'patternEdge': "#FF4500",
+            'slightlyBrighter': "#FF8C69"
+        },
+        'lavender': {
+            'brighter': "#9370DB",
+            'darker': "#6A5ACD",
+            'pattern': "#7B68EE",
+            'patternEdge': "#483D8B",
+            'slightlyBrighter': "#A569BD"
+        },
+        'mint': {
+            'brighter': "#3CB371",
+            'darker': "#2E8B57",
+            'pattern': "#2FBC71",
+            'patternEdge': "#1D6B3F",
+            'slightlyBrighter': "#40E0D0"
+        },
+        'crimson': {
+            'brighter': "#DC143C",
+            'darker': "#B22222",
+            'pattern': "#CD5C5C",
+            'patternEdge': "#8B0000",
+            'slightlyBrighter': "#FF4D4D"
+        },
+        'bronze': {
+            'brighter': "#CD7F32",
+            'darker': "#B87333",
+            'pattern': "#AA6C39",
+            'patternEdge': "#8B4513",
+            'slightlyBrighter': "#D2691E"
+        },
+        'slate': {
+            'brighter': "#708090",
+            'darker': "#4F6367",
+            'pattern': "#607080",
+            'patternEdge': "#3A4F5A",
+            'slightlyBrighter': "#778899"
+        },
+        'magenta': {
+            'brighter': "#C71585",
+            'darker': "#8B008B",
+            'pattern': "#BA55D3",
+            'patternEdge': "#9932CC",
+            'slightlyBrighter': "#DA70D6"
         }
     }
     __instance = None

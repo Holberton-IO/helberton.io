@@ -45,7 +45,7 @@ const keyMapper = { //In Circle Way
 window.onkeyup = (e) => {
     //console.log(keyMapper[e.key]);
     const keyVal = keyMapper[e.key];
-    if(keyVal && window.client && window.client.player){
+    if(keyVal && window.client && window.client.player && window.client.player.isReady){
         const dir = _ui_objects_player__WEBPACK_IMPORTED_MODULE_0__["default"].mapControlsToDir(keyVal);
         window.client.player.requestChangeDir(dir);
     }
@@ -471,8 +471,8 @@ class Client {
     }
 
     onOpen(onOpenEvent) {
-        console.log("Connected to server");
-        console.log(onOpenEvent);
+        // console.log("Connected to server");
+        // console.log(onOpenEvent);
         this.connectionStatus = ConnectionStatus.OPEN;
         this.playerStatus = PlayerStatus.CONNECTED;
         this.onConnect(this);
@@ -770,7 +770,7 @@ class FillAreaPacket extends _packet__WEBPACK_IMPORTED_MODULE_0__["default"] {
     }
 
     handleReceivedPacket(client) {
-        console.log("Received Fill Area Packet");
+        // console.log("Received Fill Area Packet");
 
         const colorsWithId = {
             brighter: this.colorBrighter,
@@ -788,6 +788,86 @@ class FillAreaPacket extends _packet__WEBPACK_IMPORTED_MODULE_0__["default"] {
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FillAreaPacket);
+
+/***/ }),
+
+/***/ "./src/network/packets/killedPlayer.js":
+/*!*********************************************!*\
+  !*** ./src/network/packets/killedPlayer.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_utils_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/utils.js */ "./src/ui/utils.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+/* harmony import */ var _ui_objects_viewer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../ui/objects/viewer */ "./src/ui/objects/viewer.js");
+
+
+
+
+
+
+
+
+class KilledPlayerPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1014;
+        this.killedPlayer = null;
+        this.killerPlayer = null;
+
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+
+        const reader = this.reader;
+        const killerId = reader.readInt4();
+        const killerName = reader.readString();
+        const killedId = reader.readInt4();
+        const killedName = reader.readString();
+        const myPlayer = client.player;
+        const killHimSelf = myPlayer.id === killerId;
+        this.killerPlayer = {
+            id: killerId,
+            name: killHimSelf ? "Your Self" : killerName
+        }
+        this.killedPlayer = {
+            id: killedId,
+            name: killedName
+        }
+    }
+
+    finalize() {
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        // Now Current Player Is Killed
+        const myPlayer = client.player;
+
+
+
+        myPlayer.isReady = false;
+        window.killMessageOverlay.showMessage(
+            this.killerPlayer,
+            myPlayer.requestRespawn
+        )
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (KilledPlayerPacket);
 
 /***/ }),
 
@@ -857,6 +937,7 @@ class NamePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
             client.username = this.name;
             client.playerStatus = _client_js__WEBPACK_IMPORTED_MODULE_3__.PlayerStatus.READY;
             window.gameEngine.gameObjects.addPlayer(player);
+            window.myPlayer = player;
 
             client.send(new _ready__WEBPACK_IMPORTED_MODULE_4__["default"]());
         }else
@@ -895,6 +976,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./stopDrawingWaitingBlocks */ "./src/network/packets/stopDrawingWaitingBlocks.js");
 /* harmony import */ var _connectAsViewerPacket__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./connectAsViewerPacket */ "./src/network/packets/connectAsViewerPacket.js");
 /* harmony import */ var _updateLeaderBoard__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./updateLeaderBoard */ "./src/network/packets/updateLeaderBoard.js");
+/* harmony import */ var _killedPlayer__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./killedPlayer */ "./src/network/packets/killedPlayer.js");
+/* harmony import */ var _respawn__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./respawn */ "./src/network/packets/respawn.js");
+
+
 
 
 
@@ -923,6 +1008,8 @@ const PacketsDictionary = {
     1011: _stopDrawingWaitingBlocks__WEBPACK_IMPORTED_MODULE_10__["default"],
     1012: _connectAsViewerPacket__WEBPACK_IMPORTED_MODULE_11__["default"],
     1013: _updateLeaderBoard__WEBPACK_IMPORTED_MODULE_12__["default"],
+    1014: _killedPlayer__WEBPACK_IMPORTED_MODULE_13__["default"],
+    1015: _respawn__WEBPACK_IMPORTED_MODULE_14__["default"], // We Be Receive As Ready Packet
 }
 
 
@@ -1092,6 +1179,7 @@ class PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default
         this.colorPattern = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
         this.colorPatternEdge = (0,_ui_utils_js__WEBPACK_IMPORTED_MODULE_3__.convertIntColorToHex)(reader.readInt4());
 
+
     }
 
     finalize() {
@@ -1103,13 +1191,11 @@ class PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default
 
 
     handleReceivedPacket(client) {
-        console.log("PlayerState Ready Packet");
 
         const myPlayer = client.player;
 
         let player = new _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__["default"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_4__["default"](0, 0), this.userId);
         player = window.gameEngine.gameObjects.addPlayer(player);
-
 
         player.name = this.playerName;
         player.colorBrighter = this.colorBrighter;
@@ -1140,7 +1226,10 @@ class PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default
         let clientServerNeedsSync = true;
 
 
+
         if (player.isMyPlayer) {
+
+
             player.lastPosServerSentTime = Date.now();
 
             // Check If Server Synced With Client
@@ -1183,6 +1272,7 @@ class PlayerStatePacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default
             player.drawPosSet = true;
             player.drawPosition = player.position.clone();
         }
+
 
     }
 }
@@ -1390,6 +1480,64 @@ class RequestWaitingBlockPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__[
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RequestWaitingBlockPacket);
+
+/***/ }),
+
+/***/ "./src/network/packets/respawn.js":
+/*!****************************************!*\
+  !*** ./src/network/packets/respawn.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../packet.js */ "./src/network/packet.js");
+/* harmony import */ var _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/writer.js */ "./src/network/utils/writer.js");
+/* harmony import */ var _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../ui/objects/player.js */ "./src/ui/objects/player.js");
+/* harmony import */ var _ui_objects_point__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../ui/objects/point */ "./src/ui/objects/point.js");
+
+
+
+
+
+
+class RespawnPacket extends _packet_js__WEBPACK_IMPORTED_MODULE_0__["default"] {
+
+    constructor() {
+        super();
+        this.packetId = 1015;
+
+    }
+
+
+    // Handel Server Response
+    parsePacket() {
+        const reader = this.reader;
+        this.playerX = reader.readInt2();
+        this.playerY = reader.readInt2();
+        this.direction = reader.readString();
+        this.userId = reader.readInt4();
+
+    }
+
+    finalize() {
+        const writer = new _utils_writer_js__WEBPACK_IMPORTED_MODULE_1__["default"](this.packetId);
+        return writer.finalize();
+    }
+
+
+    handleReceivedPacket(client) {
+        client.player = new _ui_objects_player_js__WEBPACK_IMPORTED_MODULE_2__["default"](new _ui_objects_point__WEBPACK_IMPORTED_MODULE_3__["default"](0, 0), this.userId);
+        client.player.isMyPlayer = true;
+        client.player.isReady = true;
+        window.gameEngine.gameObjects.addPlayer(client.player);
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RespawnPacket);
 
 /***/ }),
 
@@ -2001,6 +2149,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ui_objects_player_widget__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../ui/objects/player-widget */ "./src/ui/objects/player-widget.js");
 /* harmony import */ var _ui_objects_decoration_manager__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../ui/objects/decoration-manager */ "./src/ui/objects/decoration-manager.js");
 /* harmony import */ var _ui_objects_snow_particles__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../ui/objects/snow-particles */ "./src/ui/objects/snow-particles.js");
+/* harmony import */ var _ui_objects_kill_message__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../ui/objects/kill-message */ "./src/ui/objects/kill-message.js");
+
 
 
 
@@ -2034,9 +2184,23 @@ class GameInitializer {
             camera: this.camera
         });
 
-        this.setupGlobalReferences();
+
+        // this.gameTimer.start();
+
+        this.killMessageOverlay = new _ui_objects_kill_message__WEBPACK_IMPORTED_MODULE_12__["default"]({
+            duration: 5000,
+            styles: {
+                backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                textColor: '#FFFFFF',
+                subtextColor: '#FFD700'
+            }
+        });
+
+
+         this.setupGlobalReferences();
         this.initializeClient();
         this.setupNameInput();
+
     }
 
     setupGlobalReferences() {
@@ -2046,6 +2210,10 @@ class GameInitializer {
         window.game.canvas = this.canvas;
         window.leaderboard = this.gameLeaderboard;
         window.decorationManager = this.decorationManager;
+        window.snowEffect = this.snowEffect;
+        window.gameTimer = this.gameTimer;
+        window.gameMiniMap = this.gameMiniMap;
+        window.killMessageOverlay = this.killMessageOverlay;
     }
 
     setupNameInput() {
@@ -2113,9 +2281,11 @@ class GameInitializer {
 
             playerWidget?.draw(this.ctx);
             myPlayer?.removeBlocksOutsideCamera();
-            this.snowEffect.draw(this.ctx);
+             // this.snowEffect.draw(this.ctx);
+            //this.gameTimer.draw(this.ctx);
 
 
+            this.killMessageOverlay.draw(this.ctx);
         };
     }
 
@@ -3167,6 +3337,142 @@ class IObject {
 
 /***/ }),
 
+/***/ "./src/ui/objects/kill-message.js":
+/*!****************************************!*\
+  !*** ./src/ui/objects/kill-message.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class KillMessage {
+    constructor(options = {}) {
+        this.isActive = false;
+        this.message = '';
+        this.killer = '';
+        this.startTime = 0;
+        this.duration = options.duration || 3000; // 3 seconds
+        
+        this.styles = {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            textColor: '#FF4136',
+            subtextColor: '#FFFFFF',
+            progressBar: {
+                mainColor: '#FF4136',
+                edgeColor: 'rgba(255, 255, 255, 0.5)',
+                patternColor: 'rgba(255, 255, 255, 0.2)'
+            },
+            font: {
+                main: 'bold 48px Arial',
+                sub: '24px Arial'
+            }
+        };
+
+
+        this.OnMessageEnd = null;
+    }
+
+    showMessage(killerDetails = {},afterMessage=null) {
+        this.isActive = true;
+        this.startTime = Date.now();
+        this.killer = killerDetails.name || 'Unknown Player';
+        this.message = `YOU WERE KILLED BY`;
+        this.OnMessageEnd=afterMessage;
+    }
+
+    update() {
+        if (!this.isActive) return;
+
+        const elapsedTime = Date.now() - this.startTime;
+        if (elapsedTime > this.duration) {
+            this.isActive = false;
+            this.OnMessageEnd();
+        }
+    }
+
+    draw(ctx) {
+        if (!this.isActive) return;
+        this.update();
+
+        const canvas = ctx.canvas;
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - this.startTime;
+        const progress = elapsedTime / this.duration;
+
+        ctx.save();
+        ctx.resetTransform();
+
+
+
+        // Fade in/out effect
+        ctx.globalAlpha = progress < 0.2 ? progress * 5 : 
+                          progress > 0.8 ? 1 - ((progress - 0.8) * 5) : 1;
+
+
+        // Background
+        ctx.fillStyle = this.styles.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Main Message
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // First line: "YOU WERE KILLED BY"
+        ctx.font = this.styles.font.main;
+        ctx.fillStyle = this.styles.textColor;
+        ctx.fillText(this.message, canvas.width / 2, canvas.height / 2 - 50);
+
+        // Killer's name
+        ctx.font = this.styles.font.sub;
+        ctx.fillStyle = this.styles.subtextColor;
+        ctx.fillText(this.killer, canvas.width / 2, canvas.height / 2 + 50);
+
+        // Progress Bar with Pattern
+        const barHeight = 10;
+        const barWidth = canvas.width;
+        const remainingProgress = 1 - progress;
+
+        // Background pattern
+        ctx.fillStyle = this.styles.progressBar.patternColor;
+        ctx.fillRect(0, canvas.height - barHeight, barWidth, barHeight);
+
+        // Main progress bar
+        ctx.fillStyle = this.styles.progressBar.mainColor;
+        ctx.fillRect(
+            0, 
+            0,
+            barWidth * remainingProgress, 
+            barHeight
+        );
+
+        // Edge highlight
+        ctx.fillStyle = this.styles.progressBar.edgeColor;
+        ctx.fillRect(
+            0, 
+            canvas.height - barHeight, 
+            barWidth * remainingProgress, 
+            2
+        );
+
+        ctx.restore();
+    }
+
+    reset() {
+        this.isActive = false;
+        this.message = '';
+        this.killer = '';
+        this.startTime = 0;
+    }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (KillMessage);
+
+
+/***/ }),
+
 /***/ "./src/ui/objects/leaderboard.js":
 /*!***************************************!*\
   !*** ./src/ui/objects/leaderboard.js ***!
@@ -3703,10 +4009,7 @@ class PlayerWidget {
     }
 
     draw(ctx) {
-        // Save the current context state
         ctx.save();
-
-        // Reset transformation to draw in screen space
         ctx.resetTransform();
 
         // Widget dimensions and styling
@@ -3715,7 +4018,7 @@ class PlayerWidget {
 
         // Position (top-center)
         const leftMargin = (ctx.canvas.width - width) / 2;
-        const topMargin = 10;
+        const topMargin = 20;
 
         // Background with rounded corners
         this.drawRoundedRect(ctx, leftMargin, topMargin, width, height, 10);
@@ -3817,6 +4120,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _network_packets_direction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../network/packets/direction */ "./src/network/packets/direction.js");
 /* harmony import */ var _network_packets_requestWaitingBlocks__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../network/packets/requestWaitingBlocks */ "./src/network/packets/requestWaitingBlocks.js");
 /* harmony import */ var _i_object__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./i-object */ "./src/ui/objects/i-object.js");
+/* harmony import */ var _network_packets_respawn__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../network/packets/respawn */ "./src/network/packets/respawn.js");
+
 
 
 
@@ -3827,10 +4132,9 @@ __webpack_require__.r(__webpack_exports__);
 
 class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
 
-    constructor(position = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](1, 1), id) {
-        super(position, id, "");
 
-        this.drawPosSet = false; // from PlayerState Packet
+    reset() {
+         this.drawPosSet = false; // from PlayerState Packet
 
         this.deathWasCertain = false;
         this.didUncertainDeathLastTick = false;
@@ -3846,12 +4150,7 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
 
 
 
-        // Colors
-        this.colorBrighter = 0;
-        this.colorDarker = 0;
-        this.colorSlightlyBrighter = 0
-        this.colorPattern = 0
-        this.colorPatternEdge = 0
+
 
 
         // Movements
@@ -3894,11 +4193,25 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
         this.isGettingWaitingBlocks = false;
         this.skipGettingWaitingBlocksRespose = false;
         this.waitingPushedDuringReceiving = [];
-
+        this.isReady = false; // from Ready Packet
 
         // animation and drawing
         this.nameAlphaTimer = 0;
         this.isDeadTimer = 0;
+
+        this.inRespawnPhase = false;
+    }
+    constructor(position = new _point_js__WEBPACK_IMPORTED_MODULE_0__["default"](1, 1), id) {
+        super(position, id, "");
+
+         // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
+
+        this.reset();
 
     }
 
@@ -4056,6 +4369,7 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
 
         const camera = window.camera;
         camera.moveToPlayer(this)
+
 
 
         if (this.myNextDir === this.dir) return;
@@ -4326,6 +4640,7 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
         }
 
 
+
         let offsetPosition = Player.movePlayer(this.position, this.dir, offset);
         if (!this.positionInWalls(offsetPosition))
             this.updatePlayerPosition(offsetPosition);
@@ -4422,7 +4737,6 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
         const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;
         const minTimeToWaitToSendDir = 0.7 / gameSpeed;
 
-
         // Prevent Sending Same Dir
         // Prevent Sending Dir Too Fast
         if (dir === this.myLastSendDir && timePassedFromLastSend < minTimeToWaitToSendDir) {
@@ -4458,8 +4772,6 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
             return false;
         }
 
-
-        console.log("Position Passed")
         // Check If Last Direction Complete passed .55 Of Current Block
         let changeDirectionCurrentFrame = false;
 
@@ -4467,7 +4779,10 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
         if (_utils_js__WEBPACK_IMPORTED_MODULE_2__.isMovingToPositiveDir(dir)) {
             if (blockProgress < .45)
                 changeDirectionCurrentFrame = true;
-        } else if (blockProgress > .55)
+
+        }
+        else if (blockProgress > .55)
+
             changeDirectionCurrentFrame = true;
 
 
@@ -4576,6 +4891,15 @@ class Player extends _i_object__WEBPACK_IMPORTED_MODULE_5__["default"] {
                 ctx.fill();
             }
         }
+    }
+
+
+
+
+
+    requestRespawn() {
+        const packet = new _network_packets_respawn__WEBPACK_IMPORTED_MODULE_6__["default"]();
+        window.client.send(packet);
     }
 }
 
@@ -5366,6 +5690,7 @@ class Timer {
 
     draw(ctx) {
         const canvas = ctx.canvas;
+        this.loop();
         
         ctx.save();
         ctx.resetTransform();

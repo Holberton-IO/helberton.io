@@ -4,6 +4,55 @@
 
 Welcome to Holberton-IO, a territory-claiming game where players compete to have the most land when the game time runs out. Be strategic and watch out for other players who might cross your trail!
 
+
+
+### Some Game Images
+
+At Game Start You Should Enter Your Name
+
+![Screenshot](images/game_start.png)
+
+Game Play
+
+![Screenshot](images/2.png)
+![Screenshot](images/1.png)
+
+
+Game Many Players 
+![Screenshot](images/many_players.png)
+
+Player Kill Another Player
+![Screenshot](images/player_kill_player.png)
+
+Message When Player Killed
+
+![Screenshot](images/player_killed.png)
+
+
+![Screenshot](images/player_kill_player_baord.png)
+![Screenshot](images/board_example.png)
+![Screenshot](images/test_board.png)
+![Screenshot](images/viewport_theory.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Table of Contents
 
 - [About the Game](#about-the-game)
@@ -12,6 +61,7 @@ Welcome to Holberton-IO, a territory-claiming game where players compete to have
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
+- [Docker Setup and Usage](#docker-setup-and-usage)
 - [Contributing](#contributing)
 - [Conclusion](#license)
 
@@ -172,6 +222,74 @@ Now that you've set up the project, start the server. Open a new terminal window
 The server should start running, and you can access the game by navigating to the provided URL in your web browser.
 
 
+## Docker Setup and Usage
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Running the Project with Docker
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/holberton-io.git
+cd holberton-io
+```
+
+#### 2. Build and Run the Docker Container
+```bash
+# Build the Docker image and start the container
+docker-compose up --build
+
+# Or run in detached mode
+docker-compose up -d --build
+```
+
+#### 3. Accessing the Application
+- The game will be available at `http://localhost:5000`
+- Webpack will run in watch mode, automatically recompiling on file changes
+- The Python server will be running simultaneously
+
+#### 4. Stopping the Container
+```bash
+# Stop and remove containers
+docker-compose down
+
+# Remove volumes (optional)
+docker-compose down -v
+```
+
+### Development Workflow with Docker
+
+#### Rebuilding the Container
+If you make changes to dependencies or configuration:
+```bash
+docker-compose build
+docker-compose up
+```
+
+#### Viewing Logs
+```bash
+# View logs for all services
+docker-compose logs
+
+# View logs for a specific service
+docker-compose logs web
+```
+
+### Troubleshooting
+
+- Ensure no other services are running on port 5000
+- Check Docker and Docker Compose versions
+- Verify all dependencies are correctly listed in `package.json` and `req.txt`
+
+### Notes
+- The Docker setup mounts your local code into the container
+- Changes to source files will trigger webpack recompilation
+- The container uses Node.js 16 and Python 3 Alpine images for minimal size
+
 ## Usage
 
 Holberton-IO offers an intuitive and interactive gameplay experience. Follow these instructions to navigate and enjoy the game:
@@ -217,4 +335,4 @@ Thank you for exploring Holberton-IO! We hope you enjoy the engaging gameplay, s
 
 If you have feedback, suggestions, or if you encounter any issues, please don't hesitate to [open an issue](https://github.com/Holberton-IO/helberton.io/issues). We appreciate your input as we strive to make Holberton-IO even better.
 
-```Happy gaming and contributing :)``` 🎮
+```Happy gaming and contributing :)``` 

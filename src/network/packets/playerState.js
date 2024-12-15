@@ -34,6 +34,7 @@ class PlayerStatePacket extends Packet {
         this.colorPattern = convertIntColorToHex(reader.readInt4());
         this.colorPatternEdge = convertIntColorToHex(reader.readInt4());
 
+
     }
 
     finalize() {
@@ -45,13 +46,11 @@ class PlayerStatePacket extends Packet {
 
 
     handleReceivedPacket(client) {
-        console.log("PlayerState Ready Packet");
 
         const myPlayer = client.player;
 
         let player = new Player(new Point(0, 0), this.userId);
         player = window.gameEngine.gameObjects.addPlayer(player);
-
 
         player.name = this.playerName;
         player.colorBrighter = this.colorBrighter;
@@ -82,7 +81,10 @@ class PlayerStatePacket extends Packet {
         let clientServerNeedsSync = true;
 
 
+
         if (player.isMyPlayer) {
+
+
             player.lastPosServerSentTime = Date.now();
 
             // Check If Server Synced With Client
@@ -125,6 +127,7 @@ class PlayerStatePacket extends Packet {
             player.drawPosSet = true;
             player.drawPosition = player.position.clone();
         }
+
 
     }
 }

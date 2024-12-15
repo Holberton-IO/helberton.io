@@ -1,4 +1,6 @@
 from gameserver.game.objects.h_object import HObject
+from gameserver.network.packets.player_killed import KilledPlayerPacket
+from gameserver.network.packets.player_removed import PlayerRemovedPacket
 from gameserver.network.packets.stop_draw_waiting_blocks import StopDrawWaitingBlocksPacket
 from gameserver.utils.colors import Colors
 from gameserver.game.vector import Vector
@@ -152,9 +154,11 @@ class Player(HObject):
             print(f"Player {killed_player.name} Killed By {self.name}")
             self.game.map.fill_killed_player_blocks(self, killed_player)
             self.numberOfKills += 1
-            # self.send_capture_blocks()
+            killed_player.on_killed(self)
         else:
             print(f"Player {killed_player.name} Killed Himself")
+            self.on_kill_him_self()
+
 
 
     def reset_player(self):
@@ -393,8 +397,8 @@ class Player(HObject):
             if self.is_future_position(new_pos):
                 return
 
-            print(f"Server Position {self.position}, Client Position {new_pos}", "\n",
-                  f"Start Position {self.start_position}")
+            # print(f"Server Position {self.position}, Client Position {new_pos}", "\n",
+            #       f"Start Position {self.start_position}")
             self.movement_queue.pop(0)
             prev_pos = self.position.clone()
             self.position = new_pos.clone()
@@ -463,7 +467,27 @@ class Player(HObject):
 
 
 
+    def on_kill_him_self(self):
+        self.game.map.reset_blocks(self)
+        self.on_killed(self)
 
+
+    def on_killed(self,killer):
+        self.is_send_ready_packet = False
+        self.movement_queue = []
+        self.capture_blocks = []
+        self.waiting_bounds: Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
+        self.is_alive = False
+        self.capture_blocks = []
+        self.waiting_bounds: Rectangle = Rectangle(Vector(0, 0), Vector(0, 0))
+        self.current_waiting_blocks_ex_pos = 0
+        self.max_waiting_blocks = 0
+        self.total_physical_blocks = 0
+        killed_packet = KilledPlayerPacket(self, killer)
+        self.client.send(killed_packet)
+
+        self.game.map.players_captured_blocks.remove_player(self)
+        self.game.broadcast_player_removed(self)
 
     def on_removed(self):
         self.game.players.remove(self)

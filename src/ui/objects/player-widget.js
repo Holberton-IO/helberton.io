@@ -8,10 +8,7 @@ class PlayerWidget {
     }
 
     draw(ctx) {
-        // Save the current context state
         ctx.save();
-
-        // Reset transformation to draw in screen space
         ctx.resetTransform();
 
         // Widget dimensions and styling
@@ -20,7 +17,7 @@ class PlayerWidget {
 
         // Position (top-center)
         const leftMargin = (ctx.canvas.width - width) / 2;
-        const topMargin = 10;
+        const topMargin = 20;
 
         // Background with rounded corners
         this.drawRoundedRect(ctx, leftMargin, topMargin, width, height, 10);

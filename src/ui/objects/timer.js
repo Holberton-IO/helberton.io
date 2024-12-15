@@ -37,6 +37,7 @@ class Timer {
 
     draw(ctx) {
         const canvas = ctx.canvas;
+        this.loop();
         
         ctx.save();
         ctx.resetTransform();

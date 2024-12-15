@@ -46,6 +46,7 @@ class NamePacket extends Packet {
             client.username = this.name;
             client.playerStatus = PlayerStatus.READY;
             window.gameEngine.gameObjects.addPlayer(player);
+            window.myPlayer = player;
 
             client.send(new Ready());
         }else

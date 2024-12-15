@@ -4,14 +4,14 @@ import * as GameUtils from "../utils.js";
 import DirectionPacket from "../../network/packets/direction";
 import RequestWaitingBlockPacket from "../../network/packets/requestWaitingBlocks";
 import IObject from "./i-object";
+import RespawnPacket from "../../network/packets/respawn";
 
 
 class Player extends IObject {
 
-    constructor(position = new Point(1, 1), id) {
-        super(position, id, "");
 
-        this.drawPosSet = false; // from PlayerState Packet
+    reset() {
+         this.drawPosSet = false; // from PlayerState Packet
 
         this.deathWasCertain = false;
         this.didUncertainDeathLastTick = false;
@@ -27,12 +27,7 @@ class Player extends IObject {
 
 
 
-        // Colors
-        this.colorBrighter = 0;
-        this.colorDarker = 0;
-        this.colorSlightlyBrighter = 0
-        this.colorPattern = 0
-        this.colorPatternEdge = 0
+
 
 
         // Movements
@@ -75,11 +70,25 @@ class Player extends IObject {
         this.isGettingWaitingBlocks = false;
         this.skipGettingWaitingBlocksRespose = false;
         this.waitingPushedDuringReceiving = [];
-
+        this.isReady = false; // from Ready Packet
 
         // animation and drawing
         this.nameAlphaTimer = 0;
         this.isDeadTimer = 0;
+
+        this.inRespawnPhase = false;
+    }
+    constructor(position = new Point(1, 1), id) {
+        super(position, id, "");
+
+         // Colors
+        this.colorBrighter = 0;
+        this.colorDarker = 0;
+        this.colorSlightlyBrighter = 0
+        this.colorPattern = 0
+        this.colorPatternEdge = 0
+
+        this.reset();
 
     }
 
@@ -605,7 +614,6 @@ class Player extends IObject {
         const timePassedFromLastSend = Date.now() - this.lastDirServerSentTime;
         const minTimeToWaitToSendDir = 0.7 / gameSpeed;
 
-
         // Prevent Sending Same Dir
         // Prevent Sending Dir Too Fast
         if (dir === this.myLastSendDir && timePassedFromLastSend < minTimeToWaitToSendDir) {
@@ -641,8 +649,6 @@ class Player extends IObject {
             return false;
         }
 
-
-        console.log("Position Passed")
         // Check If Last Direction Complete passed .55 Of Current Block
         let changeDirectionCurrentFrame = false;
 
@@ -764,6 +770,15 @@ class Player extends IObject {
                 ctx.fill();
             }
         }
+    }
+
+
+
+
+
+    requestRespawn() {
+        const packet = new RespawnPacket();
+        window.client.send(packet);
     }
 }
 

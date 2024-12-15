@@ -96,7 +96,7 @@ class Map:
     def fill_inner_blocks_of_player_rectangle(self, player: 'Player'):
         array_of_other_players = list(self.game.get_non_fillable_blocks(ignore_player=player))
         blocks , new_player_rect = self.map_structure.get_player_blocks_inner_area(
-            self, player, array_of_other_players
+            self, player, []
         )
         # Update Player Captured Blocks In Map Memory
         self.players_captured_blocks.update_player_blocks(player, new_player_rect)
@@ -139,11 +139,6 @@ class Map:
         self.players_captured_blocks.remove_player(killed)
         self.players_captured_blocks.expand_player_blocks_rec(killer, killed_blocks_memory)
 
-        killed.is_alive = False
-        killed.game.remove_player(killed)
-
-        remove_player_packet = PlayerRemovedPacket(killed)
-        killer.client.send(remove_player_packet)
     ####################### Geometry Helpers ############################
     def compress_blocks_in(self, rect, call_back):
         block_compression = BlockCompression(self.map_structure.graph, call_back).compress_inside_rectangle(rect)

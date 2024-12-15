@@ -1,1 +1,47 @@
+# Node.js
 node_modules
+npm-debug.log
+.npm
+.node_modules
+
+# Webpack build output
+dist
+build
+
+# Python cache files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+.venv
+venv
+env
+
+# Version control
+.git
+.gitignore
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+# Docker
+Dockerfile
+docker-compose.yml

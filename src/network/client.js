@@ -56,8 +56,8 @@ class Client {
     }
 
     onOpen(onOpenEvent) {
-        console.log("Connected to server");
-        console.log(onOpenEvent);
+        // console.log("Connected to server");
+        // console.log(onOpenEvent);
         this.connectionStatus = ConnectionStatus.OPEN;
         this.playerStatus = PlayerStatus.CONNECTED;
         this.onConnect(this);

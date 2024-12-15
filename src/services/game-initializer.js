@@ -10,6 +10,7 @@ import PlayerNameInput from "../ui/objects/player-name-input";
 import PlayerWidget from "../ui/objects/player-widget";
 import DecorationManager from "../ui/objects/decoration-manager";
 import SnowEffect from "../ui/objects/snow-particles";
+import KillMessage from "../ui/objects/kill-message";
 
 export default class GameInitializer {
     constructor(canvas, serverArgs) {
@@ -31,9 +32,23 @@ export default class GameInitializer {
             camera: this.camera
         });
 
-        this.setupGlobalReferences();
+
+        // this.gameTimer.start();
+
+        this.killMessageOverlay = new KillMessage({
+            duration: 5000,
+            styles: {
+                backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                textColor: '#FFFFFF',
+                subtextColor: '#FFD700'
+            }
+        });
+
+
+         this.setupGlobalReferences();
         this.initializeClient();
         this.setupNameInput();
+
     }
 
     setupGlobalReferences() {
@@ -43,6 +58,10 @@ export default class GameInitializer {
         window.game.canvas = this.canvas;
         window.leaderboard = this.gameLeaderboard;
         window.decorationManager = this.decorationManager;
+        window.snowEffect = this.snowEffect;
+        window.gameTimer = this.gameTimer;
+        window.gameMiniMap = this.gameMiniMap;
+        window.killMessageOverlay = this.killMessageOverlay;
     }
 
     setupNameInput() {
@@ -110,9 +129,11 @@ export default class GameInitializer {
 
             playerWidget?.draw(this.ctx);
             myPlayer?.removeBlocksOutsideCamera();
-            this.snowEffect.draw(this.ctx);
+             // this.snowEffect.draw(this.ctx);
+            //this.gameTimer.draw(this.ctx);
 
 
+            this.killMessageOverlay.draw(this.ctx);
         };
     }
 

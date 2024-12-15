@@ -14,8 +14,8 @@ class WaitingBlocksPacket(Packet):
 
     def handle_packet(self, client):
         """On Received Ready Packet"""
-        print(client.player.name, "is Recived WaitingBlocksPacket")
-
+        # print(client.player.name, "is Recived WaitingBlocksPacket")
+        pass
     def finalize(self):
         writer = Writer(self.packet_id)
         writer.write_int_in_bytes(self.player.player_id, 4)

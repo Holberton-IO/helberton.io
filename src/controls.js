@@ -10,7 +10,7 @@ const keyMapper = { //In Circle Way
 window.onkeyup = (e) => {
     //console.log(keyMapper[e.key]);
     const keyVal = keyMapper[e.key];
-    if(keyVal && window.client && window.client.player){
+    if(keyVal && window.client && window.client.player && window.client.player.isReady){
         const dir = Player.mapControlsToDir(keyVal);
         window.client.player.requestChangeDir(dir);
     }

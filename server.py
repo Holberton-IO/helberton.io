@@ -20,7 +20,6 @@ def index():
     # get query params
     params = request.args
     name = params.get('name','')
-    print(params,name)
     return render_template('index.html', playerName=name)
 
 
